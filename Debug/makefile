@@ -52,6 +52,12 @@ default.size.stdout \
 OBJDUMP_LIST += \
 Centre_Aligned_PWM.list \
 
+OBJCOPY_HEX += \
+Centre_Aligned_PWM.hex \
+
+OBJCOPY_BIN += \
+Centre_Aligned_PWM.bin \
+
 
 # All Target
 all: main-build
@@ -61,7 +67,7 @@ main-build: Centre_Aligned_PWM.elf secondary-outputs
 
 # Tool invocations
 Centre_Aligned_PWM.elf Centre_Aligned_PWM.map: $(OBJS) $(USER_OBJS) C:\Users\Pratik\ TRN0094\Desktop\Pegasus_ATS_Tuned_Golden_Firmware\Centre_Aligned_PWM\STM32H743ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Centre_Aligned_PWM.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Pratik TRN0094\Desktop\Pegasus_ATS_Tuned_Golden_Firmware\Centre_Aligned_PWM\STM32H743ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Centre_Aligned_PWM.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "Centre_Aligned_PWM.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Pratik TRN0094\Desktop\Pegasus_ATS_Tuned_Golden_Firmware\Centre_Aligned_PWM\STM32H743ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Centre_Aligned_PWM.map" -Wl,--cref -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -75,12 +81,22 @@ Centre_Aligned_PWM.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DE
 	@echo 'Finished building: $@'
 	@echo ' '
 
+Centre_Aligned_PWM.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "Centre_Aligned_PWM.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+Centre_Aligned_PWM.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "Centre_Aligned_PWM.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) Centre_Aligned_PWM.elf Centre_Aligned_PWM.list Centre_Aligned_PWM.map default.size.stdout
+	-$(RM) Centre_Aligned_PWM.bin Centre_Aligned_PWM.elf Centre_Aligned_PWM.hex Centre_Aligned_PWM.list Centre_Aligned_PWM.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'

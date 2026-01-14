@@ -7,7 +7,7 @@ void Speed_Filter(float Speed)
 	static float prev_filtered_speed = 0.0f;
 
     d.rad_s = ((SPEED_FILTER_CONSTANT_1 * prev_filtered_speed) + (SPEED_FILTER_CONSTANT_2 *(Speed+prev_speed)));
-//    d.RPM = d.rad_s / 0.1047f;
+    d.RPM = d.rad_s / 0.1047f;
 
     prev_speed = Speed;
     prev_filtered_speed = d.rad_s;
