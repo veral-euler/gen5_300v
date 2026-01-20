@@ -79,7 +79,7 @@ currSens cS = INIT;
 uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 uint16_t counter = 0;
-data d = {.Kvf = 0.1992f, .freq = 5.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = 33.48f, .pole_pair = 3.0f, .Vdc = 58.0f};
+data d = {.Kvf = 0.1992f, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = 33.48f, .pole_pair = 3.0f, .Vdc = 58.0f};
 /* USER CODE END 0 */
 
 /**
@@ -130,8 +130,6 @@ int main(void)
   HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_3);
   HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
   HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -151,6 +149,10 @@ int main(void)
   		  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
   		  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
 
+  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+
   		  for (uint8_t i = 0; i < 4; i++) {
   			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, ALIGN_DUTY);
   			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, ALIGN_DUTY);
@@ -159,6 +161,10 @@ int main(void)
   			  HAL_Delay(40);
   		  }
 
+  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+
   		  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
   		  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
   		  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
@@ -166,6 +172,15 @@ int main(void)
   		  if (counter >= 5) {
   			  d.start_alignment = 0;
   			  d.end_alignment = 1;
+  			  d.count_at_alignment = __HAL_TIM_GET_COUNTER(&htim2);
+  			  d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - 0.024574f;
+  			  d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
+  			  d.Count_From_Duty = (uint16_t)((d.Angle_From_Duty / TWO_PI) * 4096.0f);
+  			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+  			  HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_1);
+  			  HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_2);
+  			  HAL_TIM_IC_DeInit(&htim5);
+  			  HAL_TIM_Base_MspDeInit(&htim5);
   			  cS = CALIB;
   		  }
   	  }
@@ -179,11 +194,12 @@ int main(void)
   HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
   HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
 
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 1250);
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 1250);
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 1250);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 
   HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
+  HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
   HAL_Delay(1000);
 
   HAL_ADCEx_InjectedStart_IT(&hadc2);
@@ -198,20 +214,32 @@ int main(void)
 	static float prev_t = 0.0f;
 	float delta = 0.0f;
 
-	d.t_req = throttle_to_torque(d.throttle_v);
-
-	if ((time_now - time_prev) >= 10000) {
+	if ((time_now - time_prev) >= 100) {
 		delta = d.t_req - prev_t;
 
 		if (delta > T_UP) {
-			d.t_req += T_UP;
+			delta = T_UP;
 		}
 
 		if (delta < -T_DOWN) {
-			d.t_req -= T_DOWN;
+			delta = T_DOWN;
 		}
 
 		time_prev = time_now;
+	}
+	d.t_req += delta;
+
+	d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
+	d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
+
+	if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET) {
+		d.t_req = throttle_to_torque(d.throttle_v);
+		d.t_req *= 1.0f;
+	} else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET) {
+		d.t_req = throttle_to_torque(d.throttle_v);
+		d.t_req *= -1.0f;
+	} else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_SET) {
+		d.t_req = 0.0f;
 	}
   }
   /* USER CODE END 3 */
@@ -567,11 +595,11 @@ static void MX_TIM2_Init(void)
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 0;
+  sConfig.IC1Filter = 10;
   sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 0;
+  sConfig.IC2Filter = 10;
   if (HAL_TIM_Encoder_Init(&htim2, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -755,6 +783,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PD3 PD4 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
@@ -785,9 +819,12 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				ib_offset = 0;
 				counter = 0;
 
-				__HAL_TIM_SET_PRESCALER(&htim1, 4);
-				__HAL_TIM_SET_AUTORELOAD(&htim1, 1250);
-				__HAL_TIM_SET_COUNTER(&htim2, 0);
+				__HAL_TIM_SET_PRESCALER(&htim1, 1);
+				__HAL_TIM_SET_AUTORELOAD(&htim1, 2499);
+				__HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
+				d.elec_angle = d.elec_angle_120 = d.elec_angle_240 = 0.0f;
+				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+				HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 1);
 				HAL_TIM_Base_Start_IT(&htim17);
 				cS = END;
 			}
@@ -799,23 +836,25 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 			phaseCurrents[0] = (float)(injectedVal[0] - currSensOff[0]) * ADC_TO_CURR;
 			phaseCurrents[1] = (float)(injectedVal[1] - currSensOff[1]) * ADC_TO_CURR;
 
-			d.mech_angle = __HAL_TIM_GET_COUNTER(&htim2) * COUNTS_TO_RADS;
+			d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
+//			d.count_delta = (float)(d.encoder_count - d.count_at_alignment);
+//			d.count_delta = fmodf(d.count_delta, 4096.0f);
+
+			d.mech_angle = d.encoder_count * COUNTS_TO_RADS;
 			d.mech_angle = fmodf(d.mech_angle, TWO_PI);
 
-			d.elec_angle = d.mech_angle * POLEPAIRS;
+			d.elec_angle = (d.mech_angle * POLEPAIRS);
 			d.elec_angle = fmodf(d.elec_angle, TWO_PI);
 
-			d.elec_angle_120 = d.elec_angle + 2.094395f;
-			d.elec_angle_240 = d.elec_angle + 4.18879f;
+			d.elec_angle_120 = d.elec_angle + DEG_TWO_PI_3;
+			d.elec_angle_240 = d.elec_angle + DEG_4_PI_3;
 
 			d.elec_angle_120 = fmodf(d.elec_angle_120, TWO_PI);
 			d.elec_angle_240 = fmodf(d.elec_angle_240, TWO_PI);
 
-			d.Vpp = (CURR_TORQUE_RATIO * d.t_req * RS * TWO_ROOT2);
-
-			d.Va = d.Vpp * sinf(d.elec_angle);
-			d.Vb = d.Vpp * sinf(d.elec_angle_120);
-			d.Vc = d.Vpp * sinf(d.elec_angle_240);
+			d.Va = d.Kvf * d.freq * sinf(d.elec_angle);
+			d.Vb = d.Kvf * d.freq * sinf(d.elec_angle_120);
+			d.Vc = d.Kvf * d.freq * sinf(d.elec_angle_240);
 
 			volatile float max = fmaxf(d.Va, fmaxf(d.Vb, d.Vc));
 			volatile float min = fminf(d.Va, fminf(d.Vb, d.Vc));
@@ -826,9 +865,27 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 			d.Vb_SVM = 1.15f * (d.Vb - avg);
 			d.Vc_SVM = 1.15f * (d.Vc - avg);
 
-			d.pwm_a = (uint16_t)((d.Va_SVM / d.Vmax_SVM) * 625.0f + 650.0f);
-			d.pwm_b = (uint16_t)((d.Vb_SVM / d.Vmax_SVM) * 650.0f + 650.0f);
-			d.pwm_c = (uint16_t)((d.Vc_SVM / d.Vmax_SVM) * 650.0f + 650.0f);
+			if (d.Va_SVM > d.Vmax_SVM) {
+				d.Va_SVM = d.Vmax_SVM;
+			} else if (d.Va_SVM < -d.Vmax_SVM) {
+				d.Va_SVM = -d.Vmax_SVM;
+			}
+
+			if (d.Vb_SVM > d.Vmax_SVM) {
+				d.Vb_SVM = d.Vmax_SVM;
+			} else if (d.Vb_SVM < -d.Vmax_SVM) {
+				d.Vb_SVM = -d.Vmax_SVM;
+			}
+
+			if (d.Vc_SVM > d.Vmax_SVM) {
+				d.Vc_SVM = d.Vmax_SVM;
+			} else if (d.Vc_SVM < -d.Vmax_SVM) {
+				d.Vc_SVM = -d.Vmax_SVM;
+			}
+
+			d.pwm_a = (uint16_t)((d.Va_SVM / d.Vmax_SVM) * 1250.0f + 1250.0f);
+			d.pwm_b = (uint16_t)((d.Vb_SVM / d.Vmax_SVM) * 1250.0f + 1250.0f);
+			d.pwm_c = (uint16_t)((d.Vc_SVM / d.Vmax_SVM) * 1250.0f + 1250.0f);
 
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, d.pwm_a);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, d.pwm_b);
@@ -852,9 +909,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if (GPIO_Pin == GPIO_PIN_7) {
 		d.z_pulse ^= 1;
 		d.z_count++;
-		if (cS == END) {
-			d.elec_angle = d.elec_angle_120 = d.elec_angle_240 = 0.0f;
-		}
+//		if (cS == END) {
+//			d.mech_angle = 0;
+//			d.count_at_alignment = 0.0f;
+//			__HAL_TIM_SET_COUNTER(&htim2, 0);
+//		}
 	}
 }
 
@@ -876,9 +935,9 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 }
 
 float throttle_to_torque(float v_throttle) {
-    const float V_MIN = 1.33f;
-    const float V_MAX = 3.88f;
-    const float T_MAX = 50.0f;
+    const float V_MIN = 0.98f;
+    const float V_MAX = 3.78f;
+    const float T_MAX = 100.0f;
 
     // Clamp voltage
     if (v_throttle <= V_MIN)

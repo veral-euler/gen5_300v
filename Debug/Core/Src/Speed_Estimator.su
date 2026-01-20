@@ -1,7 +1,0 @@
-../Core/Src/Speed_Estimator.c:19:6:Speed_Init	8	static
-../Core/Src/Speed_Estimator.c:58:6:Speed_Update	16	static
-../Core/Src/Speed_Estimator.c:126:6:PositionControlLoop	16	static
-../Core/Src/Speed_Estimator.c:139:7:Speed_GetRadPerSec	0	static
-../Core/Src/Speed_Estimator.c:143:7:Speed_GetRPM	0	static
-../Core/Src/Speed_Estimator.c:147:7:Speed_GetElectricalFreq	0	static
-../Core/Src/Speed_Estimator.c:151:6:Speed_IsMotorMoving	0	static

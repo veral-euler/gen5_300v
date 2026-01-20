@@ -1,9 +1,0 @@
-../Core/Src/RMS_Current.c:26:6:RMS_Init	16	static
-../Core/Src/RMS_Current.c:32:6:RMS_AddSample	4	static
-../Core/Src/RMS_Current.c:99:6:RMS_Calculate	0	static
-../Core/Src/RMS_Current.c:148:6:UpdateMotorRMS	16	static
-../Core/Src/RMS_Current.c:167:7:RMS_GetPhaseA	0	static
-../Core/Src/RMS_Current.c:168:7:RMS_GetPhaseB	0	static
-../Core/Src/RMS_Current.c:169:7:RMS_GetPhaseC	0	static
-../Core/Src/RMS_Current.c:170:7:RMS_GetTotal	0	static
-../Core/Src/RMS_Current.c:171:6:RMS_IsReady	0	static

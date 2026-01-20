@@ -45,15 +45,21 @@ typedef struct data {
 	uint8_t z_count;
 	uint8_t start_alignment;
 	uint8_t end_alignment;
+	uint8_t forward_pin;
+	uint8_t reverse_pin;
 	uint16_t pwm_a;
 	uint16_t pwm_b;
 	uint16_t pwm_c;
+	uint32_t count_at_alignment;
 	uint32_t encoder_count;
+	uint32_t Count_From_Duty;
+	float count_delta;
 	float Kvf;
 	float freq;
 	float t_req;
 	float ICvalue;
 	float Duty;
+	float Angle_From_Duty;
 	float Frequency;
 	float pole_pair;
 	float Vdc;
@@ -118,13 +124,15 @@ float throttle_to_torque(float v_throttle);
 #define TWO_PI				6.283185f
 #define TWO_ROOT2			2.828427f
 #define ADC_TO_CURR			0.040246f
-#define ALIGN_DUTY			625
+#define ALIGN_DUTY			750
 #define RS		  			0.0107f
 #define CURR_TORQUE_RATIO	4.375f
 #define NO_OF_SAMPLES 		4096
 #define ADC_TO_V			0.00005030822f
-#define T_DOWN				0.001f
-#define T_UP				0.001f
+#define T_DOWN				0.0000001f
+#define T_UP				0.00001f
+#define DEG_TWO_PI_3		2.094395f
+#define DEG_4_PI_3			4.188790f
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
