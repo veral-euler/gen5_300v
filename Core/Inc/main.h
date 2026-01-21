@@ -36,6 +36,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include "Speed_Sensing.h"
+#include "FOC_Basic.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -114,19 +115,20 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 uint32_t GetMicroseconds(void);
 float throttle_to_torque(float v_throttle);
+void rt_OneStep(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
-#define POLEPAIRS 			3.0f
-#define COUNTS_TO_RADS		0.001533981f
+#define POLEPAIRS 			4.0f
+#define COUNTS_TO_RADS		3.834952E-4f
 #define TWO_PI				6.283185f
 #define TWO_ROOT2			2.828427f
 #define ADC_TO_CURR			0.040246f
 #define ALIGN_DUTY			750
 #define RS		  			0.0107f
-#define CURR_TORQUE_RATIO	4.375f
+#define CURR_TORQUE_RATIO	3.75f
 #define NO_OF_SAMPLES 		4096
 #define ADC_TO_V			0.00005030822f
 #define T_DOWN				0.0000001f

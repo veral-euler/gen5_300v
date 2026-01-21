@@ -1,3 +1,4 @@
+"./Core/Src/FOC_Basic.o"
 "./Core/Src/RMS_Current.o"
 "./Core/Src/Speed_Estimator.o"
 "./Core/Src/Speed_Sensing.o"
