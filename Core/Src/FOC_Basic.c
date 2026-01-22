@@ -463,10 +463,10 @@ void FOC_Basic_step0(void)             /* Sample time: [0.0001s, 0.0s] */
   FOC_Basic_DW.Integrator_DSTATE += ((FOC_Basic_Y.Id_error *
     FOC_Basic_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA + (FOC_Basic_Y.Vd_PID -
     FOC_Basic_Y.Vd_PID)) + (FOC_Basic_Y.Vd_PID - rtb_Sum)) * 0.0001;
-  if (FOC_Basic_DW.Integrator_DSTATE > 58.0) {
-    FOC_Basic_DW.Integrator_DSTATE = 58.0;
-  } else if (FOC_Basic_DW.Integrator_DSTATE < -58.0) {
-    FOC_Basic_DW.Integrator_DSTATE = -58.0;
+  if (FOC_Basic_DW.Integrator_DSTATE > 33.48f) {
+    FOC_Basic_DW.Integrator_DSTATE = 33.48f;
+  } else if (FOC_Basic_DW.Integrator_DSTATE < -33.48f) {
+    FOC_Basic_DW.Integrator_DSTATE = -33.48f;
   }
 
   /* End of Update for DiscreteIntegrator: '<S116>/Integrator' */
@@ -487,10 +487,10 @@ void FOC_Basic_step0(void)             /* Sample time: [0.0001s, 0.0s] */
     * -10.0 + FOC_Basic_Y.Iq_error *
     FOC_Basic_U.MTPA_PID.Torque_PID_MTPA.Ki_torque_PID_MTPA) +
     (FOC_Basic_Y.Vq_PID - rtb_Sum_f)) * 0.0001;
-  if (FOC_Basic_DW.Integrator_DSTATE_h > 58.0) {
-    FOC_Basic_DW.Integrator_DSTATE_h = 58.0;
-  } else if (FOC_Basic_DW.Integrator_DSTATE_h < -58.0) {
-    FOC_Basic_DW.Integrator_DSTATE_h = -58.0;
+  if (FOC_Basic_DW.Integrator_DSTATE_h > 33.48f) {
+    FOC_Basic_DW.Integrator_DSTATE_h = 33.48f;
+  } else if (FOC_Basic_DW.Integrator_DSTATE_h < -33.48f) {
+    FOC_Basic_DW.Integrator_DSTATE_h = -33.48f;
   }
 
   /* End of Update for DiscreteIntegrator: '<S62>/Integrator' */
@@ -658,16 +658,16 @@ void FOC_Basic_initialize(void)
   FOC_Basic_DW.icLoad_p = true;
 
   /* Rate limiter settings */
-  FOC_Basic_U.Ref_Speed_rate_up = 10.0f * 10000.0f;
+  FOC_Basic_U.Ref_Speed_rate_up = 0.1f * 10000.0f;
   FOC_Basic_U.Ref_Speed_rate_down = -10.0f * 10000.0f;
   FOC_Basic_U.Rate_limiter.Torque_gen_ramp_up = 100.0f * 10000.0f;
   FOC_Basic_U.Rate_limiter.Torque_gen_ramp_down = -100.0f * 10000.0f;
 
   //not used
-  FOC_Basic_U.Rate_limiter.Iq_ramp_up = 100.0f * 10000.0f;
-  FOC_Basic_U.Rate_limiter.Iq_ramp_down = -100.0f * 10000.0f;
-  FOC_Basic_U.Rate_limiter.Id_ramp_up = 100.0f * 10000.0f;
-  FOC_Basic_U.Rate_limiter.Id_ramp_down = -100.0f * 10000.0f;
+  FOC_Basic_U.Rate_limiter.Iq_ramp_up = 50.0f * 10000.0f;
+  FOC_Basic_U.Rate_limiter.Iq_ramp_down = -50.0f * 10000.0f;
+  FOC_Basic_U.Rate_limiter.Id_ramp_up = 50.0f * 10000.0f;
+  FOC_Basic_U.Rate_limiter.Id_ramp_down = -50.0f * 10000.0f;
   //not used
 
   /* IIR Filter Settings */
@@ -682,7 +682,7 @@ void FOC_Basic_initialize(void)
   FOC_Basic_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA = 0.00001;
   FOC_Basic_U.MTPA_PID.Speed_PID_MTPA.Filter_speed_PID_MTPA = 10.0f;
 
-  FOC_Basic_U.MTPA_PID.Up_Limit_speed_PID_MTPA = 200.0f;
+  FOC_Basic_U.MTPA_PID.Up_Limit_speed_PID_MTPA = 500.0f;
   FOC_Basic_U.MTPA_PID.Low_Limit_speed_PID_MTPA = 0.0f;
 
   FOC_Basic_U.MTPA_PID.Torque_PID_MTPA.Kp_torque_PID_MTPA = 0.2f;
@@ -690,16 +690,16 @@ void FOC_Basic_initialize(void)
   FOC_Basic_U.MTPA_PID.Torque_PID_MTPA.Kd_torque_PID_MTPA = 0.0001f;
   FOC_Basic_U.MTPA_PID.Torque_PID_MTPA.Filter_torque_PID_MTPA = 10.0f;
 
-  FOC_Basic_U.MTPA_PID.Up_Limit_torque_PID = 44.45f;
-  FOC_Basic_U.MTPA_PID.Low_Limit_torque_PID = -44.45f;
+  FOC_Basic_U.MTPA_PID.Up_Limit_torque_PID = 33.48f;
+  FOC_Basic_U.MTPA_PID.Low_Limit_torque_PID = -33.48f;
 
   FOC_Basic_U.MTPA_PID.Flux_PID_MTPA.Kp_flux_PID_MTPA = 0.3f;
   FOC_Basic_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA = 6.0f;
   FOC_Basic_U.MTPA_PID.Flux_PID_MTPA.Kd_flux_PID_MTPA = 0.0001f;
   FOC_Basic_U.MTPA_PID.Flux_PID_MTPA.Filter_flux_PID_MTPA = 10.0f;
 
-  FOC_Basic_U.MTPA_PID.Up_Limit_flux_PID = 44.45f;
-  FOC_Basic_U.MTPA_PID.Low_Limit_flux_PID = -44.45f;
+  FOC_Basic_U.MTPA_PID.Up_Limit_flux_PID = 33.48f;
+  FOC_Basic_U.MTPA_PID.Low_Limit_flux_PID = -33.48f;
 
   FOC_Basic_U.Id_ref_in = 0.0f;
   FOC_Basic_U.Ref_Speed_mech_rpm = 100.0f;

@@ -121,14 +121,14 @@ void rt_OneStep(void);
 /* Private defines -----------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
-#define POLEPAIRS 			4.0f
-#define COUNTS_TO_RADS		3.834952E-4f
+#define POLEPAIRS 			3.0f
+#define COUNTS_TO_RADS		0.001533981f
 #define TWO_PI				6.283185f
 #define TWO_ROOT2			2.828427f
 #define ADC_TO_CURR			0.040246f
 #define ALIGN_DUTY			750
 #define RS		  			0.0107f
-#define CURR_TORQUE_RATIO	3.75f
+#define CURR_TORQUE_RATIO	4.375f
 #define NO_OF_SAMPLES 		4096
 #define ADC_TO_V			0.00005030822f
 #define T_DOWN				0.0000001f

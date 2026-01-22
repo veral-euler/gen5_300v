@@ -79,7 +79,7 @@ currSens cS = INIT;
 uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 uint16_t counter = 0;
-data d = {.Kvf = 0.2876f, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = 44.45f, .pole_pair = 4.0f, .Vdc = 77.0f};
+data d = {.Kvf = 0.1992f, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = 33.48f, .pole_pair = 3.0f, .Vdc = 58.0f};
 /* USER CODE END 0 */
 
 /**
@@ -173,9 +173,9 @@ int main(void)
   			  d.start_alignment = 0;
   			  d.end_alignment = 1;
   			  d.count_at_alignment = __HAL_TIM_GET_COUNTER(&htim2);
-//  			  d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - 0.024574f;
-//  			  d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
-//  			  d.Count_From_Duty = (uint16_t)((d.Angle_From_Duty / TWO_PI) * 4096.0f);
+  			  d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - 0.024574f;
+  			  d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
+  			  d.Count_From_Duty = (uint16_t)((d.Angle_From_Duty / TWO_PI) * 4096.0f);
   			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
   			  HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_1);
   			  HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_2);
@@ -558,7 +558,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 0;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 16383;
+  htim2.Init.Period = 4095;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
@@ -791,7 +791,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
 				__HAL_TIM_SET_PRESCALER(&htim1, 1);
 				__HAL_TIM_SET_AUTORELOAD(&htim1, 2499);
-				__HAL_TIM_SET_COUNTER(&htim2, 0);
+				__HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
 				d.elec_angle = d.elec_angle_120 = d.elec_angle_240 = 0.0f;
 				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 				HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 1);
@@ -866,8 +866,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		d.z_pulse ^= 1;
 		d.z_count++;
 		if (cS == END) {
-			d.elec_angle = 0.0f;
-			FOC_Basic_U.MtrElcPos = 0.0f;
+			d.mech_angle = 0.0f;
+			__HAL_TIM_SET_COUNTER(&htim2, 0);
 		}
 	}
 }
