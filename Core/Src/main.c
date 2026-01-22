@@ -79,7 +79,7 @@ currSens cS = INIT;
 uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 uint16_t counter = 0;
-data d = {.Kvf = 0.1992f, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = 33.48f, .pole_pair = 3.0f, .Vdc = 58.0f};
+data d = {.Kvf = V_F_RATIO, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
 /* USER CODE END 0 */
 
 /**
@@ -169,7 +169,7 @@ int main(void)
   		  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
   		  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
 
-  		  if (counter >= 5) {
+  		  if (counter >= 10) {
   			  d.start_alignment = 0;
   			  d.end_alignment = 1;
   			  d.count_at_alignment = __HAL_TIM_GET_COUNTER(&htim2);
@@ -210,7 +210,9 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */    
+    d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
+    d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
   }
   /* USER CODE END 3 */
 }
@@ -470,9 +472,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 19;
+  htim1.Init.Prescaler = TIM1_PSC;
   htim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED1;
-  htim1.Init.Period = 2499;
+  htim1.Init.Period = TIM1_ARR;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 1;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
@@ -518,7 +520,7 @@ static void MX_TIM1_Init(void)
   sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
   sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
   sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-  sBreakDeadTimeConfig.DeadTime = 100;
+  sBreakDeadTimeConfig.DeadTime = TIM1_DEAD_TIME;
   sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
   sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
   sBreakDeadTimeConfig.BreakFilter = 0;
@@ -558,7 +560,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 0;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 4095;
+  htim2.Init.Period = TIM2_ARR;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
@@ -838,9 +840,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				d.Vc_SVM = -d.Vmax_SVM;
 			}
 
-			d.pwm_a = (uint16_t)((d.Va_SVM / d.Vmax_SVM) * 1250.0f + 1250.0f);
-			d.pwm_b = (uint16_t)((d.Vb_SVM / d.Vmax_SVM) * 1250.0f + 1250.0f);
-			d.pwm_c = (uint16_t)((d.Vc_SVM / d.Vmax_SVM) * 1250.0f + 1250.0f);
+			d.pwm_a = (uint16_t)((d.Va_SVM / d.Vmax_SVM) * TIM1_ARR_HALF + TIM1_ARR_HALF);
+			d.pwm_b = (uint16_t)((d.Vb_SVM / d.Vmax_SVM) * TIM1_ARR_HALF + TIM1_ARR_HALF);
+			d.pwm_c = (uint16_t)((d.Vc_SVM / d.Vmax_SVM) * TIM1_ARR_HALF + TIM1_ARR_HALF);
 
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, d.pwm_a);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, d.pwm_b);

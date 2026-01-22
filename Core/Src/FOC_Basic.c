@@ -463,10 +463,10 @@ void FOC_Basic_step0(void)             /* Sample time: [0.0001s, 0.0s] */
   FOC_Basic_DW.Integrator_DSTATE += ((FOC_Basic_Y.Id_error *
     FOC_Basic_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA + (FOC_Basic_Y.Vd_PID -
     FOC_Basic_Y.Vd_PID)) + (FOC_Basic_Y.Vd_PID - rtb_Sum)) * 0.0001;
-  if (FOC_Basic_DW.Integrator_DSTATE > 33.48f) {
-    FOC_Basic_DW.Integrator_DSTATE = 33.48f;
-  } else if (FOC_Basic_DW.Integrator_DSTATE < -33.48f) {
-    FOC_Basic_DW.Integrator_DSTATE = -33.48f;
+  if (FOC_Basic_DW.Integrator_DSTATE > SVM_VOLTAGE_LIMIT) {
+    FOC_Basic_DW.Integrator_DSTATE = SVM_VOLTAGE_LIMIT;
+  } else if (FOC_Basic_DW.Integrator_DSTATE < -SVM_VOLTAGE_LIMIT) {
+    FOC_Basic_DW.Integrator_DSTATE = -SVM_VOLTAGE_LIMIT;
   }
 
   /* End of Update for DiscreteIntegrator: '<S116>/Integrator' */
@@ -487,10 +487,10 @@ void FOC_Basic_step0(void)             /* Sample time: [0.0001s, 0.0s] */
     * -10.0 + FOC_Basic_Y.Iq_error *
     FOC_Basic_U.MTPA_PID.Torque_PID_MTPA.Ki_torque_PID_MTPA) +
     (FOC_Basic_Y.Vq_PID - rtb_Sum_f)) * 0.0001;
-  if (FOC_Basic_DW.Integrator_DSTATE_h > 33.48f) {
-    FOC_Basic_DW.Integrator_DSTATE_h = 33.48f;
-  } else if (FOC_Basic_DW.Integrator_DSTATE_h < -33.48f) {
-    FOC_Basic_DW.Integrator_DSTATE_h = -33.48f;
+  if (FOC_Basic_DW.Integrator_DSTATE_h > SVM_VOLTAGE_LIMIT) {
+    FOC_Basic_DW.Integrator_DSTATE_h = SVM_VOLTAGE_LIMIT;
+  } else if (FOC_Basic_DW.Integrator_DSTATE_h < -SVM_VOLTAGE_LIMIT) {
+    FOC_Basic_DW.Integrator_DSTATE_h = -SVM_VOLTAGE_LIMIT;
   }
 
   /* End of Update for DiscreteIntegrator: '<S62>/Integrator' */
@@ -552,6 +552,13 @@ void FOC_Basic_step1(void)             /* Sample time: [0.001s, 0.0s] */
      */
     FOC_Basic_Y.Iq_gen = rtb_Sum;
   }
+
+  if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
+    FOC_Basic_Y.Iq_gen *= -1.0f;
+  else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
+    FOC_Basic_Y.Iq_gen *= 1.0f;
+  else
+    FOC_Basic_Y.Iq_gen = 0.0f;
 
   /* End of Switch: '<S190>/Switch2' */
 
@@ -690,16 +697,16 @@ void FOC_Basic_initialize(void)
   FOC_Basic_U.MTPA_PID.Torque_PID_MTPA.Kd_torque_PID_MTPA = 0.0001f;
   FOC_Basic_U.MTPA_PID.Torque_PID_MTPA.Filter_torque_PID_MTPA = 10.0f;
 
-  FOC_Basic_U.MTPA_PID.Up_Limit_torque_PID = 33.48f;
-  FOC_Basic_U.MTPA_PID.Low_Limit_torque_PID = -33.48f;
+  FOC_Basic_U.MTPA_PID.Up_Limit_torque_PID = SVM_VOLTAGE_LIMIT;
+  FOC_Basic_U.MTPA_PID.Low_Limit_torque_PID = -SVM_VOLTAGE_LIMIT;
 
   FOC_Basic_U.MTPA_PID.Flux_PID_MTPA.Kp_flux_PID_MTPA = 0.3f;
   FOC_Basic_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA = 6.0f;
   FOC_Basic_U.MTPA_PID.Flux_PID_MTPA.Kd_flux_PID_MTPA = 0.0001f;
   FOC_Basic_U.MTPA_PID.Flux_PID_MTPA.Filter_flux_PID_MTPA = 10.0f;
 
-  FOC_Basic_U.MTPA_PID.Up_Limit_flux_PID = 33.48f;
-  FOC_Basic_U.MTPA_PID.Low_Limit_flux_PID = -33.48f;
+  FOC_Basic_U.MTPA_PID.Up_Limit_flux_PID = SVM_VOLTAGE_LIMIT;
+  FOC_Basic_U.MTPA_PID.Low_Limit_flux_PID = -SVM_VOLTAGE_LIMIT;
 
   FOC_Basic_U.Id_ref_in = 0.0f;
   FOC_Basic_U.Ref_Speed_mech_rpm = 100.0f;

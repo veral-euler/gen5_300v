@@ -122,19 +122,31 @@ void rt_OneStep(void);
 
 /* USER CODE BEGIN Private defines */
 #define POLEPAIRS 			3.0f
-#define COUNTS_TO_RADS		0.001533981f
+#define COUNTS_TO_RADS		0.001533981f //(2.0f * (PI / TIM2_ARR))
 #define TWO_PI				6.283185f
 #define TWO_ROOT2			2.828427f
+#define	ROOT3				1.732051f
 #define ADC_TO_CURR			0.040246f
-#define ALIGN_DUTY			750
+#define ALIGN_DUTY			500
 #define RS		  			0.0107f
-#define CURR_TORQUE_RATIO	4.375f
+#define LQ					0.000384f
+#define LD					0.000146f
+#define CURR_TORQUE_RATIO	4.375f //(Max_Arms / Max_Torque)
 #define NO_OF_SAMPLES 		4096
 #define ADC_TO_V			0.00005030822f
 #define T_DOWN				0.0000001f
 #define T_UP				0.00001f
 #define DEG_TWO_PI_3		2.094395f
 #define DEG_4_PI_3			4.188790f
+#define OP_VOLTAGE			96.0f
+#define SVM_VOLTAGE_LIMIT	(OP_VOLTAGE / ROOT3)
+#define V_F_RATIO			0.1992f
+
+#define TIM1_PSC			19
+#define TIM1_ARR			2499
+#define TIM1_DEAD_TIME		100
+#define TIM2_ARR			4095//(MAX_COUNT of your position sensor - 1)
+#define TIM1_ARR_HALF		1250.0f
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
