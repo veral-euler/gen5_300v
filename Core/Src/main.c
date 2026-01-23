@@ -74,11 +74,11 @@ uint16_t injectedVal[2] = {0};
 float phaseCurrents[2] = {0.0f};
 uint16_t currSensOff[2] = {0.0f};
 uint16_t adc1_buffer[1] = {0};
-currSens cS = INIT;
-
 uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 uint16_t counter = 0;
+
+currSens cS = INIT;
 data d = {.Kvf = V_F_RATIO, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
 /* USER CODE END 0 */
 
@@ -772,20 +772,20 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
 	if(hadc->Instance==ADC2)
 	{
-		injectedVal[0] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_1);
-		injectedVal[1] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_2);
+		injectedVal[PHASE_U] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_1);
+		injectedVal[PHASE_V] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_2);
 
 		if (cS == CALIB) {
-			ia_offset += injectedVal[0];
-			ib_offset += injectedVal[1];
+			ia_offset += injectedVal[PHASE_U];
+			ib_offset += injectedVal[PHASE_V];
 			counter++;
 
 			if (counter >= NO_OF_SAMPLES) {
 				ia_offset = ia_offset / NO_OF_SAMPLES;
 				ib_offset = ib_offset / NO_OF_SAMPLES;
 
-				currSensOff[0] = ia_offset;
-				currSensOff[1] = ib_offset;
+				currSensOff[PHASE_U] = ia_offset;
+				currSensOff[PHASE_V] = ib_offset;
 
 				ia_offset = 0;
 				ib_offset = 0;
@@ -805,8 +805,8 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 		if (cS == END) {
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12, GPIO_PIN_SET);
 
-			FOC_Basic_U.PhaseCurrent[2] = (float)(injectedVal[0] - currSensOff[0]) * ADC_TO_CURR;
-			FOC_Basic_U.PhaseCurrent[1] = (float)(injectedVal[1] - currSensOff[1]) * ADC_TO_CURR;
+			FOC_Basic_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+			FOC_Basic_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
 			FOC_Basic_U.PhaseCurrent[0] = 0.0f - FOC_Basic_U.PhaseCurrent[1] - FOC_Basic_U.PhaseCurrent[2];
 
 			d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);

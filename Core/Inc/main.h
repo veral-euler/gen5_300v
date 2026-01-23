@@ -147,6 +147,11 @@ void rt_OneStep(void);
 #define TIM1_DEAD_TIME		100
 #define TIM2_ARR			4095//(MAX_COUNT of your position sensor - 1)
 #define TIM1_ARR_HALF		1250.0f
+
+typedef enum ADC2_CHANNELS {
+	PHASE_U,
+	PHASE_V,
+} ADC2_CHANNELS;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

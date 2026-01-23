@@ -21,25 +21,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   8 .ARM.attributes 0000002e  00000000  00000000  00020108  2**0
                   CONTENTS, READONLY
-  9 .debug_info   0001ddbd  00000000  00000000  00020136  2**0
+  9 .debug_info   0001dddc  00000000  00000000  00020136  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 10 .debug_abbrev 00002cde  00000000  00000000  0003def3  2**0
+ 10 .debug_abbrev 00002cde  00000000  00000000  0003df12  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 11 .debug_loc    00012439  00000000  00000000  00040bd1  2**0
+ 11 .debug_loc    00012439  00000000  00000000  00040bf0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 12 .debug_aranges 00000f60  00000000  00000000  00053010  2**3
+ 12 .debug_aranges 00000f60  00000000  00000000  00053030  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_ranges 00001828  00000000  00000000  00053f70  2**3
+ 13 .debug_ranges 00001828  00000000  00000000  00053f90  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_macro  000387a3  00000000  00000000  00055798  2**0
+ 14 .debug_macro  000387a3  00000000  00000000  000557b8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_line   0001c3b6  00000000  00000000  0008df3b  2**0
+ 15 .debug_line   0001c3b6  00000000  00000000  0008df5b  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_str    00170488  00000000  00000000  000aa2f1  2**0
+ 16 .debug_str    001704a6  00000000  00000000  000aa311  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .comment      00000050  00000000  00000000  0021a779  2**0
+ 17 .comment      00000050  00000000  00000000  0021a7b7  2**0
                   CONTENTS, READONLY
- 18 .debug_frame  00002de8  00000000  00000000  0021a7cc  2**2
+ 18 .debug_frame  00002de8  00000000  00000000  0021a808  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -3090,12 +3090,12 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
  80019c6:	ecbd 8b02 	vpop	{d8}
  80019ca:	bd38      	pop	{r3, r4, r5, pc}
  80019cc:	4604      	mov	r4, r0
-		injectedVal[0] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_1);
+		injectedVal[PHASE_U] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_1);
  80019ce:	2109      	movs	r1, #9
  80019d0:	f001 fc86 	bl	80032e0 <HAL_ADCEx_InjectedGetValue>
  80019d4:	4d97      	ldr	r5, [pc, #604]	; (8001c34 <HAL_ADCEx_InjectedConvCpltCallback+0x27c>)
  80019d6:	8028      	strh	r0, [r5, #0]
-		injectedVal[1] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_2);
+		injectedVal[PHASE_V] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_2);
  80019d8:	f240 110f 	movw	r1, #271	; 0x10f
  80019dc:	4620      	mov	r0, r4
  80019de:	f001 fc7f 	bl	80032e0 <HAL_ADCEx_InjectedGetValue>
@@ -3109,13 +3109,13 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
  80019ec:	2b02      	cmp	r3, #2
  80019ee:	d1ea      	bne.n	80019c6 <HAL_ADCEx_InjectedConvCpltCallback+0xe>
  80019f0:	e03d      	b.n	8001a6e <HAL_ADCEx_InjectedConvCpltCallback+0xb6>
-			ia_offset += injectedVal[0];
+			ia_offset += injectedVal[PHASE_U];
  80019f2:	882a      	ldrh	r2, [r5, #0]
  80019f4:	4b91      	ldr	r3, [pc, #580]	; (8001c3c <HAL_ADCEx_InjectedConvCpltCallback+0x284>)
  80019f6:	6819      	ldr	r1, [r3, #0]
  80019f8:	440a      	add	r2, r1
  80019fa:	601a      	str	r2, [r3, #0]
-			ib_offset += injectedVal[1];
+			ib_offset += injectedVal[PHASE_V];
  80019fc:	4b90      	ldr	r3, [pc, #576]	; (8001c40 <HAL_ADCEx_InjectedConvCpltCallback+0x288>)
  80019fe:	6819      	ldr	r1, [r3, #0]
  8001a00:	fa11 f080 	uxtah	r0, r1, r0
@@ -3129,15 +3129,15 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 			if (counter >= NO_OF_SAMPLES) {
  8001a10:	f5b3 5f80 	cmp.w	r3, #4096	; 0x1000
  8001a14:	d3d7      	bcc.n	80019c6 <HAL_ADCEx_InjectedConvCpltCallback+0xe>
-				currSensOff[0] = ia_offset;
+				currSensOff[PHASE_U] = ia_offset;
  8001a16:	4b8c      	ldr	r3, [pc, #560]	; (8001c48 <HAL_ADCEx_InjectedConvCpltCallback+0x290>)
 				ia_offset = ia_offset / NO_OF_SAMPLES;
  8001a18:	0b12      	lsrs	r2, r2, #12
-				currSensOff[0] = ia_offset;
+				currSensOff[PHASE_U] = ia_offset;
  8001a1a:	801a      	strh	r2, [r3, #0]
 				ib_offset = ib_offset / NO_OF_SAMPLES;
  8001a1c:	0b00      	lsrs	r0, r0, #12
-				currSensOff[1] = ib_offset;
+				currSensOff[PHASE_V] = ib_offset;
  8001a1e:	8058      	strh	r0, [r3, #2]
 				ia_offset = 0;
  8001a20:	2200      	movs	r2, #0
@@ -3189,7 +3189,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
  8001a70:	f44f 51e0 	mov.w	r1, #7168	; 0x1c00
  8001a74:	4878      	ldr	r0, [pc, #480]	; (8001c58 <HAL_ADCEx_InjectedConvCpltCallback+0x2a0>)
  8001a76:	f003 fd5d 	bl	8005534 <HAL_GPIO_WritePin>
-			FOC_Basic_U.PhaseCurrent[2] = (float)(injectedVal[0] - currSensOff[0]) * ADC_TO_CURR;
+			FOC_Basic_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
  8001a7a:	496e      	ldr	r1, [pc, #440]	; (8001c34 <HAL_ADCEx_InjectedConvCpltCallback+0x27c>)
  8001a7c:	880b      	ldrh	r3, [r1, #0]
  8001a7e:	4a72      	ldr	r2, [pc, #456]	; (8001c48 <HAL_ADCEx_InjectedConvCpltCallback+0x290>)
@@ -3202,7 +3202,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
  8001a94:	eeb7 7ac7 	vcvt.f64.f32	d7, s14
  8001a98:	4d74      	ldr	r5, [pc, #464]	; (8001c6c <HAL_ADCEx_InjectedConvCpltCallback+0x2b4>)
  8001a9a:	ed85 7b0e 	vstr	d7, [r5, #56]	; 0x38
-			FOC_Basic_U.PhaseCurrent[1] = (float)(injectedVal[1] - currSensOff[1]) * ADC_TO_CURR;
+			FOC_Basic_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
  8001a9e:	884b      	ldrh	r3, [r1, #2]
  8001aa0:	8852      	ldrh	r2, [r2, #2]
  8001aa2:	1a9b      	subs	r3, r3, r2
