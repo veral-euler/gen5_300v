@@ -867,6 +867,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if (GPIO_Pin == GPIO_PIN_7) {
 		d.z_pulse ^= 1;
 		d.z_count++;
+		if (d.z_count >= 255) {
+			d.z_count = 0;
+		}
 		if (cS == END) {
 			d.mech_angle = 0.0f;
 			__HAL_TIM_SET_COUNTER(&htim2, 0);
