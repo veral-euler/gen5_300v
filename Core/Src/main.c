@@ -860,6 +860,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		Speed_Sense(d.mech_angle);
 		FOC_Basic_U.MtrSpd = fabsf(d.rad_s);
 		d.throttle_v = adc1_buffer[0] * ADC_TO_V * 2.0f;
+		FOC_Basic_U.Ref_Speed_mech_rpm = throttle_to_rpm(d.throttle_v);
+		FOC_Basic_U.Id_ref_in = map_speed_to_id_ref(d.RPM);
 	}
 }
 
@@ -894,20 +896,65 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 
 }
 
-float throttle_to_torque(float v_throttle) {
-    const float V_MIN = 0.98f;
-    const float V_MAX = 3.78f;
-    const float T_MAX = 100.0f;
+float throttle_to_rpm(float v_throttle) {
+    const float V_MIN = 1.2f;
+    const float V_MAX = 3.4f;
+    const float RPM_MAX = 3000.0f;
 
     // Clamp voltage
     if (v_throttle <= V_MIN)
         return 0.0f;
 
     if (v_throttle >= V_MAX)
-        return T_MAX;
+        return RPM_MAX;
 
     // Linear map
-    return T_MAX * (v_throttle - V_MIN) / (V_MAX - V_MIN);
+    return RPM_MAX * (v_throttle - V_MIN) / (V_MAX - V_MIN);
+}
+
+float map_speed_to_id_ref(float speed_rpm)
+{
+    const float BASE_SPEED_RPM = 750.0f;   // start of flux weakening
+    const float MAX_SPEED_RPM  = 3000.0f;   // full weakening
+    const float ID_FW_MAX      = 3.0f;     // max |Id| in amps
+
+    float speed = fabsf(speed_rpm);
+
+    if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET) {
+    	if (speed <= BASE_SPEED_RPM)
+    	{
+        	return 0.0f;
+    	}
+    	else if (speed >= MAX_SPEED_RPM)
+    	{
+        	return -ID_FW_MAX;
+    	}
+    	else
+    	{
+        	float k = (speed - BASE_SPEED_RPM) /
+                  (MAX_SPEED_RPM - BASE_SPEED_RPM);
+
+        	return -ID_FW_MAX * k;
+    	}
+    } else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET) {
+    	if (speed <= BASE_SPEED_RPM)
+    	{
+        	return 0.0f;
+    	}
+    	else if (speed >= MAX_SPEED_RPM)
+    	{
+        	return ID_FW_MAX;
+    	}
+    	else
+    	{
+        	float k = (speed - BASE_SPEED_RPM) /
+                  (MAX_SPEED_RPM - BASE_SPEED_RPM);
+
+        	return ID_FW_MAX * k;
+    	}
+    } else {
+    	return 0;
+    }
 }
 
 void rt_OneStep(void)

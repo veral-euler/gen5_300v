@@ -673,8 +673,8 @@ void FOC_Basic_initialize(void)
   //not used
   FOC_Basic_U.Rate_limiter.Iq_ramp_up = 50.0f * 10000.0f;
   FOC_Basic_U.Rate_limiter.Iq_ramp_down = -50.0f * 10000.0f;
-  FOC_Basic_U.Rate_limiter.Id_ramp_up = 50.0f * 10000.0f;
-  FOC_Basic_U.Rate_limiter.Id_ramp_down = -50.0f * 10000.0f;
+  FOC_Basic_U.Rate_limiter.Id_ramp_up = 120.0f * 10000.0f;
+  FOC_Basic_U.Rate_limiter.Id_ramp_down = -120.0f * 10000.0f;
   //not used
 
   /* IIR Filter Settings */
@@ -709,7 +709,6 @@ void FOC_Basic_initialize(void)
   FOC_Basic_U.MTPA_PID.Low_Limit_flux_PID = -SVM_VOLTAGE_LIMIT;
 
   FOC_Basic_U.Id_ref_in = 0.0f;
-  FOC_Basic_U.Ref_Speed_mech_rpm = 100.0f;
 }
 
 /* Model terminate function */
