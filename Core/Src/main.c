@@ -73,7 +73,7 @@ static void MX_TIM2_Init(void);
 uint16_t injectedVal[2] = {0};
 float phaseCurrents[2] = {0.0f};
 uint16_t currSensOff[2] = {0.0f};
-uint16_t adc1_buffer[1] = {0};
+uint16_t adc1_buffer[3] = {0};
 uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 uint16_t counter = 0;
@@ -202,7 +202,7 @@ int main(void)
   HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
   HAL_Delay(1000);
 
-  FOC_Basic_initialize();
+  FOC_Basic_FF_initialize();
 
   HAL_ADCEx_InjectedStart_IT(&hadc2);
 
@@ -213,6 +213,12 @@ int main(void)
     /* USER CODE BEGIN 3 */    
     d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
     d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
+
+    d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP]);
+    d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP]);
+
+    FOC_Basic_FF_U.MCTemperature_C = d.Mtc_temp;
+    FOC_Basic_FF_U.MotorTemperature_C = d.Mtr_temp;
   }
   /* USER CODE END 3 */
 }
@@ -330,11 +336,11 @@ static void MX_ADC1_Init(void)
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2;
   hadc1.Init.Resolution = ADC_RESOLUTION_16B;
-  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 3;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -364,6 +370,25 @@ static void MX_ADC1_Init(void)
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
   sConfig.OffsetSignedSaturation = DISABLE;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.SamplingTime = ADC_SAMPLETIME_32CYCLES_5;
+  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_8;
+  sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -724,6 +749,7 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
@@ -796,7 +822,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				__HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
 				d.elec_angle = d.elec_angle_120 = d.elec_angle_240 = 0.0f;
 				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-				HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 1);
+				HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 3);
 				HAL_TIM_Base_Start_IT(&htim17);
 				cS = END;
 			}
@@ -805,22 +831,22 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 		if (cS == END) {
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12, GPIO_PIN_SET);
 
-			FOC_Basic_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
-			FOC_Basic_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
-			FOC_Basic_U.PhaseCurrent[0] = 0.0f - FOC_Basic_U.PhaseCurrent[1] - FOC_Basic_U.PhaseCurrent[2];
+			FOC_Basic_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+			FOC_Basic_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
+			FOC_Basic_FF_U.PhaseCurrent[0] = 0.0f - FOC_Basic_FF_U.PhaseCurrent[1] - FOC_Basic_FF_U.PhaseCurrent[2];
 
 			d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
 			d.mech_angle = d.encoder_count * COUNTS_TO_RADS;
 			d.mech_angle = fmodf(d.mech_angle, TWO_PI);
 			d.elec_angle = (d.mech_angle * POLEPAIRS);
 			d.elec_angle = fmodf(d.elec_angle, TWO_PI);
-			FOC_Basic_U.MtrElcPos = d.elec_angle;
+			FOC_Basic_FF_U.MtrElcPos = d.elec_angle;
 
 			rt_OneStep();
 
-			d.Va_SVM = FOC_Basic_Y.Va;
-			d.Vb_SVM = FOC_Basic_Y.Vb;
-			d.Vc_SVM = FOC_Basic_Y.Vc;
+			d.Va_SVM = FOC_Basic_FF_Y.Va;
+			d.Vb_SVM = FOC_Basic_FF_Y.Vb;
+			d.Vc_SVM = FOC_Basic_FF_Y.Vc;
 
 			if (d.Va_SVM > d.Vmax_SVM) {
 				d.Va_SVM = d.Vmax_SVM;
@@ -858,10 +884,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM17) {
 		Speed_Sense(d.mech_angle);
-		FOC_Basic_U.MtrSpd = fabsf(d.rad_s);
-		d.throttle_v = adc1_buffer[0] * ADC_TO_V * 2.0f;
-		FOC_Basic_U.Ref_Speed_mech_rpm = throttle_to_rpm(d.throttle_v);
-		FOC_Basic_U.Id_ref_in = map_speed_to_id_ref(d.RPM);
+		FOC_Basic_FF_U.MtrSpd = fabsf(d.rad_s);
+		d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
+		FOC_Basic_FF_U.Id_ref_in = map_speed_to_id_ref(d.RPM);
 	}
 }
 
@@ -969,7 +994,7 @@ void rt_OneStep(void)
 
   /* Check base rate for overrun */
   if (OverrunFlags[0]) {
-    rtmSetErrorStatus(FOC_Basic_M, "Overrun");
+    rtmSetErrorStatus(FOC_Basic_FF_M, "Overrun");
     return;
   }
 
@@ -989,7 +1014,7 @@ void rt_OneStep(void)
       OverrunFlags[1] = true;
 
       /* Sampling too fast */
-      rtmSetErrorStatus(FOC_Basic_M, "Overrun");
+      rtmSetErrorStatus(FOC_Basic_FF_M, "Overrun");
       return;
     }
 
@@ -1004,7 +1029,7 @@ void rt_OneStep(void)
   /* Set model inputs associated with base rate here */
 
   /* Step the model for base rate */
-  FOC_Basic_step0();
+  FOC_Basic_FF_step0();
 
   /* Get model outputs here */
 
@@ -1023,7 +1048,7 @@ void rt_OneStep(void)
     /* Set model inputs associated with subrates here */
 
     /* Step the model for subrate 1 */
-    FOC_Basic_step1();
+    FOC_Basic_FF_step1();
 
     /* Get model outputs here */
 

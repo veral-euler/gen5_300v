@@ -36,7 +36,8 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include "Speed_Sensing.h"
-#include "FOC_Basic.h"
+#include "FOC_Basic_FF.h"
+#include "NTC_Temp_Reading.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -54,6 +55,8 @@ typedef struct data {
 	uint32_t count_at_alignment;
 	uint32_t encoder_count;
 	uint32_t Count_From_Duty;
+	float Mtr_temp;
+	float Mtc_temp;
 	float count_delta;
 	float Kvf;
 	float freq;
@@ -153,6 +156,12 @@ typedef enum ADC2_CHANNELS {
 	PHASE_U,
 	PHASE_V,
 } ADC2_CHANNELS;
+
+typedef enum ADC1_CHANNELS {
+	THROTTLE,
+	CONTRL_TEMP,
+	MOTOR_TEMP,
+} ADC1_CHANNELS;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

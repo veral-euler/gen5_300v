@@ -33,7 +33,8 @@ Core/Src/FOC_Basic.o: ../Core/Src/FOC_Basic.c ../Core/Inc/FOC_Basic.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr_ex.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
- ../Core/Inc/Speed_Sensing.h ../Core/Inc/FOC_Basic.h \
+ ../Core/Inc/Speed_Sensing.h ../Core/Inc/FOC_Basic_FF.h \
+ ../Core/Inc/FOC_Basic_FF_types.h ../Core/Inc/NTC_Temp_Reading.h \
  ../Core/Inc/FOC_Basic_types.h
 ../Core/Inc/FOC_Basic.h:
 ../Core/Inc/complex_types.h:
@@ -72,5 +73,7 @@ Core/Src/FOC_Basic.o: ../Core/Src/FOC_Basic.c ../Core/Inc/FOC_Basic.h \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h:
 ../Core/Inc/Speed_Sensing.h:
-../Core/Inc/FOC_Basic.h:
+../Core/Inc/FOC_Basic_FF.h:
+../Core/Inc/FOC_Basic_FF_types.h:
+../Core/Inc/NTC_Temp_Reading.h:
 ../Core/Inc/FOC_Basic_types.h:
