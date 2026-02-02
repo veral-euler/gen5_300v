@@ -56,6 +56,7 @@ typedef struct data {
 	uint32_t count_at_alignment;
 	uint32_t encoder_count;
 	uint32_t Count_From_Duty;
+	float Aux_dc;
 	float Mtr_temp;
 	float Mtc_temp;
 	float count_delta;
@@ -145,6 +146,7 @@ void rt_OneStep(void);
 #define DEG_TWO_PI_3		2.094395f
 #define DEG_4_PI_3			4.188790f
 #define OP_VOLTAGE			58.0f
+#define AUX_OP_VOLTAGE		12.0f
 #define SVM_VOLTAGE_LIMIT	(OP_VOLTAGE / ROOT3)
 #define V_F_RATIO			0.1992f
 

@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_Basic_FF'.
  *
- * Model version                  : 18.284
+ * Model version                  : 18.289
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Thu Jan 29 14:01:39 2026
+ * C/C++ source code generated on : Mon Feb  2 14:22:29 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -15,7 +15,6 @@
 
 #ifndef FOC_Basic_FF_types_h_
 #define FOC_Basic_FF_types_h_
-#include <stdint.h>
 #ifndef DEFINED_TYPEDEF_FOR_Flux_PID_MTPA_
 #define DEFINED_TYPEDEF_FOR_Flux_PID_MTPA_
 
@@ -92,62 +91,6 @@ typedef struct {
   float Iq_Filter_coefficient;
   float Iq_Filter_switch;
 } IIR_FilterBus;
-
-#endif
-
-#ifndef DEFINED_TYPEDEF_FOR_ThresholdsBus_
-#define DEFINED_TYPEDEF_FOR_ThresholdsBus_
-
-typedef struct {
-  float MaxCurrentLimit_A;
-  float OTWarningLimit_C;
-  float OTErrorLimit_C;
-  float UVWarningLimit_V;
-  float UVErrorLimit_V;
-  float OVWarningLimit_V;
-  float OVErrorLimit_V;
-  float OCWarningLimit_A;
-  float OCErrorLimit_A;
-  float WarningSpeedLimit_rpm;
-  float VoltageProtectionTimeout_msec;
-  float TempProtectionTimeout_msec;
-  float CurrentProtectionTimeout_msec;
-} ThresholdsBus;
-
-#endif
-
-#ifndef DEFINED_TYPEDEF_FOR_TempState_
-#define DEFINED_TYPEDEF_FOR_TempState_
-
-typedef enum {
-  SafeTemperature = 0,                 /* Default value */
-  OT_Warning,
-  OT_Error
-} TempState;
-
-#endif
-
-#ifndef DEFINED_TYPEDEF_FOR_VoltageState_
-#define DEFINED_TYPEDEF_FOR_VoltageState_
-
-typedef enum {
-  SafeVoltage = 0,                     /* Default value */
-  OV_Warning,
-  OV_Error,
-  UV_Warning,
-  UV_Error
-} VoltageState;
-
-#endif
-
-#ifndef DEFINED_TYPEDEF_FOR_CurrentState_
-#define DEFINED_TYPEDEF_FOR_CurrentState_
-
-typedef enum {
-  SafeCurrent = 0,                     /* Default value */
-  OC_Warning,
-  OC_Error
-} CurrentState;
 
 #endif
 

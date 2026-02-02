@@ -217,9 +217,6 @@ int main(void)
 
     d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
     d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
-
-    FOC_Basic_FF_U.MCTemperature_C = d.Mtc_temp;
-    FOC_Basic_FF_U.MotorTemperature_C = d.Mtr_temp;
   }
   /* USER CODE END 3 */
 }
@@ -894,8 +891,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		MCU_Protections_U.I_c = FOC_Basic_FF_U.PhaseCurrent[0];
 		MCU_Protections_U.MC_Temperature_C = d.Mtc_temp;
 		MCU_Protections_U.Motor_Temperature_C = d.Mtr_temp;
-		MCU_Protections_U.Bus_Voltage_V = 58.0f;
-		MCU_Protections_U.Aux_Voltage_V = 12.0f;
+		MCU_Protections_U.Bus_Voltage_V = OP_VOLTAGE;
+		MCU_Protections_U.Aux_Voltage_V = AUX_OP_VOLTAGE;
 		MCU_Protections_step();
 	}
 }

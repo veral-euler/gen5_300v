@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_Basic_FF'.
  *
- * Model version                  : 18.284
+ * Model version                  : 18.289
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Thu Jan 29 14:01:39 2026
+ * C/C++ source code generated on : Mon Feb  2 14:22:29 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M

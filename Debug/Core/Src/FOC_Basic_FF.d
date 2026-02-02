@@ -37,8 +37,7 @@ Core/Src/FOC_Basic_FF.o: ../Core/Src/FOC_Basic_FF.c \
  ../Core/Inc/NTC_Temp_Reading.h ../Core/Inc/MCU_Protections.h \
  ../Core/Inc/rtw_continuous.h ../Core/Inc/rtwtypes.h \
  ../Core/Inc/rtw_solver.h ../Core/Inc/MCU_Protections_types.h \
- ../Core/Inc/zero_crossing_types.h ../Core/Inc/FOC_Basic_FF_types.h \
- ../Core/Inc/FOC_Basic_FF_types.h
+ ../Core/Inc/zero_crossing_types.h ../Core/Inc/FOC_Basic_FF_types.h
 ../Core/Inc/FOC_Basic_FF.h:
 ../Core/Inc/complex_types.h:
 ../Core/Inc/main.h:
@@ -84,5 +83,4 @@ Core/Src/FOC_Basic_FF.o: ../Core/Src/FOC_Basic_FF.c \
 ../Core/Inc/rtw_solver.h:
 ../Core/Inc/MCU_Protections_types.h:
 ../Core/Inc/zero_crossing_types.h:
-../Core/Inc/FOC_Basic_FF_types.h:
 ../Core/Inc/FOC_Basic_FF_types.h:

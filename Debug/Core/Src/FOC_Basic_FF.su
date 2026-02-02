@@ -1,4 +1,4 @@
-../Core/Src/FOC_Basic_FF.c:178:6:FOC_Basic_FF_step0	160	static
-../Core/Src/FOC_Basic_FF.c:1013:6:FOC_Basic_FF_step1	16	static
-../Core/Src/FOC_Basic_FF.c:1168:6:FOC_Basic_FF_initialize	4	static
-../Core/Src/FOC_Basic_FF.c:1231:6:FOC_Basic_FF_terminate	0	static
+../Core/Src/FOC_Basic_FF.c:33:6:FOC_Basic_FF_step0	128	static
+../Core/Src/FOC_Basic_FF.c:595:6:FOC_Basic_FF_step1	16	static
+../Core/Src/FOC_Basic_FF.c:743:6:FOC_Basic_FF_initialize	4	static
+../Core/Src/FOC_Basic_FF.c:804:6:FOC_Basic_FF_terminate	0	static
