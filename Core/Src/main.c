@@ -79,6 +79,7 @@ uint32_t ib_offset = 0;
 uint16_t counter = 0;
 
 currSens cS = INIT;
+errors er = {0};
 data d = {.Kvf = V_F_RATIO, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
 /* USER CODE END 0 */
 
@@ -158,7 +159,7 @@ int main(void)
   			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, ALIGN_DUTY);
   			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ALIGN_DUTY);
 
-  			  HAL_Delay(40);
+  			  HAL_Delay(46);
   		  }
 
   		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
@@ -819,16 +820,20 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				__HAL_TIM_SET_AUTORELOAD(&htim1, 2499);
 				__HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
 				d.elec_angle = d.elec_angle_120 = d.elec_angle_240 = 0.0f;
-				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-				HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 3);
-				HAL_TIM_Base_Start_IT(&htim17);
-				cS = END;
+				d.init_check = Initial_Fault_Check();
+				if (d.init_check == HAL_OK) {
+					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+					HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 3);
+					HAL_TIM_Base_Start_IT(&htim17);
+					cS = END;
+				} else if (d.init_check == !HAL_OK) {
+					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+					cS = CONT_ERROR;
+				}
 			}
 		}
 
 		if (cS == END) {
-			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12, GPIO_PIN_SET);
-
 			FOC_Basic_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
 			FOC_Basic_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
 			FOC_Basic_FF_U.PhaseCurrent[0] = 0.0f - FOC_Basic_FF_U.PhaseCurrent[1] - FOC_Basic_FF_U.PhaseCurrent[2];
@@ -871,9 +876,21 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, d.pwm_a);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, d.pwm_b);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, d.pwm_c);
+		}
 
-			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12, GPIO_PIN_RESET);
+		if (cS == CONT_ERROR) {
+			if (er.error_triggered) {
+				er.drive_off = 1;
 
+				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+				__HAL_TIM_MOE_DISABLE(&htim1);
+			}
+
+			(void)memset(&FOC_Basic_FF_U, 0, sizeof(ExtU_FOC_Basic_FF_T));
+			(void)memset(&FOC_Basic_FF_Y, 0, sizeof(ExtY_FOC_Basic_FF_T));
 		}
 	}
 
@@ -894,6 +911,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		MCU_Protections_U.Bus_Voltage_V = OP_VOLTAGE;
 		MCU_Protections_U.Aux_Voltage_V = AUX_OP_VOLTAGE;
 		MCU_Protections_step();
+
+		if (MCU_Protections_Y.Aux_Voltage_Flag == OV_Error || MCU_Protections_Y.Aux_Voltage_Flag == UV_Error || MCU_Protections_Y.Bus_Voltage_Flag == OV_Error || MCU_Protections_Y.Bus_Voltage_Flag == UV_Error || MCU_Protections_Y.Current_Flag == OC_Error || MCU_Protections_Y.MC_TempFlag == OT_Error || MCU_Protections_Y.Motor_TempFlag == OT_Error) {
+			er.error_triggered = 1;
+			cS = CONT_ERROR;
+		}
 	}
 }
 
@@ -1067,6 +1089,29 @@ void rt_OneStep(void)
   /* Disable interrupts here */
   /* Restore FPU context here (if necessary) */
   /* Enable interrupts here */
+}
+
+uint8_t Initial_Fault_Check(void) {
+	if (injectedVal[0] <= 14000 || injectedVal[1] <= 14000 || injectedVal[0] >= 40000 || injectedVal[1] >= 40000) {
+		er.curr_sens_error = 1;
+		er.error_triggered = 1;
+	}
+
+	if (d.Vdc >= 68.0f) {
+		er.bus_voltage_ov_error = 1;
+		er.error_triggered = 1;
+	}
+
+	if (d.Vdc <= 45.0f) {
+		er.bus_voltage_uv_error = 1;
+		er.error_triggered = 1;
+	}
+
+	if (er.error_triggered) {
+		return !HAL_OK;
+	} else {
+		return HAL_OK;
+	}
 }
 /* USER CODE END 4 */
 

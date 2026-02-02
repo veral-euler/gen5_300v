@@ -50,6 +50,7 @@ typedef struct data {
 	uint8_t end_alignment;
 	uint8_t forward_pin;
 	uint8_t reverse_pin;
+	uint8_t init_check;
 	uint16_t pwm_a;
 	uint16_t pwm_b;
 	uint16_t pwm_c;
@@ -92,14 +93,28 @@ typedef struct data {
 	float throttle_v;
 } data;
 
+typedef struct errors {
+	char curr_sens_error;
+	char bus_voltage_ov_error;
+	char bus_voltage_uv_error;
+	char id_iq_oc_error;
+	char phase_curr_error;
+	char mtr_temp_ot_error;
+	char mtc_temp_ot_error;
+	char error_triggered;
+	char drive_off;
+} errors;
+
 typedef enum currSens {
 	INIT,
 	CALIB,
-	END
+	END,
+	CONT_ERROR
 } currSens;
 
 extern currSens cS;
 extern data d;
+extern errors er;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -121,6 +136,7 @@ void Error_Handler(void);
 uint32_t GetMicroseconds(void);
 float throttle_to_rpm(float v_throttle);
 float map_speed_to_id_ref(float speed_rpm);
+uint8_t Initial_Fault_Check(void);
 void rt_OneStep(void);
 /* USER CODE END EFP */
 
