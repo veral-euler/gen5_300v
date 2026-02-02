@@ -642,6 +642,13 @@ void FOC_Basic_FF_step1(void)          /* Sample time: [0.001s, 0.0s] */
     FOC_Basic_FF_Y.Iq_gen = rtb_Sum;
   }
 
+  if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
+    FOC_Basic_FF_Y.Iq_gen *= 1.0f;
+  else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
+    FOC_Basic_FF_Y.Iq_gen *= -1.0f;
+  else
+    FOC_Basic_FF_Y.Iq_gen = 0.0f;
+
   /* End of Switch: '<S196>/Switch2' */
 
   /* Delay: '<S7>/Delay' */
