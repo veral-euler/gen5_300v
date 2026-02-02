@@ -131,10 +131,11 @@ void rt_OneStep(void);
 #define TWO_ROOT2			2.828427f
 #define	ROOT3				1.732051f
 #define ADC_TO_CURR			0.040246f
-#define ALIGN_DUTY			500
-#define RS		  			0.0107f
-#define LQ					0.000384f
-#define LD					0.000146f
+#define ALIGN_DUTY			750
+#define RS		  			0.006389f
+#define LQ					0.000277f
+#define LD					0.00009989f
+#define LAMBDA				0.03652f
 #define CURR_TORQUE_RATIO	4.375f //(Max_Arms / Max_Torque)
 #define NO_OF_SAMPLES 		4096
 #define ADC_TO_V			0.00005030822f
@@ -142,15 +143,19 @@ void rt_OneStep(void);
 #define T_UP				0.00001f
 #define DEG_TWO_PI_3		2.094395f
 #define DEG_4_PI_3			4.188790f
-#define OP_VOLTAGE			96.0f
+#define OP_VOLTAGE			58.0f
 #define SVM_VOLTAGE_LIMIT	(OP_VOLTAGE / ROOT3)
 #define V_F_RATIO			0.1992f
 
 #define TIM1_PSC			19
 #define TIM1_ARR			2499
 #define TIM1_DEAD_TIME		100
-#define TIM2_ARR			4095//(MAX_COUNT of your position sensor - 1)
 #define TIM1_ARR_HALF		1250.0f
+#define TIM2_ARR			4095//(MAX_COUNT of your position sensor - 1)
+#define TIM5_PSC			99
+#define TIM5_ARR			0xFFFFFFFF
+#define TIM17_PSC			3
+#define TIM17_ARR			2499
 
 typedef enum ADC2_CHANNELS {
 	PHASE_U,

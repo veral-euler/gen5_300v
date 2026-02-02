@@ -1061,9 +1061,9 @@ void FOC_Basic_FF_step1(void)          /* Sample time: [0.001s, 0.0s] */
   }
 
   if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
-    FOC_Basic_FF_Y.Iq_gen *= -1.0f;
-  else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
     FOC_Basic_FF_Y.Iq_gen *= 1.0f;
+  else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
+    FOC_Basic_FF_Y.Iq_gen *= -1.0f;
   else
     FOC_Basic_FF_Y.Iq_gen = 0.0f;
 
@@ -1176,9 +1176,9 @@ void FOC_Basic_FF_initialize(void)
   FOC_Basic_FF_U.BusVoltage_V = OP_VOLTAGE;
   FOC_Basic_FF_U.MotorTemperature_C = 40.0f;
   FOC_Basic_FF_U.MCTemperature_C = 40.0f;
-  FOC_Basic_FF_U.Lambda = 0.0263f;
-  FOC_Basic_FF_U.Ld = 0.000146f;
-  FOC_Basic_FF_U.Lq = 0.000387f;
+  FOC_Basic_FF_U.Lambda = LAMBDA;
+  FOC_Basic_FF_U.Ld = LD;
+  FOC_Basic_FF_U.Lq = LQ;
 
     /* Rate limiter settings */
   FOC_Basic_FF_U.Ref_Speed_rate_up = 0.1f * 10000.0f;

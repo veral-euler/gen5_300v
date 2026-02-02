@@ -214,8 +214,8 @@ int main(void)
     d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
     d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
 
-    d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP]);
-    d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP]);
+    d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], 10000.0f);
+    d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], 47000.0f);
 
     FOC_Basic_FF_U.MCTemperature_C = d.Mtc_temp;
     FOC_Basic_FF_U.MotorTemperature_C = d.Mtr_temp;
@@ -635,9 +635,9 @@ static void MX_TIM5_Init(void)
 
   /* USER CODE END TIM5_Init 1 */
   htim5.Instance = TIM5;
-  htim5.Init.Prescaler = 99;
+  htim5.Init.Prescaler = TIM5_PSC;
   htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim5.Init.Period = 4294967295;
+  htim5.Init.Period = TIM5_ARR;
   htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
@@ -706,9 +706,9 @@ static void MX_TIM17_Init(void)
 
   /* USER CODE END TIM17_Init 1 */
   htim17.Instance = TIM17;
-  htim17.Init.Prescaler = 3;
+  htim17.Init.Prescaler = TIM17_PSC;
   htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim17.Init.Period = 2499;
+  htim17.Init.Period = TIM17_ARR;
   htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim17.Init.RepetitionCounter = 0;
   htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
@@ -945,7 +945,7 @@ float map_speed_to_id_ref(float speed_rpm)
 
     float speed = fabsf(speed_rpm);
 
-    if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET) {
+    if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET) {
     	if (speed <= BASE_SPEED_RPM)
     	{
         	return 0.0f;
@@ -961,7 +961,7 @@ float map_speed_to_id_ref(float speed_rpm)
 
         	return -ID_FW_MAX * k;
     	}
-    } else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET) {
+    } else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET) {
     	if (speed <= BASE_SPEED_RPM)
     	{
         	return 0.0f;
