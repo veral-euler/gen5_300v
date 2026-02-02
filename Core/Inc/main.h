@@ -38,6 +38,7 @@ extern "C" {
 #include "Speed_Sensing.h"
 #include "FOC_Basic_FF.h"
 #include "NTC_Temp_Reading.h"
+#include "MCU_Protections.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -156,6 +157,9 @@ void rt_OneStep(void);
 #define TIM5_ARR			0xFFFFFFFF
 #define TIM17_PSC			3
 #define TIM17_ARR			2499
+
+#define MTR_NTC_R25			10000.0f
+#define MTC_NTC_R25			10000.0f
 
 typedef enum ADC2_CHANNELS {
 	PHASE_U,

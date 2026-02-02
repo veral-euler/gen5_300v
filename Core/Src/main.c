@@ -203,6 +203,7 @@ int main(void)
   HAL_Delay(1000);
 
   FOC_Basic_FF_initialize();
+  MCU_Protections_initialize();
 
   HAL_ADCEx_InjectedStart_IT(&hadc2);
 
@@ -214,8 +215,8 @@ int main(void)
     d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
     d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
 
-    d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], 10000.0f);
-    d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], 47000.0f);
+    d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
+    d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
 
     FOC_Basic_FF_U.MCTemperature_C = d.Mtc_temp;
     FOC_Basic_FF_U.MotorTemperature_C = d.Mtr_temp;
@@ -887,6 +888,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		FOC_Basic_FF_U.MtrSpd = fabsf(d.rad_s);
 		d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
 		FOC_Basic_FF_U.Id_ref_in = map_speed_to_id_ref(d.RPM);
+
+		MCU_Protections_U.I_a = FOC_Basic_FF_U.PhaseCurrent[2];
+		MCU_Protections_U.I_b = FOC_Basic_FF_U.PhaseCurrent[1];
+		MCU_Protections_U.I_c = FOC_Basic_FF_U.PhaseCurrent[0];
+		MCU_Protections_U.MC_Temperature_C = d.Mtc_temp;
+		MCU_Protections_U.Motor_Temperature_C = d.Mtr_temp;
+		MCU_Protections_U.Bus_Voltage_V = 58.0f;
+		MCU_Protections_U.Aux_Voltage_V = 12.0f;
+		MCU_Protections_step();
 	}
 }
 
