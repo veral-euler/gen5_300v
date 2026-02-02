@@ -551,10 +551,10 @@ void FOC_Basic_FF_step0(void)          /* Sample time: [0.0001s, 0.0s] */
     FOC_Basic_FF_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA +
     (FOC_Basic_FF_Y.Vd_PID - FOC_Basic_FF_Y.Vd_PID)) + (FOC_Basic_FF_Y.Vd_PID -
     rtb_Sum)) * 0.0001;
-  if (FOC_Basic_FF_DW.Integrator_DSTATE > 58.0) {
-    FOC_Basic_FF_DW.Integrator_DSTATE = 58.0;
-  } else if (FOC_Basic_FF_DW.Integrator_DSTATE < -58.0) {
-    FOC_Basic_FF_DW.Integrator_DSTATE = -58.0;
+  if (FOC_Basic_FF_DW.Integrator_DSTATE > SVM_VOLTAGE_LIMIT) {
+    FOC_Basic_FF_DW.Integrator_DSTATE = SVM_VOLTAGE_LIMIT;
+  } else if (FOC_Basic_FF_DW.Integrator_DSTATE < -SVM_VOLTAGE_LIMIT) {
+    FOC_Basic_FF_DW.Integrator_DSTATE = -SVM_VOLTAGE_LIMIT;
   }
 
   /* End of Update for DiscreteIntegrator: '<S122>/Integrator' */
@@ -576,10 +576,10 @@ void FOC_Basic_FF_step0(void)          /* Sample time: [0.0001s, 0.0s] */
     FOC_Basic_FF_Y.Vq_PID) * -10.0 + FOC_Basic_FF_Y.Iq_error *
     FOC_Basic_FF_U.MTPA_PID.Torque_PID_MTPA.Ki_torque_PID_MTPA) +
     (FOC_Basic_FF_Y.Vq_PID - rtb_Sum_f)) * 0.0001;
-  if (FOC_Basic_FF_DW.Integrator_DSTATE_h > 58.0) {
-    FOC_Basic_FF_DW.Integrator_DSTATE_h = 58.0;
-  } else if (FOC_Basic_FF_DW.Integrator_DSTATE_h < -58.0) {
-    FOC_Basic_FF_DW.Integrator_DSTATE_h = -58.0;
+  if (FOC_Basic_FF_DW.Integrator_DSTATE_h > SVM_VOLTAGE_LIMIT) {
+    FOC_Basic_FF_DW.Integrator_DSTATE_h = SVM_VOLTAGE_LIMIT;
+  } else if (FOC_Basic_FF_DW.Integrator_DSTATE_h < -SVM_VOLTAGE_LIMIT) {
+    FOC_Basic_FF_DW.Integrator_DSTATE_h = -SVM_VOLTAGE_LIMIT;
   }
 
   /* End of Update for DiscreteIntegrator: '<S68>/Integrator' */

@@ -160,7 +160,7 @@ void rt_OneStep(void);
 #define TIM17_PSC			3
 #define TIM17_ARR			2499
 
-#define MTR_NTC_R25			10000.0f
+#define MTR_NTC_R25			44000.0f
 #define MTC_NTC_R25			10000.0f
 
 typedef enum ADC2_CHANNELS {
