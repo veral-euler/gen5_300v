@@ -188,6 +188,8 @@ typedef enum ADC1_CHANNELS {
 	THROTTLE,
 	CONTRL_TEMP,
 	MOTOR_TEMP,
+	AUX_DC,
+	BUS_DC
 } ADC1_CHANNELS;
 /* USER CODE END Private defines */
 

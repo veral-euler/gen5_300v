@@ -73,7 +73,7 @@ static void MX_TIM2_Init(void);
 uint16_t injectedVal[2] = {0};
 float phaseCurrents[2] = {0.0f};
 uint16_t currSensOff[2] = {0.0f};
-uint16_t adc1_buffer[3] = {0};
+uint16_t adc1_buffer[5] = {0};
 uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 uint16_t counter = 0;
@@ -203,6 +203,8 @@ int main(void)
   HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
   HAL_Delay(1000);
 
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 5);
+
   FOC_Basic_FF_initialize();
   MCU_Protections_initialize();
 
@@ -218,6 +220,9 @@ int main(void)
 
     d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
     d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
+
+    d.Vdc = (float)adc1_buffer[BUS_DC] * 0.00206f;
+    d.Aux_dc = (float)adc1_buffer[AUX_DC] * 0.00005031f * 3.75f;
   }
   /* USER CODE END 3 */
 }
@@ -339,7 +344,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
-  hadc1.Init.NbrOfConversion = 3;
+  hadc1.Init.NbrOfConversion = 5;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -388,6 +393,25 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = ADC_REGULAR_RANK_3;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_17;
+  sConfig.Rank = ADC_REGULAR_RANK_4;
+  sConfig.SamplingTime = ADC_SAMPLETIME_16CYCLES_5;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_15;
+  sConfig.Rank = ADC_REGULAR_RANK_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -821,9 +845,12 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				__HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
 				d.elec_angle = d.elec_angle_120 = d.elec_angle_240 = 0.0f;
 				d.init_check = Initial_Fault_Check();
+
+			    d.Vdc = (float)adc1_buffer[BUS_DC] * 0.00206f;
+			    d.Aux_dc = (float)adc1_buffer[AUX_DC] * 0.00005031f * 3.75f;
+
 				if (d.init_check == HAL_OK) {
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-					HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 3);
 					HAL_TIM_Base_Start_IT(&htim17);
 					cS = END;
 				} else if (d.init_check == !HAL_OK) {
@@ -908,8 +935,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		MCU_Protections_U.I_c = FOC_Basic_FF_U.PhaseCurrent[0];
 		MCU_Protections_U.MC_Temperature_C = d.Mtc_temp;
 		MCU_Protections_U.Motor_Temperature_C = d.Mtr_temp;
-		MCU_Protections_U.Bus_Voltage_V = OP_VOLTAGE;
-		MCU_Protections_U.Aux_Voltage_V = AUX_OP_VOLTAGE;
+		MCU_Protections_U.Bus_Voltage_V = d.Vdc;
+		MCU_Protections_U.Aux_Voltage_V = d.Aux_dc;
 		MCU_Protections_step();
 
 		if (MCU_Protections_Y.Aux_Voltage_Flag == OV_Error || MCU_Protections_Y.Aux_Voltage_Flag == UV_Error || MCU_Protections_Y.Bus_Voltage_Flag == OV_Error || MCU_Protections_Y.Bus_Voltage_Flag == UV_Error || MCU_Protections_Y.Current_Flag == OC_Error || MCU_Protections_Y.MC_TempFlag == OT_Error || MCU_Protections_Y.Motor_TempFlag == OT_Error) {
