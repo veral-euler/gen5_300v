@@ -205,7 +205,7 @@ int main(void)
 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 5);
 
-  FOC_Basic_FF_initialize();
+  FOC_MTPA_FF_initialize();
   MCU_Protections_initialize();
 
   HAL_ADCEx_InjectedStart_IT(&hadc2);
@@ -861,22 +861,22 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 		}
 
 		if (cS == END) {
-			FOC_Basic_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
-			FOC_Basic_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
-			FOC_Basic_FF_U.PhaseCurrent[0] = 0.0f - FOC_Basic_FF_U.PhaseCurrent[1] - FOC_Basic_FF_U.PhaseCurrent[2];
+			FOC_MTPA_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+			FOC_MTPA_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
+			FOC_MTPA_FF_U.PhaseCurrent[0] = 0.0f - FOC_MTPA_FF_U.PhaseCurrent[1] - FOC_MTPA_FF_U.PhaseCurrent[2];
 
 			d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
 			d.mech_angle = d.encoder_count * COUNTS_TO_RADS;
 			d.mech_angle = fmodf(d.mech_angle, TWO_PI);
 			d.elec_angle = (d.mech_angle * POLEPAIRS);
 			d.elec_angle = fmodf(d.elec_angle, TWO_PI);
-			FOC_Basic_FF_U.MtrElcPos = d.elec_angle;
+			FOC_MTPA_FF_U.MtrElcPos = d.elec_angle;
 
 			rt_OneStep();
 
-			d.Va_SVM = FOC_Basic_FF_Y.Va;
-			d.Vb_SVM = FOC_Basic_FF_Y.Vb;
-			d.Vc_SVM = FOC_Basic_FF_Y.Vc;
+			d.Va_SVM = FOC_MTPA_FF_Y.Va;
+			d.Vb_SVM = FOC_MTPA_FF_Y.Vb;
+			d.Vc_SVM = FOC_MTPA_FF_Y.Vc;
 
 			if (d.Va_SVM > d.Vmax_SVM) {
 				d.Va_SVM = d.Vmax_SVM;
@@ -916,8 +916,8 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				__HAL_TIM_MOE_DISABLE(&htim1);
 			}
 
-			(void)memset(&FOC_Basic_FF_U, 0, sizeof(ExtU_FOC_Basic_FF_T));
-			(void)memset(&FOC_Basic_FF_Y, 0, sizeof(ExtY_FOC_Basic_FF_T));
+			(void)memset(&FOC_MTPA_FF_U, 0, sizeof(ExtU_FOC_MTPA_FF_T));
+			(void)memset(&FOC_MTPA_FF_Y, 0, sizeof(ExtY_FOC_MTPA_FF_T));
 		}
 	}
 
@@ -926,13 +926,12 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM17) {
 		Speed_Sense(d.mech_angle);
-		FOC_Basic_FF_U.MtrSpd = fabsf(d.rad_s);
+		FOC_MTPA_FF_U.MtrSpd = fabsf(d.rad_s);
 		d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
-		FOC_Basic_FF_U.Id_ref_in = map_speed_to_id_ref(d.RPM);
 
-		MCU_Protections_U.I_a = FOC_Basic_FF_U.PhaseCurrent[2];
-		MCU_Protections_U.I_b = FOC_Basic_FF_U.PhaseCurrent[1];
-		MCU_Protections_U.I_c = FOC_Basic_FF_U.PhaseCurrent[0];
+		MCU_Protections_U.I_a = FOC_MTPA_FF_U.PhaseCurrent[2];
+		MCU_Protections_U.I_b = FOC_MTPA_FF_U.PhaseCurrent[1];
+		MCU_Protections_U.I_c = FOC_MTPA_FF_U.PhaseCurrent[0];
 		MCU_Protections_U.MC_Temperature_C = d.Mtc_temp;
 		MCU_Protections_U.Motor_Temperature_C = d.Mtr_temp;
 		MCU_Protections_U.Bus_Voltage_V = d.Vdc;
@@ -1050,7 +1049,7 @@ void rt_OneStep(void)
 
   /* Check base rate for overrun */
   if (OverrunFlags[0]) {
-    rtmSetErrorStatus(FOC_Basic_FF_M, "Overrun");
+    rtmSetErrorStatus(FOC_MTPA_FF_M, "Overrun");
     return;
   }
 
@@ -1070,7 +1069,7 @@ void rt_OneStep(void)
       OverrunFlags[1] = true;
 
       /* Sampling too fast */
-      rtmSetErrorStatus(FOC_Basic_FF_M, "Overrun");
+      rtmSetErrorStatus(FOC_MTPA_FF_M, "Overrun");
       return;
     }
 
@@ -1085,7 +1084,7 @@ void rt_OneStep(void)
   /* Set model inputs associated with base rate here */
 
   /* Step the model for base rate */
-  FOC_Basic_FF_step0();
+  FOC_MTPA_FF_step0();
 
   /* Get model outputs here */
 
@@ -1104,7 +1103,7 @@ void rt_OneStep(void)
     /* Set model inputs associated with subrates here */
 
     /* Step the model for subrate 1 */
-    FOC_Basic_FF_step1();
+    FOC_MTPA_FF_step1();
 
     /* Get model outputs here */
 
@@ -1124,12 +1123,12 @@ uint8_t Initial_Fault_Check(void) {
 		er.error_triggered = 1;
 	}
 
-	if (d.Vdc >= 68.0f) {
+	if (d.Vdc >= MCU_Protections_U.Thresholds.OV_Error_Limit_V) {
 		er.bus_voltage_ov_error = 1;
 		er.error_triggered = 1;
 	}
 
-	if (d.Vdc <= 45.0f) {
+	if (d.Vdc <= MCU_Protections_U.Thresholds.UV_Error_Limit_V) {
 		er.bus_voltage_uv_error = 1;
 		er.error_triggered = 1;
 	}

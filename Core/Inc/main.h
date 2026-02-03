@@ -36,9 +36,9 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include "Speed_Sensing.h"
-#include "FOC_Basic_FF.h"
 #include "NTC_Temp_Reading.h"
 #include "MCU_Protections.h"
+#include "FOC_MTPA_FF.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -150,11 +150,11 @@ void rt_OneStep(void);
 #define	ROOT3				1.732051f
 #define ADC_TO_CURR			0.040246f
 #define ALIGN_DUTY			750
-#define RS		  			0.006389f
+#define RS		  			0.0091f
 #define LQ					0.000277f
 #define LD					0.00009989f
-#define LAMBDA				0.03652f
-#define CURR_TORQUE_RATIO	4.375f //(Max_Arms / Max_Torque)
+#define LAMBDA				0.03557f
+#define CURR_TORQUE_RATIO	0.1711f //(Max_Torque/Max_Arms)
 #define NO_OF_SAMPLES 		4096
 #define ADC_TO_V			0.00005030822f
 #define T_DOWN				0.0000001f
@@ -164,7 +164,7 @@ void rt_OneStep(void);
 #define OP_VOLTAGE			58.0f
 #define AUX_OP_VOLTAGE		12.0f
 #define SVM_VOLTAGE_LIMIT	(OP_VOLTAGE / ROOT3)
-#define V_F_RATIO			0.1992f
+#define V_F_RATIO			0.2875f
 
 #define TIM1_PSC			19
 #define TIM1_ARR			2499

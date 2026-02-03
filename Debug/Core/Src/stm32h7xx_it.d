@@ -32,12 +32,12 @@ Core/Src/stm32h7xx_it.o: ../Core/Src/stm32h7xx_it.c ../Core/Inc/main.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr_ex.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
- ../Core/Inc/Speed_Sensing.h ../Core/Inc/FOC_Basic_FF.h \
- ../Core/Inc/complex_types.h ../Core/Inc/main.h \
- ../Core/Inc/FOC_Basic_FF_types.h ../Core/Inc/NTC_Temp_Reading.h \
- ../Core/Inc/MCU_Protections.h ../Core/Inc/rtw_continuous.h \
+ ../Core/Inc/Speed_Sensing.h ../Core/Inc/NTC_Temp_Reading.h \
+ ../Core/Inc/main.h ../Core/Inc/MCU_Protections.h \
+ ../Core/Inc/complex_types.h ../Core/Inc/rtw_continuous.h \
  ../Core/Inc/rtwtypes.h ../Core/Inc/rtw_solver.h \
  ../Core/Inc/MCU_Protections_types.h ../Core/Inc/zero_crossing_types.h \
+ ../Core/Inc/FOC_MTPA_FF.h ../Core/Inc/FOC_MTPA_FF_types.h \
  ../Core/Inc/stm32h7xx_it.h
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
@@ -74,15 +74,15 @@ Core/Src/stm32h7xx_it.o: ../Core/Src/stm32h7xx_it.c ../Core/Inc/main.h \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h:
 ../Core/Inc/Speed_Sensing.h:
-../Core/Inc/FOC_Basic_FF.h:
-../Core/Inc/complex_types.h:
-../Core/Inc/main.h:
-../Core/Inc/FOC_Basic_FF_types.h:
 ../Core/Inc/NTC_Temp_Reading.h:
+../Core/Inc/main.h:
 ../Core/Inc/MCU_Protections.h:
+../Core/Inc/complex_types.h:
 ../Core/Inc/rtw_continuous.h:
 ../Core/Inc/rtwtypes.h:
 ../Core/Inc/rtw_solver.h:
 ../Core/Inc/MCU_Protections_types.h:
 ../Core/Inc/zero_crossing_types.h:
+../Core/Inc/FOC_MTPA_FF.h:
+../Core/Inc/FOC_MTPA_FF_types.h:
 ../Core/Inc/stm32h7xx_it.h:

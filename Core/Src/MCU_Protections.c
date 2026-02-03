@@ -1239,8 +1239,8 @@ void MCU_Protections_initialize(void)
   MCU_Protections_U.Thresholds.Motor_OT_Warning_Limit_C = 100.0f;
   MCU_Protections_U.Thresholds.Motor_OT_Error_Limit_C = 120.0f;
 
-  MCU_Protections_U.Thresholds.OC_Warning_Limit_A = 150.0f;
-  MCU_Protections_U.Thresholds.OC_Error_Limit_A = 200.0f;
+  MCU_Protections_U.Thresholds.OC_Warning_Limit_A = 400.0f;
+  MCU_Protections_U.Thresholds.OC_Error_Limit_A = 450.0f;
   MCU_Protections_U.Thresholds.Current_count_limit = 100.0f;
 
   MCU_Protections_U.Thresholds.OV_Warning_Limit_V = 68.0f;
