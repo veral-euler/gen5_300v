@@ -39,6 +39,8 @@ extern "C" {
 #include "NTC_Temp_Reading.h"
 #include "MCU_Protections.h"
 #include "FOC_MTPA_FF.h"
+#include "fdcan.h"
+#include "alignment_routine.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

@@ -44,6 +44,8 @@ ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 DMA_HandleTypeDef hdma_adc1;
 
+FDCAN_HandleTypeDef hfdcan2;
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim5;
@@ -64,6 +66,7 @@ static void MX_TIM5_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_FDCAN2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -77,6 +80,7 @@ uint16_t adc1_buffer[5] = {0};
 uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 uint16_t counter = 0;
+uint8_t heart_beat_init[8] = {0x01,0x00};
 
 currSens cS = INIT;
 errors er = {0};
@@ -121,6 +125,7 @@ int main(void)
   MX_TIM17_Init();
   MX_ADC1_Init();
   MX_TIM2_Init();
+  MX_FDCAN2_Init();
   /* USER CODE BEGIN 2 */
   HAL_Delay(100);
 
@@ -135,58 +140,10 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  if (cS == INIT) {
-	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-  	  while (d.start_alignment == 1 && d.end_alignment == 0)
-  	  {
+  Motor_Alignment_Routine();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  		  static uint8_t count = 0;
-
-  		  count++;
-
-  		  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-  		  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-  		  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
-
-  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
-  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
-  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-
-  		  for (uint8_t i = 0; i < 4; i++) {
-  			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, ALIGN_DUTY);
-  			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, ALIGN_DUTY);
-  			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ALIGN_DUTY);
-
-  			  HAL_Delay(46);
-  		  }
-
-  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
-  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
-  		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-
-  		  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
-  		  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-  		  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-
-  		  if (count >= 10) {
-  			  d.start_alignment = 0;
-  			  d.end_alignment = 1;
-  			  d.count_at_alignment = __HAL_TIM_GET_COUNTER(&htim2);
-  			  d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - 0.024574f;
-  			  d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
-  			  d.Count_From_Duty = (uint16_t)((d.Angle_From_Duty / TWO_PI) * 4096.0f);
-  			  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
-  			  HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_1);
-  			  HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_2);
-  			  HAL_TIM_IC_DeInit(&htim5);
-  			  HAL_TIM_Base_MspDeInit(&htim5);
-  			  cS = CALIB;
-  		  }
-  	  }
-  }
-
   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
@@ -200,6 +157,12 @@ int main(void)
   FOC_MTPA_FF_initialize();
   MCU_Protections_initialize();
   HAL_Delay(100);
+
+  //Starting FDCAN2
+  FDCAN_SETUP();
+
+  //Sending Heartbeat message once at init
+  _fdcan_transmit_on_can(0x400, 0, heart_beat_init, 0x08);
 
   //Starting ADC2 Injected conversions first
   HAL_ADCEx_InjectedStart_IT(&hadc2);
@@ -266,7 +229,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 4;
   RCC_OscInitStruct.PLL.PLLN = 12;
   RCC_OscInitStruct.PLL.PLLP = 2;
-  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
@@ -501,6 +464,59 @@ static void MX_ADC2_Init(void)
   /* USER CODE BEGIN ADC2_Init 2 */
 
   /* USER CODE END ADC2_Init 2 */
+
+}
+
+/**
+  * @brief FDCAN2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_FDCAN2_Init(void)
+{
+
+  /* USER CODE BEGIN FDCAN2_Init 0 */
+
+  /* USER CODE END FDCAN2_Init 0 */
+
+  /* USER CODE BEGIN FDCAN2_Init 1 */
+
+  /* USER CODE END FDCAN2_Init 1 */
+  hfdcan2.Instance = FDCAN2;
+  hfdcan2.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
+  hfdcan2.Init.Mode = FDCAN_MODE_NORMAL;
+  hfdcan2.Init.AutoRetransmission = ENABLE;
+  hfdcan2.Init.TransmitPause = DISABLE;
+  hfdcan2.Init.ProtocolException = DISABLE;
+  hfdcan2.Init.NominalPrescaler = 10;
+  hfdcan2.Init.NominalSyncJumpWidth = 1;
+  hfdcan2.Init.NominalTimeSeg1 = 16;
+  hfdcan2.Init.NominalTimeSeg2 = 3;
+  hfdcan2.Init.DataPrescaler = 10;
+  hfdcan2.Init.DataSyncJumpWidth = 1;
+  hfdcan2.Init.DataTimeSeg1 = 16;
+  hfdcan2.Init.DataTimeSeg2 = 3;
+  hfdcan2.Init.MessageRAMOffset = 0;
+  hfdcan2.Init.StdFiltersNbr = 8;
+  hfdcan2.Init.ExtFiltersNbr = 0;
+  hfdcan2.Init.RxFifo0ElmtsNbr = 6;
+  hfdcan2.Init.RxFifo0ElmtSize = FDCAN_DATA_BYTES_8;
+  hfdcan2.Init.RxFifo1ElmtsNbr = 6;
+  hfdcan2.Init.RxFifo1ElmtSize = FDCAN_DATA_BYTES_8;
+  hfdcan2.Init.RxBuffersNbr = 6;
+  hfdcan2.Init.RxBufferSize = FDCAN_DATA_BYTES_8;
+  hfdcan2.Init.TxEventsNbr = 0;
+  hfdcan2.Init.TxBuffersNbr = 8;
+  hfdcan2.Init.TxFifoQueueElmtsNbr = 8;
+  hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
+  hfdcan2.Init.TxElmtSize = FDCAN_DATA_BYTES_8;
+  if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN FDCAN2_Init 2 */
+
+  /* USER CODE END FDCAN2_Init 2 */
 
 }
 
@@ -786,8 +802,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12, GPIO_PIN_RESET);
@@ -936,6 +952,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM17) {
+    static uint16_t can_counter = 0;
+    can_counter++;
+
 		Speed_Sense(d.mech_angle);
 		FOC_MTPA_FF_U.MtrSpd = fabsf(d.rad_s);
 		d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
@@ -953,6 +972,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 			er.error_triggered = 1;
 			cS = CONT_ERROR;
 		}
+
+    if (can_counter >= 500) { // Send CAN message every 500 ms
+        can_counter = 0;
+        Send_Data_On_CAN_401();
+    }
 	}
 }
 
