@@ -50,7 +50,7 @@ TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim17;
 
 /* USER CODE BEGIN PV */
-uint16_t count = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -142,9 +142,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  		  static uint8_t counter = 0;
+  		  static uint8_t count = 0;
 
-  		  counter++;
+  		  count++;
 
   		  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
   		  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
@@ -170,7 +170,7 @@ int main(void)
   		  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
   		  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
 
-  		  if (counter >= 10) {
+  		  if (count >= 10) {
   			  d.start_alignment = 0;
   			  d.end_alignment = 1;
   			  d.count_at_alignment = __HAL_TIM_GET_COUNTER(&htim2);
@@ -187,14 +187,6 @@ int main(void)
   	  }
   }
 
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-
-  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
-  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
-
   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
@@ -207,8 +199,21 @@ int main(void)
 
   FOC_MTPA_FF_initialize();
   MCU_Protections_initialize();
+  HAL_Delay(100);
 
+  //Starting ADC2 Injected conversions first
   HAL_ADCEx_InjectedStart_IT(&hadc2);
+
+  //Then starting TIM1 complementary channels and trigger channel
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+
+  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
+  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
 
   while (1)
   {
@@ -338,7 +343,7 @@ static void MX_ADC1_Init(void)
   /** Common config
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_16B;
   hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
@@ -443,7 +448,7 @@ static void MX_ADC2_Init(void)
   /** Common config
   */
   hadc2.Instance = ADC2;
-  hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2;
+  hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV4;
   hadc2.Init.Resolution = ADC_RESOLUTION_16B;
   hadc2.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
@@ -460,9 +465,9 @@ static void MX_ADC2_Init(void)
     Error_Handler();
   }
 
-  /** Enable Injected Queue
+  /** Disable Injected Queue
   */
-  HAL_ADCEx_EnableInjectedQueue(&hadc2);
+  HAL_ADCEx_DisableInjectedQueue(&hadc2);
 
   /** Configure Injected Channel
   */
@@ -474,10 +479,10 @@ static void MX_ADC2_Init(void)
   sConfigInjected.InjectedOffset = 0;
   sConfigInjected.InjectedOffsetSignedSaturation = DISABLE;
   sConfigInjected.InjectedNbrOfConversion = 2;
-  sConfigInjected.InjectedDiscontinuousConvMode = ENABLE;
+  sConfigInjected.InjectedDiscontinuousConvMode = DISABLE;
   sConfigInjected.AutoInjectedConv = DISABLE;
   sConfigInjected.QueueInjectedContext = DISABLE;
-  sConfigInjected.ExternalTrigInjecConv = ADC_EXTERNALTRIGINJEC_T1_TRGO;
+  sConfigInjected.ExternalTrigInjecConv = ADC_EXTERNALTRIGINJEC_T1_TRGO2;
   sConfigInjected.ExternalTrigInjecConvEdge = ADC_EXTERNALTRIGINJECCONV_EDGE_RISING;
   sConfigInjected.InjecOversamplingMode = DISABLE;
   if (HAL_ADCEx_InjectedConfigChannel(&hadc2, &sConfigInjected) != HAL_OK)
@@ -524,7 +529,7 @@ static void MX_TIM1_Init(void)
   htim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED1;
   htim1.Init.Period = TIM1_ARR;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim1.Init.RepetitionCounter = 1;
+  htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
   {
@@ -539,9 +544,9 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
-  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_OC4REF;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
@@ -562,6 +567,12 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.Pulse = 1250;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
   {
     Error_Handler();
   }

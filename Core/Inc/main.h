@@ -173,7 +173,7 @@ void rt_OneStep(void);
 #define TIM2_ARR			4095//(MAX_COUNT of your position sensor - 1)
 #define TIM5_PSC			99
 #define TIM5_ARR			0xFFFFFFFF
-#define TIM17_PSC			3
+#define TIM17_PSC			39
 #define TIM17_ARR			2499
 
 #define MTR_NTC_R25			44000.0f
