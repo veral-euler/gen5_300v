@@ -1,4 +1,4 @@
 ../Core/Src/FOC_Basic_FF.c:33:6:FOC_Basic_FF_step0	128	static
 ../Core/Src/FOC_Basic_FF.c:595:6:FOC_Basic_FF_step1	16	static
-../Core/Src/FOC_Basic_FF.c:750:6:FOC_Basic_FF_initialize	4	static
+../Core/Src/FOC_Basic_FF.c:750:6:FOC_Basic_FF_initialize	0	static
 ../Core/Src/FOC_Basic_FF.c:811:6:FOC_Basic_FF_terminate	0	static

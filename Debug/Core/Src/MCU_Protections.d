@@ -40,9 +40,8 @@ Core/Src/MCU_Protections.o: ../Core/Src/MCU_Protections.c \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
  ../Core/Inc/Speed_Sensing.h ../Core/Inc/NTC_Temp_Reading.h \
- ../Core/Inc/main.h ../Core/Inc/FOC_MTPA_FF.h \
- ../Core/Inc/FOC_MTPA_FF_types.h ../Core/Inc/fdcan.h \
- ../Core/Inc/alignment_routine.h
+ ../Core/Inc/main.h ../Core/Inc/FOC_H12.h ../Core/Inc/FOC_H12_types.h \
+ ../Core/Inc/fdcan.h ../Core/Inc/alignment_routine.h
 ../Core/Inc/MCU_Protections.h:
 ../Core/Inc/complex_types.h:
 ../Core/Inc/rtw_continuous.h:
@@ -92,7 +91,7 @@ Core/Src/MCU_Protections.o: ../Core/Src/MCU_Protections.c \
 ../Core/Inc/Speed_Sensing.h:
 ../Core/Inc/NTC_Temp_Reading.h:
 ../Core/Inc/main.h:
-../Core/Inc/FOC_MTPA_FF.h:
-../Core/Inc/FOC_MTPA_FF_types.h:
+../Core/Inc/FOC_H12.h:
+../Core/Inc/FOC_H12_types.h:
 ../Core/Inc/fdcan.h:
 ../Core/Inc/alignment_routine.h:

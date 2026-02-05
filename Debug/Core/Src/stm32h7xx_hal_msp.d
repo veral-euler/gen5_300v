@@ -38,8 +38,8 @@ Core/Src/stm32h7xx_hal_msp.o: ../Core/Src/stm32h7xx_hal_msp.c \
  ../Core/Inc/complex_types.h ../Core/Inc/rtw_continuous.h \
  ../Core/Inc/rtwtypes.h ../Core/Inc/rtw_solver.h \
  ../Core/Inc/MCU_Protections_types.h ../Core/Inc/zero_crossing_types.h \
- ../Core/Inc/FOC_MTPA_FF.h ../Core/Inc/FOC_MTPA_FF_types.h \
- ../Core/Inc/fdcan.h ../Core/Inc/alignment_routine.h
+ ../Core/Inc/FOC_H12.h ../Core/Inc/FOC_H12_types.h ../Core/Inc/fdcan.h \
+ ../Core/Inc/alignment_routine.h
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -85,7 +85,7 @@ Core/Src/stm32h7xx_hal_msp.o: ../Core/Src/stm32h7xx_hal_msp.c \
 ../Core/Inc/rtw_solver.h:
 ../Core/Inc/MCU_Protections_types.h:
 ../Core/Inc/zero_crossing_types.h:
-../Core/Inc/FOC_MTPA_FF.h:
-../Core/Inc/FOC_MTPA_FF_types.h:
+../Core/Inc/FOC_H12.h:
+../Core/Inc/FOC_H12_types.h:
 ../Core/Inc/fdcan.h:
 ../Core/Inc/alignment_routine.h:

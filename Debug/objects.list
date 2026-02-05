@@ -1,5 +1,7 @@
 "./Core/Src/FOC_Basic.o"
 "./Core/Src/FOC_Basic_FF.o"
+"./Core/Src/FOC_H12.o"
+"./Core/Src/FOC_H12_data.o"
 "./Core/Src/FOC_MTPA_FF.o"
 "./Core/Src/MCU_Protections.o"
 "./Core/Src/MCU_Protections_data.o"

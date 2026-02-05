@@ -38,7 +38,7 @@ extern "C" {
 #include "Speed_Sensing.h"
 #include "NTC_Temp_Reading.h"
 #include "MCU_Protections.h"
-#include "FOC_MTPA_FF.h"
+#include "FOC_H12.h"
 #include "fdcan.h"
 #include "alignment_routine.h"
 /* USER CODE END Includes */
@@ -149,6 +149,7 @@ void rt_OneStep(void);
 #define COUNTS_TO_RADS		0.001533981f //(2.0f * (PI / TIM2_ARR))
 #define TWO_PI				6.283185f
 #define TWO_ROOT2			2.828427f
+#define ROOT2				1.414213f
 #define	ROOT3				1.732051f
 #define ADC_TO_CURR			0.040246f
 #define ALIGN_DUTY			750
@@ -166,6 +167,8 @@ void rt_OneStep(void);
 #define OP_VOLTAGE			58.0f
 #define AUX_OP_VOLTAGE		12.0f
 #define SVM_VOLTAGE_LIMIT	(OP_VOLTAGE / ROOT3)
+#define MOTOR_PEAK_ARMS		350.0f
+#define MOTOR_PEAK_AC		(MOTOR_PEAK_ARMS * ROOT2)
 #define V_F_RATIO			0.2875f
 
 #define TIM1_PSC			19

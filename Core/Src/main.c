@@ -129,6 +129,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_Delay(100);
 
+  /* Stopping all TIM1 for safety precauiton at program start */
   HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
   HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
   HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
@@ -140,6 +141,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  /* Alignment routine at the start of program to align the rotor to U phase */
   Motor_Alignment_Routine();
     /* USER CODE END WHILE */
 
@@ -154,20 +156,21 @@ int main(void)
 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 5);
 
-  FOC_MTPA_FF_initialize();
+  /* Initializing FOC and Protections model */
+  FOC_H12_initialize();
   MCU_Protections_initialize();
   HAL_Delay(100);
 
-  //Starting FDCAN2
+  /*Starting FDCAN2*/
   FDCAN_SETUP();
 
-  //Sending Heartbeat message once at init
+  /*Sending Heartbeat message once at init*/
   _fdcan_transmit_on_can(0x400, 0, heart_beat_init, 0x08);
 
-  //Starting ADC2 Injected conversions first
+  /*Starting ADC2 Injected conversions first*/
   HAL_ADCEx_InjectedStart_IT(&hadc2);
 
-  //Then starting TIM1 complementary channels and trigger channel
+  /*Then starting TIM1 complementary channels and trigger channel*/
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -848,10 +851,12 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
 	if(hadc->Instance==ADC2)
 	{
+    /* Reading injected values for the 2 phases */
 		injectedVal[PHASE_U] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_1);
 		injectedVal[PHASE_V] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_2);
 
 		if (cS == CALIB) {
+      /* Calibrating current sensor offsets */
 			ia_offset += injectedVal[PHASE_U];
 			ib_offset += injectedVal[PHASE_V];
 			counter++;
@@ -867,15 +872,22 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				ib_offset = 0;
 				counter = 0;
 
+        /* Setting TIM1 PWM freq to 10kHz and setting TIM2 counter reg to inital angle count */
 				__HAL_TIM_SET_PRESCALER(&htim1, 1);
 				__HAL_TIM_SET_AUTORELOAD(&htim1, 2499);
 				__HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
+
+        /* Setting elec angle to 0 */
 				d.elec_angle = d.elec_angle_120 = d.elec_angle_240 = 0.0f;
+
+        /* Running initial fault check */
 				d.init_check = Initial_Fault_Check();
 
+        /* Gathering initial Bus Vdc and Aux Vdc */
 			    d.Vdc = (float)adc1_buffer[BUS_DC] * 0.00206f;
 			    d.Aux_dc = (float)adc1_buffer[AUX_DC] * 0.00005031f * 3.75f;
 
+        /* Checking if inital fault check is OK and turning on the Gate drivers*/
 				if (d.init_check == HAL_OK) {
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 					HAL_TIM_Base_Start_IT(&htim17);
@@ -888,22 +900,26 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 		}
 
 		if (cS == END) {
-			FOC_MTPA_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
-			FOC_MTPA_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
-			FOC_MTPA_FF_U.PhaseCurrent[0] = 0.0f - FOC_MTPA_FF_U.PhaseCurrent[1] - FOC_MTPA_FF_U.PhaseCurrent[2];
+      /* Updating pahse current data */
+			FOC_H12_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+			FOC_H12_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
+			FOC_H12_U.PhaseCurrent[0] = 0.0f - FOC_H12_U.PhaseCurrent[1] - FOC_H12_U.PhaseCurrent[2];
 
+      /* Updating angle data */
 			d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
 			d.mech_angle = d.encoder_count * COUNTS_TO_RADS;
 			d.mech_angle = fmodf(d.mech_angle, TWO_PI);
 			d.elec_angle = (d.mech_angle * POLEPAIRS);
 			d.elec_angle = fmodf(d.elec_angle, TWO_PI);
-			FOC_MTPA_FF_U.MtrElcPos = d.elec_angle;
+			FOC_H12_U.MtrElcPos = d.elec_angle;
 
+      /* Running the FOC model */
 			rt_OneStep();
 
-			d.Va_SVM = FOC_MTPA_FF_Y.Va;
-			d.Vb_SVM = FOC_MTPA_FF_Y.Vb;
-			d.Vc_SVM = FOC_MTPA_FF_Y.Vc;
+      /* SVM and PWM update */
+			d.Va_SVM = FOC_H12_Y.Va;
+			d.Vb_SVM = FOC_H12_Y.Vb;
+			d.Vc_SVM = FOC_H12_Y.Vc;
 
 			if (d.Va_SVM > d.Vmax_SVM) {
 				d.Va_SVM = d.Vmax_SVM;
@@ -933,6 +949,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 		}
 
 		if (cS == CONT_ERROR) {
+      /* Checking is error is triggered and shutting off gate drivers and TIM1 */
 			if (er.error_triggered) {
 				er.drive_off = 1;
 
@@ -943,8 +960,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				__HAL_TIM_MOE_DISABLE(&htim1);
 			}
 
-			(void)memset(&FOC_MTPA_FF_U, 0, sizeof(ExtU_FOC_MTPA_FF_T));
-			(void)memset(&FOC_MTPA_FF_Y, 0, sizeof(ExtY_FOC_MTPA_FF_T));
+      /* Resetting FOC data structures after error trigger */
+			(void)memset(&FOC_H12_U, 0, sizeof(ExtU_FOC_H12_T));
+			(void)memset(&FOC_H12_Y, 0, sizeof(ExtY_FOC_H12_T));
 		}
 	}
 
@@ -955,25 +973,31 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     static uint16_t can_counter = 0;
     can_counter++;
 
+    /* Gathering throttle voltage and speed feedback data */
 		Speed_Sense(d.mech_angle);
-		FOC_MTPA_FF_U.MtrSpd = fabsf(d.rad_s);
+		FOC_H12_U.MtrSpd = fabsf(d.rad_s);
 		d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
 
-		MCU_Protections_U.I_a = FOC_MTPA_FF_U.PhaseCurrent[2];
-		MCU_Protections_U.I_b = FOC_MTPA_FF_U.PhaseCurrent[1];
-		MCU_Protections_U.I_c = FOC_MTPA_FF_U.PhaseCurrent[0];
+    /* Populating MCU Protections input data structures */
+		MCU_Protections_U.I_a = FOC_H12_U.PhaseCurrent[2];
+		MCU_Protections_U.I_b = FOC_H12_U.PhaseCurrent[1];
+		MCU_Protections_U.I_c = FOC_H12_U.PhaseCurrent[0];
 		MCU_Protections_U.MC_Temperature_C = d.Mtc_temp;
 		MCU_Protections_U.Motor_Temperature_C = d.Mtr_temp;
 		MCU_Protections_U.Bus_Voltage_V = d.Vdc;
 		MCU_Protections_U.Aux_Voltage_V = d.Aux_dc;
+
+    /* Running MCU protections model */
 		MCU_Protections_step();
 
+    /* Checking for error flag and changing the STATE */
 		if (MCU_Protections_Y.Aux_Voltage_Flag == OV_Error || MCU_Protections_Y.Aux_Voltage_Flag == UV_Error || MCU_Protections_Y.Bus_Voltage_Flag == OV_Error || MCU_Protections_Y.Bus_Voltage_Flag == UV_Error || MCU_Protections_Y.Current_Flag == OC_Error || MCU_Protections_Y.MC_TempFlag == OT_Error || MCU_Protections_Y.Motor_TempFlag == OT_Error) {
 			er.error_triggered = 1;
 			cS = CONT_ERROR;
 		}
 
-    if (can_counter >= 500) { // Send CAN message every 500 ms
+    /* Sending data on CAN bus every 500ms */
+    if (can_counter >= 500) {
         can_counter = 0;
         Send_Data_On_CAN_401();
     }
@@ -987,6 +1011,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		if (d.z_count >= 255) {
 			d.z_count = 0;
 		}
+
+    /* Resetting mech angle and TIM2 reg on every z index pulse */
 		if (cS == END) {
 			d.mech_angle = 0.0f;
 			__HAL_TIM_SET_COUNTER(&htim2, 0);
@@ -995,20 +1021,22 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
-	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)  // If the interrupt is triggered by channel 1
-	{
-		// Read the IC value
-		d.ICvalue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+  if (htim->Instance == TIM5) {
+    if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)  // If the interrupt is triggered by channel 1
+    {
+      /* Using TIM5 to get the initial angle on startup from the encoder PWM duty */
+      // Read the IC value
+      d.ICvalue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
 
-		if (d.ICvalue != 0)
-		{
-			// calculate the Duty Cycle
-			d.Duty = (HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) *100)/d.ICvalue;
+      if (d.ICvalue != 0)
+      {
+        // calculate the Duty Cycle
+        d.Duty = (HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) *100)/d.ICvalue;
 
-			d.Frequency = 1000000.0f/d.ICvalue;
-		}
-	}
-
+        d.Frequency = 1000000.0f/d.ICvalue;
+      }
+    }
+  }
 }
 
 float throttle_to_rpm(float v_throttle) {
@@ -1084,7 +1112,7 @@ void rt_OneStep(void)
 
   /* Check base rate for overrun */
   if (OverrunFlags[0]) {
-    rtmSetErrorStatus(FOC_MTPA_FF_M, "Overrun");
+    rtmSetErrorStatus(FOC_H12_M, "Overrun");
     return;
   }
 
@@ -1104,7 +1132,7 @@ void rt_OneStep(void)
       OverrunFlags[1] = true;
 
       /* Sampling too fast */
-      rtmSetErrorStatus(FOC_MTPA_FF_M, "Overrun");
+      rtmSetErrorStatus(FOC_H12_M, "Overrun");
       return;
     }
 
@@ -1119,7 +1147,7 @@ void rt_OneStep(void)
   /* Set model inputs associated with base rate here */
 
   /* Step the model for base rate */
-  FOC_MTPA_FF_step0();
+  FOC_H12_step0();
 
   /* Get model outputs here */
 
@@ -1138,7 +1166,7 @@ void rt_OneStep(void)
     /* Set model inputs associated with subrates here */
 
     /* Step the model for subrate 1 */
-    FOC_MTPA_FF_step1();
+    FOC_H12_step1();
 
     /* Get model outputs here */
 
