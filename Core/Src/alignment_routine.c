@@ -41,9 +41,9 @@ void Motor_Alignment_Routine(void)
                 d.start_alignment = 0;
                 d.end_alignment = 1;
                 d.count_at_alignment = __HAL_TIM_GET_COUNTER(&htim2);
-                d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - 0.024574f;
+                d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - HIGH_PULSE16_ERROR;
                 d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
-                d.Count_From_Duty = (uint16_t)((d.Angle_From_Duty / TWO_PI) * 4096.0f);
+                d.Count_From_Duty = (uint16_t)((d.Angle_From_Duty / TWO_PI) * (TIM2_ARR + 1));
                 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
                 HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_1);
                 HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_2);

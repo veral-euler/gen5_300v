@@ -32,10 +32,10 @@ void Send_Data_On_CAN_401(void)
 {
 	uint8_t can_data[8] = {0};
 
-	uint16_t rpm_ref = (uint16_t)(FOC_H12_U.Ref_Speed_mech_rpm * 10.0f);
+	uint16_t rpm_ref = (uint16_t)(FOC_LivGguard_U.Ref_Speed_mech_rpm * 10.0f);
 	uint16_t rpm_fdbk = (uint16_t)((d.RPM + 3250.0f) * 10.0f);
-	uint16_t Id = (uint16_t)(FOC_H12_Y.Id + 512.0f);
-	uint16_t Iq = (uint16_t)(FOC_H12_Y.Iq + 512.0f);
+	uint16_t Id = (uint16_t)(FOC_LivGguard_Y.Id + 512.0f);
+	uint16_t Iq = (uint16_t)(FOC_LivGguard_Y.Iq + 512.0f);
 
 	can_data[0] = (uint8_t)(rpm_ref & 0xFF);
 	can_data[1] = (uint8_t)((rpm_ref >> 8) & 0xFF);
@@ -54,10 +54,10 @@ void Send_Data_On_CAN_402(void)
 	// Implement similar to Send_Data_On_CAN_401 with different data
 	uint8_t can_data[8] = {0};
 
-	uint16_t Vd = (uint16_t)(FOC_H12_Y.Outport1 + SVM_VOLTAGE_LIMIT);
-	uint16_t Vq = (uint16_t)(FOC_H12_Y.Outport2 + SVM_VOLTAGE_LIMIT);
-	uint16_t Iq_ref = (uint16_t)(FOC_H12_Y.Iq_ref + 512.0f);
-	uint16_t Id_ref = (uint16_t)(FOC_H12_Y.Id_ref + 512.0f);
+	uint16_t Vd = (uint16_t)(FOC_LivGguard_Y.Vd + SVM_VOLTAGE_LIMIT);
+	uint16_t Vq = (uint16_t)(FOC_LivGguard_Y.Vq + SVM_VOLTAGE_LIMIT);
+	uint16_t Iq_ref = (uint16_t)(FOC_LivGguard_Y.Iq_ref + 512.0f);
+	uint16_t Id_ref = (uint16_t)(FOC_LivGguard_Y.Id_ref + 512.0f);
 	uint16_t enc_cnt = (uint16_t)(d.encoder_count);
 
 	// Fill can_data with appropriate values for message 402

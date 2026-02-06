@@ -157,7 +157,7 @@ int main(void)
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 5);
 
   /* Initializing FOC and Protections model */
-  FOC_H12_initialize();
+  FOC_LivGguard_initialize();
   MCU_Protections_initialize();
   HAL_Delay(100);
 
@@ -901,9 +901,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
 		if (cS == END) {
       /* Updating pahse current data */
-			FOC_H12_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
-			FOC_H12_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
-			FOC_H12_U.PhaseCurrent[0] = 0.0f - FOC_H12_U.PhaseCurrent[1] - FOC_H12_U.PhaseCurrent[2];
+			FOC_LivGguard_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+			FOC_LivGguard_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
+			FOC_LivGguard_U.PhaseCurrent[0] = 0.0f - FOC_LivGguard_U.PhaseCurrent[1] - FOC_LivGguard_U.PhaseCurrent[2];
 
       /* Updating angle data */
 			d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
@@ -911,15 +911,15 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 			d.mech_angle = fmodf(d.mech_angle, TWO_PI);
 			d.elec_angle = (d.mech_angle * POLEPAIRS);
 			d.elec_angle = fmodf(d.elec_angle, TWO_PI);
-			FOC_H12_U.MtrElcPos = d.elec_angle;
+			FOC_LivGguard_U.MtrElcPos = d.elec_angle;
 
       /* Running the FOC model */
 			rt_OneStep();
 
       /* SVM and PWM update */
-			d.Va_SVM = FOC_H12_Y.Va;
-			d.Vb_SVM = FOC_H12_Y.Vb;
-			d.Vc_SVM = FOC_H12_Y.Vc;
+			d.Va_SVM = FOC_LivGguard_Y.Va;
+			d.Vb_SVM = FOC_LivGguard_Y.Vb;
+			d.Vc_SVM = FOC_LivGguard_Y.Vc;
 
 			if (d.Va_SVM > d.Vmax_SVM) {
 				d.Va_SVM = d.Vmax_SVM;
@@ -961,8 +961,8 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 			}
 
       /* Resetting FOC data structures after error trigger */
-			(void)memset(&FOC_H12_U, 0, sizeof(ExtU_FOC_H12_T));
-			(void)memset(&FOC_H12_Y, 0, sizeof(ExtY_FOC_H12_T));
+			(void)memset(&FOC_LivGguard_U, 0, sizeof(ExtU_FOC_LivGguard_T));
+			(void)memset(&FOC_LivGguard_Y, 0, sizeof(ExtY_FOC_LivGguard_T));
 		}
 	}
 
@@ -975,13 +975,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
     /* Gathering throttle voltage and speed feedback data */
 		Speed_Sense(d.mech_angle);
-		FOC_H12_U.MtrSpd = fabsf(d.rad_s);
+		FOC_LivGguard_U.MtrSpd = fabsf(d.rad_s);
 		d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
 
     /* Populating MCU Protections input data structures */
-		MCU_Protections_U.I_a = FOC_H12_U.PhaseCurrent[2];
-		MCU_Protections_U.I_b = FOC_H12_U.PhaseCurrent[1];
-		MCU_Protections_U.I_c = FOC_H12_U.PhaseCurrent[0];
+		MCU_Protections_U.I_a = FOC_LivGguard_U.PhaseCurrent[2];
+		MCU_Protections_U.I_b = FOC_LivGguard_U.PhaseCurrent[1];
+		MCU_Protections_U.I_c = FOC_LivGguard_U.PhaseCurrent[0];
 		MCU_Protections_U.MC_Temperature_C = d.Mtc_temp;
 		MCU_Protections_U.Motor_Temperature_C = d.Mtr_temp;
 		MCU_Protections_U.Bus_Voltage_V = d.Vdc;
@@ -1114,7 +1114,7 @@ void rt_OneStep(void)
 
   /* Check base rate for overrun */
   if (OverrunFlags[0]) {
-    rtmSetErrorStatus(FOC_H12_M, "Overrun");
+    rtmSetErrorStatus(FOC_LivGguard_M, "Overrun");
     return;
   }
 
@@ -1134,7 +1134,7 @@ void rt_OneStep(void)
       OverrunFlags[1] = true;
 
       /* Sampling too fast */
-      rtmSetErrorStatus(FOC_H12_M, "Overrun");
+      rtmSetErrorStatus(FOC_LivGguard_M, "Overrun");
       return;
     }
 
@@ -1149,7 +1149,7 @@ void rt_OneStep(void)
   /* Set model inputs associated with base rate here */
 
   /* Step the model for base rate */
-  FOC_H12_step0();
+  FOC_LivGguard_step0();
 
   /* Get model outputs here */
 
@@ -1168,7 +1168,7 @@ void rt_OneStep(void)
     /* Set model inputs associated with subrates here */
 
     /* Step the model for subrate 1 */
-    FOC_H12_step1();
+    FOC_LivGguard_step1();
 
     /* Get model outputs here */
 
