@@ -192,8 +192,8 @@ int main(void)
     d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
     d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
 
-    d.Vdc = (float)adc1_buffer[BUS_DC] * 0.00206f;
-    d.Aux_dc = (float)adc1_buffer[AUX_DC] * 0.00005031f * 3.75f;
+    d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
+    d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
   }
   /* USER CODE END 3 */
 }
@@ -884,8 +884,8 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				d.init_check = Initial_Fault_Check();
 
         /* Gathering initial Bus Vdc and Aux Vdc */
-			    d.Vdc = (float)adc1_buffer[BUS_DC] * 0.00206f;
-			    d.Aux_dc = (float)adc1_buffer[AUX_DC] * 0.00005031f * 3.75f;
+			    d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
+			    d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
 
         /* Checking if inital fault check is OK and turning on the Gate drivers*/
 				if (d.init_check == HAL_OK) {
@@ -997,7 +997,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		}
 
     /* Sending data on CAN bus every 500ms */
-    if (can_counter >= 500) {
+    if (can_counter >= CAN_BUS_CYCLE) {
         can_counter = 0;
         Send_Data_On_CAN_401();
     }

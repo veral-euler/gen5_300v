@@ -170,6 +170,9 @@ void rt_OneStep(void);
 #define MOTOR_PEAK_ARMS		350.0f
 #define MOTOR_PEAK_AC		(MOTOR_PEAK_ARMS * ROOT2)
 #define V_F_RATIO			0.2875f
+#define BUS_VDC_SCALE		0.00206f
+#define AUX_VDC_SCALE		0.000188658f
+#define CAN_BUS_CYCLE		500
 
 #define TIM1_PSC			19
 #define TIM1_ARR			2499
