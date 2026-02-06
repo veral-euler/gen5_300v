@@ -1000,6 +1000,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     if (can_counter >= CAN_BUS_CYCLE) {
         can_counter = 0;
         Send_Data_On_CAN_401();
+        Send_Data_On_CAN_402();
+        Send_Data_On_CAN_403();
     }
 	}
 }
@@ -1031,9 +1033,9 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
       if (d.ICvalue != 0)
       {
         // calculate the Duty Cycle
-        d.Duty = (HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) *100)/d.ICvalue;
+        d.Duty = (HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) * 100.0f)/d.ICvalue;
 
-        d.Frequency = 1000000.0f/d.ICvalue;
+        d.Frequency = (float)HAL_RCC_GetSysClockFreq()/(d.ICvalue * (TIM5_PSC + 1));
       }
     }
   }

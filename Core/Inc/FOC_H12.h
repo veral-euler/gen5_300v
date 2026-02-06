@@ -173,8 +173,8 @@ typedef struct {
   double Id_error;                     /* '<Root>/Id_error' */
   double Iq_error;                     /* '<Root>/Iq_error' */
   double Speed_error;                  /* '<Root>/Speed_error' */
-  double Outport1;                     /* '<Root>/Outport1' */
-  double Outport2;                     /* '<Root>/Outport2' */
+  double Outport1;                     /* '<Root>/Outport1' Vd */
+  double Outport2;                     /* '<Root>/Outport2' Vq */
 } ExtY_FOC_H12_T;
 
 /* Real-time Model Data Structure */

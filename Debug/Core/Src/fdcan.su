@@ -1,3 +1,5 @@
 ../Core/Src/fdcan.c:5:6:FDCAN_SETUP	8	static
 ../Core/Src/fdcan.c:13:6:_fdcan_transmit_on_can	48	static
 ../Core/Src/fdcan.c:31:6:Send_Data_On_CAN_401	16	static
+../Core/Src/fdcan.c:52:6:Send_Data_On_CAN_402	16	static
+../Core/Src/fdcan.c:76:6:Send_Data_On_CAN_403	16	static
