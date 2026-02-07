@@ -40,6 +40,7 @@ extern "C" {
 #include "MCU_Protections.h"
 #include "FOC_LivGguard.h"
 #include "fdcan.h"
+#include "Rate_Limiter.h"
 #include "alignment_routine.h"
 /* USER CODE END Includes */
 
@@ -56,6 +57,7 @@ typedef struct data {
 	uint16_t pwm_a;
 	uint16_t pwm_b;
 	uint16_t pwm_c;
+	uint16_t speed_ref;
 	uint32_t count_at_alignment;
 	uint32_t encoder_count;
 	uint32_t Count_From_Duty;

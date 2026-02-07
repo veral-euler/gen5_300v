@@ -39,7 +39,7 @@ Core/Src/fdcan.o: ../Core/Src/fdcan.c ../Core/Inc/fdcan.h \
  ../Core/Inc/rtw_solver.h ../Core/Inc/MCU_Protections_types.h \
  ../Core/Inc/zero_crossing_types.h ../Core/Inc/FOC_LivGguard.h \
  ../Core/Inc/FOC_LivGguard_types.h ../Core/Inc/fdcan.h \
- ../Core/Inc/alignment_routine.h
+ ../Core/Inc/Rate_Limiter.h ../Core/Inc/alignment_routine.h
 ../Core/Inc/fdcan.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
@@ -88,4 +88,5 @@ Core/Src/fdcan.o: ../Core/Src/fdcan.c ../Core/Inc/fdcan.h \
 ../Core/Inc/FOC_LivGguard.h:
 ../Core/Inc/FOC_LivGguard_types.h:
 ../Core/Inc/fdcan.h:
+../Core/Inc/Rate_Limiter.h:
 ../Core/Inc/alignment_routine.h:

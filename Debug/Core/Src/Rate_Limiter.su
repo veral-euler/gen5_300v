@@ -1,0 +1,2 @@
+../Core/Src/Rate_Limiter.c:13:6:RateLimiter_Init	0	static
+../Core/Src/Rate_Limiter.c:32:7:RateLimiter_Update	0	static

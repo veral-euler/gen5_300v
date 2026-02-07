@@ -159,6 +159,7 @@ int main(void)
   /* Initializing FOC and Protections model */
   FOC_LivGguard_initialize();
   MCU_Protections_initialize();
+  RateLimiter_Init(&limiter, 50.0f, 10.0f, 0.0f);
   HAL_Delay(100);
 
   /*Starting FDCAN2*/
@@ -185,7 +186,9 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */    
+    /* USER CODE BEGIN 3 */   
+    uint32_t time_stamp_now = HAL_GetTick();
+    
     d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
     d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
 
@@ -194,6 +197,8 @@ int main(void)
 
     d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
     d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
+
+    FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, (time_stamp_now * 0.001f));
   }
   /* USER CODE END 3 */
 }

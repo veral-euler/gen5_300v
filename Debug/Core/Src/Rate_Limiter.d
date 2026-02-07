@@ -1,5 +1,5 @@
-Core/Src/FOC_H12_data.o: ../Core/Src/FOC_H12_data.c ../Core/Inc/FOC_H12.h \
- ../Core/Inc/complex_types.h ../Core/Inc/main.h \
+Core/Src/Rate_Limiter.o: ../Core/Src/Rate_Limiter.c \
+ ../Core/Inc/Rate_Limiter.h ../Core/Inc/main.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
@@ -35,14 +35,13 @@ Core/Src/FOC_H12_data.o: ../Core/Src/FOC_H12_data.c ../Core/Inc/FOC_H12.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
  ../Core/Inc/Speed_Sensing.h ../Core/Inc/NTC_Temp_Reading.h \
- ../Core/Inc/MCU_Protections.h ../Core/Inc/rtw_continuous.h \
- ../Core/Inc/rtwtypes.h ../Core/Inc/rtw_solver.h \
- ../Core/Inc/MCU_Protections_types.h ../Core/Inc/zero_crossing_types.h \
- ../Core/Inc/FOC_LivGguard.h ../Core/Inc/FOC_LivGguard_types.h \
- ../Core/Inc/fdcan.h ../Core/Inc/Rate_Limiter.h \
- ../Core/Inc/alignment_routine.h ../Core/Inc/FOC_H12_types.h
-../Core/Inc/FOC_H12.h:
-../Core/Inc/complex_types.h:
+ ../Core/Inc/MCU_Protections.h ../Core/Inc/complex_types.h \
+ ../Core/Inc/rtw_continuous.h ../Core/Inc/rtwtypes.h \
+ ../Core/Inc/rtw_solver.h ../Core/Inc/MCU_Protections_types.h \
+ ../Core/Inc/zero_crossing_types.h ../Core/Inc/FOC_LivGguard.h \
+ ../Core/Inc/FOC_LivGguard_types.h ../Core/Inc/fdcan.h \
+ ../Core/Inc/Rate_Limiter.h ../Core/Inc/alignment_routine.h
+../Core/Inc/Rate_Limiter.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -81,6 +80,7 @@ Core/Src/FOC_H12_data.o: ../Core/Src/FOC_H12_data.c ../Core/Inc/FOC_H12.h \
 ../Core/Inc/Speed_Sensing.h:
 ../Core/Inc/NTC_Temp_Reading.h:
 ../Core/Inc/MCU_Protections.h:
+../Core/Inc/complex_types.h:
 ../Core/Inc/rtw_continuous.h:
 ../Core/Inc/rtwtypes.h:
 ../Core/Inc/rtw_solver.h:
@@ -91,4 +91,3 @@ Core/Src/FOC_H12_data.o: ../Core/Src/FOC_H12_data.c ../Core/Inc/FOC_H12.h \
 ../Core/Inc/fdcan.h:
 ../Core/Inc/Rate_Limiter.h:
 ../Core/Inc/alignment_routine.h:
-../Core/Inc/FOC_H12_types.h:
