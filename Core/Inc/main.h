@@ -101,6 +101,8 @@ typedef struct errors {
 	char curr_sens_error;
 	char bus_voltage_ov_error;
 	char bus_voltage_uv_error;
+	char aux_voltage_ov_error;
+	char aux_voltage_uv_error;
 	char id_iq_oc_error;
 	char phase_curr_error;
 	char mtr_temp_ot_error;
@@ -108,6 +110,19 @@ typedef struct errors {
 	char error_triggered;
 	char drive_off;
 } errors;
+
+typedef enum errors_nums {
+	NO_ERROR,
+	CURR_SENS_ERROR,
+	BUS_VOLTAGE_OV_ERROR,
+	BUS_VOLTAGE_UV_ERROR,
+	AUX_VOLTAGE_OV_ERROR,
+	AUX_VOLTAGE_UV_ERROR,
+	ID_IQ_OC_ERROR,
+	PHASE_CURR_ERROR,
+	MTR_TEMP_OT_ERROR,
+	MTC_TEMP_OT_ERROR
+} errors_nums;
 
 typedef enum currSens {
 	INIT,
@@ -119,6 +134,7 @@ typedef enum currSens {
 extern currSens cS;
 extern data d;
 extern errors er;
+extern errors_nums err;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

@@ -83,6 +83,7 @@ uint16_t counter = 0;
 uint8_t heart_beat_init[8] = {0x01,0x00};
 
 currSens cS = INIT;
+errors_nums err = NO_ERROR;
 errors er = {0};
 data d = {.Kvf = V_F_RATIO, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
 /* USER CODE END 0 */
@@ -996,10 +997,42 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 		MCU_Protections_step();
 
     /* Checking for error flag and changing the STATE */
-		if (MCU_Protections_Y.Aux_Voltage_Flag == OV_Error || MCU_Protections_Y.Aux_Voltage_Flag == UV_Error || MCU_Protections_Y.Bus_Voltage_Flag == OV_Error || MCU_Protections_Y.Bus_Voltage_Flag == UV_Error || MCU_Protections_Y.Current_Flag == OC_Error || MCU_Protections_Y.MC_TempFlag == OT_Error || MCU_Protections_Y.Motor_TempFlag == OT_Error) {
+		if (MCU_Protections_Y.Aux_Voltage_Flag == OV_Error) {
 			er.error_triggered = 1;
+      er.aux_voltage_ov_error = 1;
+      err = AUX_VOLTAGE_OV_ERROR;
 			cS = CONT_ERROR;
-		}
+		} else if (MCU_Protections_Y.Aux_Voltage_Flag == UV_Error) {
+      er.error_triggered = 1;
+      er.aux_voltage_uv_error = 1;
+      err = AUX_VOLTAGE_UV_ERROR;
+      cS = CONT_ERROR;
+    } else if (MCU_Protections_Y.Bus_Voltage_Flag == OV_Error) {
+      er.error_triggered = 1;
+      er.bus_voltage_ov_error = 1;
+      err = BUS_VOLTAGE_OV_ERROR;
+      cS = CONT_ERROR;
+    } else if (MCU_Protections_Y.Bus_Voltage_Flag == UV_Error) {
+      er.error_triggered = 1;
+      er.bus_voltage_uv_error = 1;
+      err = BUS_VOLTAGE_UV_ERROR;
+      cS = CONT_ERROR;
+    } else if (MCU_Protections_Y.Motor_TempFlag == OT_Error) {
+      er.error_triggered = 1;
+      er.mtr_temp_ot_error = 1;
+      err = MTR_TEMP_OT_ERROR;
+      cS = CONT_ERROR;
+    } else if (MCU_Protections_Y.MC_TempFlag == OT_Error) {
+      er.error_triggered = 1;
+      er.mtc_temp_ot_error = 1;
+      err = MTC_TEMP_OT_ERROR;
+      cS = CONT_ERROR;
+    } else if (MCU_Protections_Y.Current_Flag == OC_Error) {
+      er.error_triggered = 1;
+      er.phase_curr_error = 1;
+      err = PHASE_CURR_ERROR;
+      cS = CONT_ERROR;
+    }
 
     /* Sending data on CAN bus every 500ms */
     if (can_counter >= CAN_BUS_CYCLE) {
@@ -1190,16 +1223,19 @@ void rt_OneStep(void)
 uint8_t Initial_Fault_Check(void) {
 	if (injectedVal[0] <= 14000 || injectedVal[1] <= 14000 || injectedVal[0] >= 40000 || injectedVal[1] >= 40000) {
 		er.curr_sens_error = 1;
+    err = CURR_SENS_ERROR;
 		er.error_triggered = 1;
 	}
 
 	if (d.Vdc >= MCU_Protections_U.Thresholds.OV_Error_Limit_V) {
 		er.bus_voltage_ov_error = 1;
+    err = BUS_VOLTAGE_OV_ERROR;
 		er.error_triggered = 1;
 	}
 
 	if (d.Vdc <= MCU_Protections_U.Thresholds.UV_Error_Limit_V) {
 		er.bus_voltage_uv_error = 1;
+    err = BUS_VOLTAGE_UV_ERROR;
 		er.error_triggered = 1;
 	}
 

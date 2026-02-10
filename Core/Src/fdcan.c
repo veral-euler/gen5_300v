@@ -88,7 +88,7 @@ void Send_Data_On_CAN_403(void)
 	can_data[3] = (uint8_t)((aux_voltage >> 8) & 0xFF);
 	can_data[4] = (uint8_t)(motor_temp);
 	can_data[5] = (uint8_t)(mc_temp);
-	can_data[6] = 0;
+	can_data[6] = (uint8_t)err;
 	can_data[7] = 0;
 
 	_fdcan_transmit_on_can(0x403, 0, can_data, 0x08);
