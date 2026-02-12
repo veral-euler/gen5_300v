@@ -215,7 +215,7 @@ void rt_OneStep(void);
 #define TIM17_PSC			39
 #define TIM17_ARR			2499
 #define HIGH_PULSE16_ERROR	0.024574f
-#define OFFSET_CALC_ELEC 	1.43f
+#define OFFSET_CALC_ELEC 	1.1913f
 
 #define MTR_NTC_R25			49000.0f
 #define MTC_NTC_R25			10000.0f
