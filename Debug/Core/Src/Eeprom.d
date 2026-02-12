@@ -1,5 +1,4 @@
-Core/Src/FOC_LivGguard_data.o: ../Core/Src/FOC_LivGguard_data.c \
- ../Core/Inc/FOC_LivGguard.h ../Core/Inc/complex_types.h \
+Core/Src/Eeprom.o: ../Core/Src/Eeprom.c ../Core/Inc/Eeprom.h \
  ../Core/Inc/main.h ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
@@ -35,14 +34,14 @@ Core/Src/FOC_LivGguard_data.o: ../Core/Src/FOC_LivGguard_data.c \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
  ../Core/Inc/Speed_Sensing.h ../Core/Inc/NTC_Temp_Reading.h \
- ../Core/Inc/MCU_Protections.h ../Core/Inc/rtw_continuous.h \
- ../Core/Inc/rtwtypes.h ../Core/Inc/rtw_solver.h \
- ../Core/Inc/MCU_Protections_types.h ../Core/Inc/zero_crossing_types.h \
- ../Core/Inc/FOC_LivGguard.h ../Core/Inc/fdcan.h \
+ ../Core/Inc/MCU_Protections.h ../Core/Inc/complex_types.h \
+ ../Core/Inc/rtw_continuous.h ../Core/Inc/rtwtypes.h \
+ ../Core/Inc/rtw_solver.h ../Core/Inc/MCU_Protections_types.h \
+ ../Core/Inc/zero_crossing_types.h ../Core/Inc/FOC_LivGguard.h \
+ ../Core/Inc/FOC_LivGguard_types.h ../Core/Inc/fdcan.h \
  ../Core/Inc/Rate_Limiter.h ../Core/Inc/alignment_routine.h \
- ../Core/Inc/Eeprom.h ../Core/Inc/FOC_LivGguard_types.h
-../Core/Inc/FOC_LivGguard.h:
-../Core/Inc/complex_types.h:
+ ../Core/Inc/Eeprom.h
+../Core/Inc/Eeprom.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -81,14 +80,15 @@ Core/Src/FOC_LivGguard_data.o: ../Core/Src/FOC_LivGguard_data.c \
 ../Core/Inc/Speed_Sensing.h:
 ../Core/Inc/NTC_Temp_Reading.h:
 ../Core/Inc/MCU_Protections.h:
+../Core/Inc/complex_types.h:
 ../Core/Inc/rtw_continuous.h:
 ../Core/Inc/rtwtypes.h:
 ../Core/Inc/rtw_solver.h:
 ../Core/Inc/MCU_Protections_types.h:
 ../Core/Inc/zero_crossing_types.h:
 ../Core/Inc/FOC_LivGguard.h:
+../Core/Inc/FOC_LivGguard_types.h:
 ../Core/Inc/fdcan.h:
 ../Core/Inc/Rate_Limiter.h:
 ../Core/Inc/alignment_routine.h:
 ../Core/Inc/Eeprom.h:
-../Core/Inc/FOC_LivGguard_types.h:

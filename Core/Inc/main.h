@@ -42,6 +42,7 @@ extern "C" {
 #include "fdcan.h"
 #include "Rate_Limiter.h"
 #include "alignment_routine.h"
+#include "Eeprom.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -57,10 +58,13 @@ typedef struct data {
 	uint16_t pwm_a;
 	uint16_t pwm_b;
 	uint16_t pwm_c;
-	uint16_t speed_ref;
+	uint16_t offset_angle_elec_16bit;
 	uint32_t count_at_alignment;
 	uint32_t encoder_count;
 	uint32_t Count_From_Duty;
+	uint32_t count_at_z;
+	float offset_angle_elec;
+	float speed_ref;
 	float Aux_dc;
 	float Mtr_temp;
 	float Mtc_temp;
@@ -107,6 +111,8 @@ typedef struct errors {
 	char phase_curr_error;
 	char mtr_temp_ot_error;
 	char mtc_temp_ot_error;
+	char eeprom_write_error;
+	char eeprom_read_error;
 	char error_triggered;
 	char drive_off;
 } errors;
@@ -121,13 +127,18 @@ typedef enum errors_nums {
 	ID_IQ_OC_ERROR,
 	PHASE_CURR_ERROR,
 	MTR_TEMP_OT_ERROR,
-	MTC_TEMP_OT_ERROR
+	MTC_TEMP_OT_ERROR,
+	EEPROM_WRITE_ERROR,
+	EEPROM_READ_ERROR
 } errors_nums;
 
 typedef enum currSens {
 	INIT,
-	CALIB,
-	END,
+	ANGLE_CALIB,
+	ANGLE_CALIB_DONE,
+	ANGLE_OFFSET_STORE,
+	CURR_SENS_CALIB,
+	FOC_START,
 	CONT_ERROR
 } currSens;
 
@@ -157,6 +168,7 @@ uint32_t GetMicroseconds(void);
 float throttle_to_rpm(float v_throttle);
 float map_speed_to_id_ref(float speed_rpm);
 uint8_t Initial_Fault_Check(void);
+void set_Initial_angle(void);
 void rt_OneStep(void);
 /* USER CODE END EFP */
 
@@ -170,7 +182,7 @@ void rt_OneStep(void);
 #define ROOT2				1.414213f
 #define	ROOT3				1.732051f
 #define ADC_TO_CURR			0.040246f
-#define ALIGN_DUTY			750
+#define ALIGN_DUTY			1000
 #define RS		  			0.0102f
 #define LQ					0.000148f
 #define LD					0.000064f
@@ -191,6 +203,7 @@ void rt_OneStep(void);
 #define BUS_VDC_SCALE		0.00206f
 #define AUX_VDC_SCALE		0.000188658f
 #define CAN_BUS_CYCLE		500
+#define SPEED_REF_RPM_MAX	500.0f
 
 #define TIM1_PSC			19
 #define TIM1_ARR			2499
@@ -202,6 +215,7 @@ void rt_OneStep(void);
 #define TIM17_PSC			39
 #define TIM17_ARR			2499
 #define HIGH_PULSE16_ERROR	0.024574f
+#define OFFSET_CALC_ELEC 	1.43f
 
 #define MTR_NTC_R25			49000.0f
 #define MTC_NTC_R25			10000.0f

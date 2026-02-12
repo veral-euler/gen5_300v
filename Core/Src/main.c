@@ -46,6 +46,8 @@ DMA_HandleTypeDef hdma_adc1;
 
 FDCAN_HandleTypeDef hfdcan2;
 
+I2C_HandleTypeDef hi2c2;
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim5;
@@ -67,6 +69,7 @@ static void MX_TIM17_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_FDCAN2_Init(void);
+static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -82,10 +85,10 @@ uint32_t ib_offset = 0;
 uint16_t counter = 0;
 uint8_t heart_beat_init[8] = {0x01,0x00};
 
-currSens cS = INIT;
+currSens cS = ANGLE_CALIB_DONE;
 errors_nums err = NO_ERROR;
 errors er = {0};
-data d = {.Kvf = V_F_RATIO, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
+data d = {.Kvf = V_F_RATIO, .speed_ref = SPEED_REF_RPM_MAX, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
 /* USER CODE END 0 */
 
 /**
@@ -127,6 +130,7 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM2_Init();
   MX_FDCAN2_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   HAL_Delay(100);
 
@@ -143,7 +147,12 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   /* Alignment routine at the start of program to align the rotor to U phase */
-  Motor_Alignment_Routine();
+  if (cS == INIT) {
+    cS = ANGLE_CALIB;
+    Motor_Alignment_Routine();
+  } else if (cS == ANGLE_CALIB_DONE) {
+    set_Initial_angle();
+  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -160,7 +169,7 @@ int main(void)
   /* Initializing FOC and Protections model */
   FOC_LivGguard_initialize();
   MCU_Protections_initialize();
-  RateLimiter_Init(&limiter, 50.0f, 10.0f, 0.0f);
+  RateLimiter_Init(&limiter, 50.0f, 100.0f, 0.0f);
   HAL_Delay(100);
 
   /*Starting FDCAN2*/
@@ -199,7 +208,7 @@ int main(void)
     d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
     d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
 
-    FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, (time_stamp_now * 0.001f));
+    FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
   }
   /* USER CODE END 3 */
 }
@@ -257,7 +266,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
   RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
 
@@ -526,6 +535,54 @@ static void MX_FDCAN2_Init(void)
   /* USER CODE BEGIN FDCAN2_Init 2 */
 
   /* USER CODE END FDCAN2_Init 2 */
+
+}
+
+/**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.Timing = 0x10C0ECFF;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Analogue filter
+  */
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c2, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Digital filter
+  */
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c2, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
 
 }
 
@@ -861,7 +918,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 		injectedVal[PHASE_U] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_1);
 		injectedVal[PHASE_V] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_2);
 
-		if (cS == CALIB) {
+		if (cS == CURR_SENS_CALIB) {
       /* Calibrating current sensor offsets */
 			ia_offset += injectedVal[PHASE_U];
 			ib_offset += injectedVal[PHASE_V];
@@ -897,15 +954,16 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				if (d.init_check == HAL_OK) {
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 					HAL_TIM_Base_Start_IT(&htim17);
-					cS = END;
+					cS = FOC_START;
 				} else if (d.init_check == !HAL_OK) {
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+					HAL_TIM_Base_Start_IT(&htim17);
 					cS = CONT_ERROR;
 				}
 			}
 		}
 
-		if (cS == END) {
+		if (cS == FOC_START) {
       /* Updating pahse current data */
 			FOC_LivGguard_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
 			FOC_LivGguard_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
@@ -915,7 +973,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 			d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
 			d.mech_angle = d.encoder_count * COUNTS_TO_RADS;
 			d.mech_angle = fmodf(d.mech_angle, TWO_PI);
-			d.elec_angle = (d.mech_angle * POLEPAIRS);
+			d.elec_angle = (d.mech_angle * POLEPAIRS) - d.offset_angle_elec;
 			d.elec_angle = fmodf(d.elec_angle, TWO_PI);
 			FOC_LivGguard_U.MtrElcPos = d.elec_angle;
 
@@ -970,6 +1028,18 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 			(void)memset(&FOC_LivGguard_U, 0, sizeof(ExtU_FOC_LivGguard_T));
 			(void)memset(&FOC_LivGguard_Y, 0, sizeof(ExtY_FOC_LivGguard_T));
 		}
+
+    if (cS == ANGLE_OFFSET_STORE) {
+      //TODO: Store the angle offset in flash memory and read it on startup to avoid doing the offset calibration on every power cycle
+      uint16_t offset_eeprom = (uint16_t)(d.offset_angle_elec * 100.0f);
+      if (EEPROM_Write_Page0(offset_eeprom) == HAL_OK)
+        cS = ANGLE_CALIB_DONE;
+      else {
+        er.eeprom_write_error = 1;
+        err = EEPROM_WRITE_ERROR;
+      }
+      HAL_TIM_Base_Start_IT(&htim17);
+    }
 	}
 
 }
@@ -1053,9 +1123,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		}
 
     /* Resetting mech angle and TIM2 reg on every z index pulse */
-		if (cS == END) {
-			d.mech_angle = 0.0f;
-			__HAL_TIM_SET_COUNTER(&htim2, 0);
+		if (cS == FOC_START) {
+			d.count_at_z = __HAL_TIM_GET_COUNTER(&htim2);
+//			d.mech_angle = 0.0f;
+//			__HAL_TIM_SET_COUNTER(&htim2, 0);
 		}
 	}
 }
@@ -1244,6 +1315,32 @@ uint8_t Initial_Fault_Check(void) {
 	} else {
 		return HAL_OK;
 	}
+}
+
+void set_Initial_angle(void) {
+  d.start_alignment = 0;
+  d.end_alignment = 1;
+
+  if (EEPROM_Read_Page0(&d.offset_angle_elec_16bit) == HAL_OK) {
+    d.offset_angle_elec = (float)d.offset_angle_elec_16bit / 100.0f;
+  } else {
+    er.eeprom_read_error = 1;
+    err = EEPROM_READ_ERROR;
+    d.offset_angle_elec = OFFSET_CALC_ELEC;
+  }
+
+  d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - HIGH_PULSE16_ERROR;
+  d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
+  d.Count_From_Duty = (uint16_t)((d.Angle_From_Duty / TWO_PI) * (TIM2_ARR + 1));
+
+  HAL_Delay(100);
+
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+  HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_1);
+  HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_2);
+  HAL_TIM_IC_DeInit(&htim5);
+  HAL_TIM_Base_MspDeInit(&htim5);
+  cS = CURR_SENS_CALIB;
 }
 /* USER CODE END 4 */
 

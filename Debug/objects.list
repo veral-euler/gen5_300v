@@ -1,3 +1,4 @@
+"./Core/Src/Eeprom.o"
 "./Core/Src/FOC_Basic.o"
 "./Core/Src/FOC_Basic_FF.o"
 "./Core/Src/FOC_H12.o"

@@ -5,6 +5,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Core/Src/Eeprom.c \
 ../Core/Src/FOC_Basic.c \
 ../Core/Src/FOC_Basic_FF.c \
 ../Core/Src/FOC_H12.c \
@@ -29,6 +30,7 @@ C_SRCS += \
 ../Core/Src/system_stm32h7xx.c 
 
 OBJS += \
+./Core/Src/Eeprom.o \
 ./Core/Src/FOC_Basic.o \
 ./Core/Src/FOC_Basic_FF.o \
 ./Core/Src/FOC_H12.o \
@@ -53,6 +55,7 @@ OBJS += \
 ./Core/Src/system_stm32h7xx.o 
 
 C_DEPS += \
+./Core/Src/Eeprom.d \
 ./Core/Src/FOC_Basic.d \
 ./Core/Src/FOC_Basic_FF.d \
 ./Core/Src/FOC_H12.d \
@@ -84,7 +87,7 @@ Core/Src/%.o Core/Src/%.su: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/FOC_Basic.d ./Core/Src/FOC_Basic.o ./Core/Src/FOC_Basic.su ./Core/Src/FOC_Basic_FF.d ./Core/Src/FOC_Basic_FF.o ./Core/Src/FOC_Basic_FF.su ./Core/Src/FOC_H12.d ./Core/Src/FOC_H12.o ./Core/Src/FOC_H12.su ./Core/Src/FOC_H12_data.d ./Core/Src/FOC_H12_data.o ./Core/Src/FOC_H12_data.su ./Core/Src/FOC_LivGguard.d ./Core/Src/FOC_LivGguard.o ./Core/Src/FOC_LivGguard.su ./Core/Src/FOC_LivGguard_data.d ./Core/Src/FOC_LivGguard_data.o ./Core/Src/FOC_LivGguard_data.su ./Core/Src/FOC_MTPA_FF.d ./Core/Src/FOC_MTPA_FF.o ./Core/Src/FOC_MTPA_FF.su ./Core/Src/MCU_Protections.d ./Core/Src/MCU_Protections.o ./Core/Src/MCU_Protections.su ./Core/Src/MCU_Protections_data.d ./Core/Src/MCU_Protections_data.o ./Core/Src/MCU_Protections_data.su ./Core/Src/NTC_Temp_Reading.d ./Core/Src/NTC_Temp_Reading.o ./Core/Src/NTC_Temp_Reading.su ./Core/Src/RMS_Current.d ./Core/Src/RMS_Current.o ./Core/Src/RMS_Current.su ./Core/Src/Rate_Limiter.d ./Core/Src/Rate_Limiter.o ./Core/Src/Rate_Limiter.su ./Core/Src/Speed_Estimator.d ./Core/Src/Speed_Estimator.o ./Core/Src/Speed_Estimator.su ./Core/Src/Speed_Sensing.d ./Core/Src/Speed_Sensing.o ./Core/Src/Speed_Sensing.su ./Core/Src/alignment_routine.d ./Core/Src/alignment_routine.o ./Core/Src/alignment_routine.su ./Core/Src/fdcan.d ./Core/Src/fdcan.o ./Core/Src/fdcan.su ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/stm32h7xx_hal_msp.d ./Core/Src/stm32h7xx_hal_msp.o ./Core/Src/stm32h7xx_hal_msp.su ./Core/Src/stm32h7xx_it.d ./Core/Src/stm32h7xx_it.o ./Core/Src/stm32h7xx_it.su ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32h7xx.d ./Core/Src/system_stm32h7xx.o ./Core/Src/system_stm32h7xx.su
+	-$(RM) ./Core/Src/Eeprom.d ./Core/Src/Eeprom.o ./Core/Src/Eeprom.su ./Core/Src/FOC_Basic.d ./Core/Src/FOC_Basic.o ./Core/Src/FOC_Basic.su ./Core/Src/FOC_Basic_FF.d ./Core/Src/FOC_Basic_FF.o ./Core/Src/FOC_Basic_FF.su ./Core/Src/FOC_H12.d ./Core/Src/FOC_H12.o ./Core/Src/FOC_H12.su ./Core/Src/FOC_H12_data.d ./Core/Src/FOC_H12_data.o ./Core/Src/FOC_H12_data.su ./Core/Src/FOC_LivGguard.d ./Core/Src/FOC_LivGguard.o ./Core/Src/FOC_LivGguard.su ./Core/Src/FOC_LivGguard_data.d ./Core/Src/FOC_LivGguard_data.o ./Core/Src/FOC_LivGguard_data.su ./Core/Src/FOC_MTPA_FF.d ./Core/Src/FOC_MTPA_FF.o ./Core/Src/FOC_MTPA_FF.su ./Core/Src/MCU_Protections.d ./Core/Src/MCU_Protections.o ./Core/Src/MCU_Protections.su ./Core/Src/MCU_Protections_data.d ./Core/Src/MCU_Protections_data.o ./Core/Src/MCU_Protections_data.su ./Core/Src/NTC_Temp_Reading.d ./Core/Src/NTC_Temp_Reading.o ./Core/Src/NTC_Temp_Reading.su ./Core/Src/RMS_Current.d ./Core/Src/RMS_Current.o ./Core/Src/RMS_Current.su ./Core/Src/Rate_Limiter.d ./Core/Src/Rate_Limiter.o ./Core/Src/Rate_Limiter.su ./Core/Src/Speed_Estimator.d ./Core/Src/Speed_Estimator.o ./Core/Src/Speed_Estimator.su ./Core/Src/Speed_Sensing.d ./Core/Src/Speed_Sensing.o ./Core/Src/Speed_Sensing.su ./Core/Src/alignment_routine.d ./Core/Src/alignment_routine.o ./Core/Src/alignment_routine.su ./Core/Src/fdcan.d ./Core/Src/fdcan.o ./Core/Src/fdcan.su ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/stm32h7xx_hal_msp.d ./Core/Src/stm32h7xx_hal_msp.o ./Core/Src/stm32h7xx_hal_msp.su ./Core/Src/stm32h7xx_it.d ./Core/Src/stm32h7xx_it.o ./Core/Src/stm32h7xx_it.su ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32h7xx.d ./Core/Src/system_stm32h7xx.o ./Core/Src/system_stm32h7xx.su
 
 .PHONY: clean-Core-2f-Src
 
