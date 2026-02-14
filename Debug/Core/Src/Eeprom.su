@@ -1,4 +1,5 @@
-../Core/Src/Eeprom.c:49:9:EEPROM_Write	32	static
+../Core/Src/Eeprom.c:69:9:EEPROM_Write	32	static
 ../Core/Src/Eeprom.c:14:9:EEPROM_Write_Page0	16	static
-../Core/Src/Eeprom.c:63:9:EEPROM_Read	24	static
-../Core/Src/Eeprom.c:27:9:EEPROM_Read_Page0	16	static
+../Core/Src/Eeprom.c:83:9:EEPROM_Read	24	static
+../Core/Src/Eeprom.c:29:9:EEPROM_Read_Page0	16	static
+../Core/Src/Eeprom.c:59:6:Read_EEPROM_at_init	8	static

@@ -146,7 +146,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  /* Alignment routine at the start of program to align the rotor to U phase */
+  Read_EEPROM_at_init();
+
   if (cS == INIT) {
     cS = ANGLE_CALIB;
     Motor_Alignment_Routine();
@@ -1039,6 +1040,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         err = EEPROM_WRITE_ERROR;
       }
       HAL_TIM_Base_Start_IT(&htim17);
+      HAL_NVIC_SystemReset();
     }
 	}
 
@@ -1318,17 +1320,6 @@ uint8_t Initial_Fault_Check(void) {
 }
 
 void set_Initial_angle(void) {
-  d.start_alignment = 0;
-  d.end_alignment = 1;
-
-  if (EEPROM_Read_Page0(&d.offset_angle_elec_16bit) == HAL_OK) {
-    d.offset_angle_elec = (float)d.offset_angle_elec_16bit / 100.0f;
-  } else {
-    er.eeprom_read_error = 1;
-    err = EEPROM_READ_ERROR;
-    d.offset_angle_elec = OFFSET_CALC_ELEC;
-  }
-
   d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - HIGH_PULSE16_ERROR;
   d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
   d.Count_From_Duty = (uint16_t)((d.Angle_From_Duty / TWO_PI) * (TIM2_ARR + 1));

@@ -14,11 +14,13 @@
 Page 0  0       EEPROM_MAGIC_NUM
         1       Offset
         2		Offset
-        3       CRC
+        3       CALIB DONE bit
+        4       CRC
 */
 
 uint8_t EEPROM_Write(uint16_t addr, uint8_t *data, uint16_t size);
 uint8_t EEPROM_Read(uint16_t addr, uint8_t *data, uint16_t size);
+void Read_EEPROM_at_init(void);
 
 uint8_t EEPROM_Write_Page0(uint16_t offset);
 uint8_t EEPROM_Read_Page0(uint16_t* offset);

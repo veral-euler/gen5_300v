@@ -12,28 +12,38 @@ static uint8_t crc8(const uint8_t *data, uint8_t len){
 }
 
 uint8_t EEPROM_Write_Page0(uint16_t offset){
-  uint8_t page[4];
+  uint8_t page[5];
 
   page[0] = EEPROM_MAGIC_NUM;
 
   page[1] = (offset >> 8) & 0xFF;
   page[2] = (offset >> 0) & 0xFF;
 
-  page[3] = crc8(page, 3);
+  page[3] = 1;
 
-  return EEPROM_Write(0x00, page, 4);
+  page[4] = crc8(page, 4);
+
+  return EEPROM_Write(0x00, page, 5);
 }
 
 uint8_t EEPROM_Read_Page0(uint16_t* offset){
-  uint8_t page[4];
+  uint8_t page[5];
 
-  if(EEPROM_Read(0x00, page, 4) != HAL_OK){
+  if(EEPROM_Read(0x00, page, 5) != HAL_OK){
     return HAL_ERROR;
   }
 
-  uint8_t calc_crc = crc8(page, 3);
+  if (page[3] == 1) {
+    cS = ANGLE_CALIB_DONE;
+    d.start_alignment = 0;
+    d.end_alignment = 1;
+  } else {
+    cS = INIT;
+  }
 
-  if(calc_crc != page[3]){
+  uint8_t calc_crc = crc8(page, 4);
+
+  if(calc_crc != page[4]){
     return HAL_ERROR;
   }
 
@@ -44,6 +54,16 @@ uint8_t EEPROM_Read_Page0(uint16_t* offset){
   *offset = (page[1] << 8) | page[2];
 
   return HAL_OK;
+}
+
+void Read_EEPROM_at_init(void) {
+  if (EEPROM_Read_Page0(&d.offset_angle_elec_16bit) == HAL_OK) {
+    d.offset_angle_elec = (float)d.offset_angle_elec_16bit / 100.0f;
+  } else {
+    er.eeprom_read_error = 1;
+    err = EEPROM_READ_ERROR;
+    d.offset_angle_elec = OFFSET_CALC_ELEC;
+  }
 }
 
 uint8_t EEPROM_Write(uint16_t mem_addr, uint8_t* data, uint16_t size){
