@@ -142,6 +142,13 @@ typedef enum currSens {
 	CONT_ERROR
 } currSens;
 
+typedef enum fnr_state_t {
+	FORWARD = 1,
+	REVERSE,
+	NEUTRAL
+} fnr_state_t;
+
+extern fnr_state_t fnr_state;
 extern currSens cS;
 extern data d;
 extern errors er;
@@ -203,7 +210,7 @@ void rt_OneStep(void);
 #define BUS_VDC_SCALE		0.00206f
 #define AUX_VDC_SCALE		0.000188658f
 #define CAN_BUS_CYCLE		500
-#define SPEED_REF_RPM_MAX	500.0f
+#define SPEED_REF_RPM_MAX	0.0f
 
 #define TIM1_PSC			19
 #define TIM1_ARR			2499

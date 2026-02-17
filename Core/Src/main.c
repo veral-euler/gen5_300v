@@ -76,15 +76,15 @@ static void MX_I2C2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint8_t heart_beat_init[8] = {0x01,0x00};
 uint16_t injectedVal[2] = {0};
-float phaseCurrents[2] = {0.0f};
 uint16_t currSensOff[2] = {0.0f};
 uint16_t adc1_buffer[5] = {0};
+uint16_t counter = 0;
 uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
-uint16_t counter = 0;
-uint8_t heart_beat_init[8] = {0x01,0x00};
 
+fnr_state_t fnr_state = NEUTRAL;
 currSens cS = ANGLE_CALIB_DONE;
 errors_nums err = NO_ERROR;
 errors er = {0};
@@ -202,6 +202,16 @@ int main(void)
     
     d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
     d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
+
+    if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_SET) {
+      fnr_state = NEUTRAL;
+      d.speed_ref = 0.0f;
+      FOC_LivGguard_U.Ref_Speed_mech_rpm = 0.0f;
+    } else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET) {
+      fnr_state = FORWARD;
+    } else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET) {
+      fnr_state = REVERSE;
+    }
 
     d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
     d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);

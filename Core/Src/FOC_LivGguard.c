@@ -162,6 +162,14 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    */
   rtb_Product1 = FOC_LivGguard_U.Iq_Torque_ratio * FOC_LivGguard_B.Switch2;
 
+  if (fnr_state == FORWARD) {
+    rtb_Product1 *= 1.0f;
+  } else if (fnr_state == REVERSE) {
+    rtb_Product1 *= -1.0f;
+  } else if (fnr_state == NEUTRAL) {
+    rtb_Product1 = 0.0f;
+  }
+
   /* Delay: '<S8>/Delay' */
   if (FOC_LivGguard_DW.icLoad) {
     /* Sum: '<S8>/Difference Inputs2'
@@ -522,14 +530,6 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   FOC_LivGguard_Y.Iq_ref = FOC_LivGguard_Y.Iq_error +
     FOC_LivGguard_DW.Delay_DSTATE_bc;
 
-  if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
-    FOC_LivGguard_Y.Iq_ref *= 1.0f;
-  else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
-    FOC_LivGguard_Y.Iq_ref *= -1.0f;
-  else {
-    FOC_LivGguard_Y.Iq_ref = 0.0f;
-    FOC_LivGguard_Y.Id_ref = 0.0f;
-  }
 
   /* Switch: '<S157>/Switch2' incorporates:
    *  Inport: '<Root>/Id_Iq_MTPA_limit'
