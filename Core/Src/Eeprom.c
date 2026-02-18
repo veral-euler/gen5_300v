@@ -30,6 +30,9 @@ uint8_t EEPROM_Read_Page0(uint16_t* offset){
   uint8_t page[5];
 
   if(EEPROM_Read(0x00, page, 5) != HAL_OK){
+    cS = INIT;
+    d.start_alignment = 1;
+    d.end_alignment = 0;
     return HAL_ERROR;
   }
 
@@ -44,10 +47,16 @@ uint8_t EEPROM_Read_Page0(uint16_t* offset){
   uint8_t calc_crc = crc8(page, 4);
 
   if(calc_crc != page[4]){
+    cS = INIT;
+    d.start_alignment = 1;
+    d.end_alignment = 0;
     return HAL_ERROR;
   }
 
   if(page[0] != EEPROM_MAGIC_NUM){
+    cS = INIT;
+    d.start_alignment = 1;
+    d.end_alignment = 0;
     return EEPROM_NO_MAGIC_NUM;
   }
 

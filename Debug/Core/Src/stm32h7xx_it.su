@@ -12,5 +12,5 @@
 ../Core/Src/stm32h7xx_it.c:239:6:FDCAN2_IT1_IRQHandler	8	static
 ../Core/Src/stm32h7xx_it.c:253:6:EXTI9_5_IRQHandler	8	static
 ../Core/Src/stm32h7xx_it.c:267:6:TIM2_IRQHandler	8	static
-../Core/Src/stm32h7xx_it.c:281:6:TIM5_IRQHandler	8	static
-../Core/Src/stm32h7xx_it.c:295:6:TIM17_IRQHandler	8	static
+../Core/Src/stm32h7xx_it.c:284:6:TIM5_IRQHandler	8	static
+../Core/Src/stm32h7xx_it.c:298:6:TIM17_IRQHandler	8	static

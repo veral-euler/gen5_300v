@@ -1,4 +1,6 @@
-Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
+Core/Src/Sensor_Disconnection_Checks.o: \
+ ../Core/Src/Sensor_Disconnection_Checks.c \
+ ../Core/Inc/Sensor_Disconnection_Checks.h ../Core/Inc/main.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
@@ -34,14 +36,14 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
  ../Core/Inc/Speed_Sensing.h ../Core/Inc/NTC_Temp_Reading.h \
- ../Core/Inc/main.h ../Core/Inc/MCU_Protections.h \
- ../Core/Inc/complex_types.h ../Core/Inc/rtw_continuous.h \
- ../Core/Inc/rtwtypes.h ../Core/Inc/rtw_solver.h \
- ../Core/Inc/MCU_Protections_types.h ../Core/Inc/zero_crossing_types.h \
- ../Core/Inc/FOC_LivGguard.h ../Core/Inc/FOC_LivGguard_types.h \
- ../Core/Inc/fdcan.h ../Core/Inc/Rate_Limiter.h \
- ../Core/Inc/alignment_routine.h ../Core/Inc/Eeprom.h \
- ../Core/Inc/Sensor_Disconnection_Checks.h
+ ../Core/Inc/MCU_Protections.h ../Core/Inc/complex_types.h \
+ ../Core/Inc/rtw_continuous.h ../Core/Inc/rtwtypes.h \
+ ../Core/Inc/rtw_solver.h ../Core/Inc/MCU_Protections_types.h \
+ ../Core/Inc/zero_crossing_types.h ../Core/Inc/FOC_LivGguard.h \
+ ../Core/Inc/FOC_LivGguard_types.h ../Core/Inc/fdcan.h \
+ ../Core/Inc/Rate_Limiter.h ../Core/Inc/alignment_routine.h \
+ ../Core/Inc/Eeprom.h ../Core/Inc/Sensor_Disconnection_Checks.h
+../Core/Inc/Sensor_Disconnection_Checks.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -79,7 +81,6 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h:
 ../Core/Inc/Speed_Sensing.h:
 ../Core/Inc/NTC_Temp_Reading.h:
-../Core/Inc/main.h:
 ../Core/Inc/MCU_Protections.h:
 ../Core/Inc/complex_types.h:
 ../Core/Inc/rtw_continuous.h:

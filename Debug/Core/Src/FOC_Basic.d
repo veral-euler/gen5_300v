@@ -41,7 +41,7 @@ Core/Src/FOC_Basic.o: ../Core/Src/FOC_Basic.c ../Core/Inc/FOC_Basic.h \
  ../Core/Inc/FOC_LivGguard.h ../Core/Inc/FOC_LivGguard_types.h \
  ../Core/Inc/fdcan.h ../Core/Inc/Rate_Limiter.h \
  ../Core/Inc/alignment_routine.h ../Core/Inc/Eeprom.h \
- ../Core/Inc/FOC_Basic_types.h
+ ../Core/Inc/Sensor_Disconnection_Checks.h ../Core/Inc/FOC_Basic_types.h
 ../Core/Inc/FOC_Basic.h:
 ../Core/Inc/complex_types.h:
 ../Core/Inc/main.h:
@@ -93,4 +93,5 @@ Core/Src/FOC_Basic.o: ../Core/Src/FOC_Basic.c ../Core/Inc/FOC_Basic.h \
 ../Core/Inc/Rate_Limiter.h:
 ../Core/Inc/alignment_routine.h:
 ../Core/Inc/Eeprom.h:
+../Core/Inc/Sensor_Disconnection_Checks.h:
 ../Core/Inc/FOC_Basic_types.h:

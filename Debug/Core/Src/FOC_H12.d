@@ -41,8 +41,8 @@ Core/Src/FOC_H12.o: ../Core/Src/FOC_H12.c ../Core/Inc/FOC_H12.h \
  ../Core/Inc/FOC_LivGguard.h ../Core/Inc/FOC_LivGguard_types.h \
  ../Core/Inc/fdcan.h ../Core/Inc/Rate_Limiter.h \
  ../Core/Inc/alignment_routine.h ../Core/Inc/Eeprom.h \
- ../Core/Inc/FOC_H12_types.h ../Core/Inc/FOC_H12_private.h \
- ../Core/Inc/FOC_H12.h
+ ../Core/Inc/Sensor_Disconnection_Checks.h ../Core/Inc/FOC_H12_types.h \
+ ../Core/Inc/FOC_H12_private.h ../Core/Inc/FOC_H12.h
 ../Core/Inc/FOC_H12.h:
 ../Core/Inc/complex_types.h:
 ../Core/Inc/main.h:
@@ -94,6 +94,7 @@ Core/Src/FOC_H12.o: ../Core/Src/FOC_H12.c ../Core/Inc/FOC_H12.h \
 ../Core/Inc/Rate_Limiter.h:
 ../Core/Inc/alignment_routine.h:
 ../Core/Inc/Eeprom.h:
+../Core/Inc/Sensor_Disconnection_Checks.h:
 ../Core/Inc/FOC_H12_types.h:
 ../Core/Inc/FOC_H12_private.h:
 ../Core/Inc/FOC_H12.h:

@@ -40,7 +40,8 @@ Core/Src/FOC_LivGguard_data.o: ../Core/Src/FOC_LivGguard_data.c \
  ../Core/Inc/MCU_Protections_types.h ../Core/Inc/zero_crossing_types.h \
  ../Core/Inc/FOC_LivGguard.h ../Core/Inc/fdcan.h \
  ../Core/Inc/Rate_Limiter.h ../Core/Inc/alignment_routine.h \
- ../Core/Inc/Eeprom.h ../Core/Inc/FOC_LivGguard_types.h
+ ../Core/Inc/Eeprom.h ../Core/Inc/Sensor_Disconnection_Checks.h \
+ ../Core/Inc/FOC_LivGguard_types.h
 ../Core/Inc/FOC_LivGguard.h:
 ../Core/Inc/complex_types.h:
 ../Core/Inc/main.h:
@@ -91,4 +92,5 @@ Core/Src/FOC_LivGguard_data.o: ../Core/Src/FOC_LivGguard_data.c \
 ../Core/Inc/Rate_Limiter.h:
 ../Core/Inc/alignment_routine.h:
 ../Core/Inc/Eeprom.h:
+../Core/Inc/Sensor_Disconnection_Checks.h:
 ../Core/Inc/FOC_LivGguard_types.h:

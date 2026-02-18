@@ -88,7 +88,7 @@ fnr_state_t fnr_state = NEUTRAL;
 currSens cS = ANGLE_CALIB_DONE;
 errors_nums err = NO_ERROR;
 errors er = {0};
-data d = {.Kvf = V_F_RATIO, .speed_ref = SPEED_REF_RPM_MAX, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
+data d = {.Kvf = V_F_RATIO, .speed_ref = 0.0f, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
 /* USER CODE END 0 */
 
 /**
@@ -965,6 +965,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				if (d.init_check == HAL_OK) {
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 					HAL_TIM_Base_Start_IT(&htim17);
+          d.speed_ref = SPEED_REF_RPM_MAX;
 					cS = FOC_START;
 				} else if (d.init_check == !HAL_OK) {
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
@@ -982,6 +983,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
       /* Updating angle data */
 			d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
+      d.curr_z_count = d.z_count;
+      d.count_diff_at_z = fabsf((TIM2_ARR + 1) - d.count_at_z);
+      d.z_count_diff = d.curr_z_count - d.prev_z_count;
 			d.mech_angle = d.encoder_count * COUNTS_TO_RADS;
 			d.mech_angle = fmodf(d.mech_angle, TWO_PI);
 			d.elec_angle = (d.mech_angle * POLEPAIRS) - d.offset_angle_elec;
@@ -1064,6 +1068,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     /* Gathering throttle voltage and speed feedback data */
 		Speed_Sense(d.mech_angle);
 		FOC_LivGguard_U.MtrSpd = fabsf(d.rad_s);
+    if (fabsf(d.RPM) >= 80.0f) {
+      d.motor_start = 1;
+    }
 		d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
 
     /* Populating MCU Protections input data structures */
@@ -1077,6 +1084,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
     /* Running MCU protections model */
 		MCU_Protections_step();
+    Sensor_Disconnection_Check();
 
     /* Checking for error flag and changing the STATE */
 		if (MCU_Protections_Y.Aux_Voltage_Flag == OV_Error) {
@@ -1130,16 +1138,21 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if (GPIO_Pin == GPIO_PIN_7) {
 		d.z_pulse ^= 1;
 		d.z_count++;
-		if (d.z_count >= 255) {
+
+    /* Stopping uint32_t overflow */
+		if (d.z_count >= UINT32_MAX) {
 			d.z_count = 0;
 		}
 
-    /* Resetting mech angle and TIM2 reg on every z index pulse */
+    /* Not Resetting mech angle and TIM2 reg on every z index pulse, only getting the TIM2 count */
 		if (cS == FOC_START) {
 			d.count_at_z = __HAL_TIM_GET_COUNTER(&htim2);
 //			d.mech_angle = 0.0f;
 //			__HAL_TIM_SET_COUNTER(&htim2, 0);
 		}
+
+    /* Storing the prev Z count */
+    d.prev_z_count = d.curr_z_count;
 	}
 }
 

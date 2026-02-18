@@ -41,7 +41,7 @@ Core/Src/RMS_Current.o: ../Core/Src/RMS_Current.c \
  ../Core/Inc/zero_crossing_types.h ../Core/Inc/FOC_LivGguard.h \
  ../Core/Inc/FOC_LivGguard_types.h ../Core/Inc/fdcan.h \
  ../Core/Inc/Rate_Limiter.h ../Core/Inc/alignment_routine.h \
- ../Core/Inc/Eeprom.h
+ ../Core/Inc/Eeprom.h ../Core/Inc/Sensor_Disconnection_Checks.h
 ../Core/Inc/RMS_Current.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
@@ -93,3 +93,4 @@ Core/Src/RMS_Current.o: ../Core/Src/RMS_Current.c \
 ../Core/Inc/Rate_Limiter.h:
 ../Core/Inc/alignment_routine.h:
 ../Core/Inc/Eeprom.h:
+../Core/Inc/Sensor_Disconnection_Checks.h:

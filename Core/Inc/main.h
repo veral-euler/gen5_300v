@@ -43,13 +43,17 @@ extern "C" {
 #include "Rate_Limiter.h"
 #include "alignment_routine.h"
 #include "Eeprom.h"
+#include "Sensor_Disconnection_Checks.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 typedef struct data {
 	uint8_t z_pulse;
-	uint8_t z_count;
+	uint8_t A_Pulse;
+	uint8_t B_Pulse;
+	uint8_t A_B_XOR;
+	uint8_t motor_start;
 	uint8_t start_alignment;
 	uint8_t end_alignment;
 	uint8_t forward_pin;
@@ -63,6 +67,11 @@ typedef struct data {
 	uint32_t encoder_count;
 	uint32_t Count_From_Duty;
 	uint32_t count_at_z;
+	uint32_t count_diff_at_z;
+	uint32_t z_count;
+	uint32_t prev_z_count;
+	uint32_t curr_z_count;
+	uint32_t z_count_diff;
 	float offset_angle_elec;
 	float speed_ref;
 	float Aux_dc;
@@ -111,8 +120,12 @@ typedef struct errors {
 	char phase_curr_error;
 	char mtr_temp_ot_error;
 	char mtc_temp_ot_error;
+	char mtr_temp_disconnection_error;
+	char mtc_temp_disconnection_error;
 	char eeprom_write_error;
 	char eeprom_read_error;
+	char a_b_error;
+	char z_error;
 	char error_triggered;
 	char drive_off;
 } errors;
@@ -128,8 +141,12 @@ typedef enum errors_nums {
 	PHASE_CURR_ERROR,
 	MTR_TEMP_OT_ERROR,
 	MTC_TEMP_OT_ERROR,
+	MTR_TEMP_DISCONNECTION_ERROR,
+	MTC_TEMP_DISCONNECTION_ERROR,
 	EEPROM_WRITE_ERROR,
-	EEPROM_READ_ERROR
+	EEPROM_READ_ERROR,
+	ENCODER_A_B_ERROR,
+	ENCODER_Z_ERROR
 } errors_nums;
 
 typedef enum currSens {
@@ -183,7 +200,7 @@ void rt_OneStep(void);
 
 /* USER CODE BEGIN Private defines */
 #define POLEPAIRS 			3.0f
-#define COUNTS_TO_RADS		0.003067962f //(2.0f * (PI / (TIM2_ARR+1)))
+#define COUNTS_TO_RADS		0.001533981f //(2.0f * (PI / (TIM2_ARR+1)))
 #define TWO_PI				6.283185f
 #define TWO_ROOT2			2.828427f
 #define ROOT2				1.414213f
@@ -210,13 +227,16 @@ void rt_OneStep(void);
 #define BUS_VDC_SCALE		0.00206f
 #define AUX_VDC_SCALE		0.000188658f
 #define CAN_BUS_CYCLE		500
-#define SPEED_REF_RPM_MAX	0.0f
+#define SPEED_REF_RPM_MAX	500.0f
+#define ENCODER_CHECK_MS	20
+#define ENCODER_FAULT_MAX_COUNT 5
+#define TEMP_SENS_FAULT_COUNT 65000
 
 #define TIM1_PSC			19
 #define TIM1_ARR			2499
 #define TIM1_DEAD_TIME		100
 #define TIM1_ARR_HALF		1250.0f
-#define TIM2_ARR			2047//(MAX_COUNT of your position sensor - 1)
+#define TIM2_ARR			4095//(MAX_COUNT of your position sensor - 1)
 #define TIM5_PSC			99
 #define TIM5_ARR			0xFFFFFFFF
 #define TIM17_PSC			39
@@ -224,7 +244,7 @@ void rt_OneStep(void);
 #define HIGH_PULSE16_ERROR	0.024574f
 #define OFFSET_CALC_ELEC 	1.1913f
 
-#define MTR_NTC_R25			49000.0f
+#define MTR_NTC_R25			10000.0f
 #define MTC_NTC_R25			10000.0f
 
 typedef enum ADC2_CHANNELS {

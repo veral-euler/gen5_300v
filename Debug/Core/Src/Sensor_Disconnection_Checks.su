@@ -1,0 +1,4 @@
+../Core/Src/Sensor_Disconnection_Checks.c:3:9:encoder_ab_error_check	0	static
+../Core/Src/Sensor_Disconnection_Checks.c:20:9:encoder_z_index_check	0	static
+../Core/Src/Sensor_Disconnection_Checks.c:30:9:temp_sensor_disconnection_check	0	static
+../Core/Src/Sensor_Disconnection_Checks.c:41:6:Sensor_Disconnection_Check	8	static
