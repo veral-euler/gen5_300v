@@ -154,9 +154,12 @@ int main(void)
   } else if (cS == ANGLE_CALIB_DONE) {
     set_Initial_angle();
   }
-    /* USER CODE END WHILE */
+  /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+  /* USER CODE BEGIN 3 */
+  // Start encoder capture on both channels with interrupts
+  if (HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL) != HAL_OK) Error_Handler();
+
   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
@@ -212,6 +215,14 @@ int main(void)
     } else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET) {
       fnr_state = REVERSE;
     }
+
+    /* Gathering MTR Temp, CNT Temp, VDC and AUX DC in while loop */
+    d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
+    d.mtc_analog_val = adc1_buffer[CONTRL_TEMP];
+    d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
+    d.mtr_analog_val = adc1_buffer[MOTOR_TEMP];
+    d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
+    d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
 
     FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
   }
@@ -729,8 +740,7 @@ static void MX_TIM2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM2_Init 2 */
-  // Start encoder capture on both channels with interrupts
-  if (HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL) != HAL_OK) Error_Handler();
+
   /* USER CODE END TIM2_Init 2 */
 
 }
@@ -909,7 +919,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 2, 0);
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 }
@@ -973,9 +983,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
       /* Updating angle data */
 			d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
-      d.curr_z_count = d.z_count;
-      d.count_diff_at_z = fabsf((TIM2_ARR + 1) - d.count_at_z);
-      d.z_count_diff = d.curr_z_count - d.prev_z_count;
 			d.mech_angle = d.encoder_count * COUNTS_TO_RADS;
 			d.mech_angle = fmodf(d.mech_angle, TWO_PI);
 			d.elec_angle = (d.mech_angle * POLEPAIRS) - d.offset_angle_elec;
@@ -1056,15 +1063,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     static uint16_t can_counter = 0;
     can_counter++;
 
+    /* Storing Curr Z count */
+    d.curr_z_count = d.z_count;
+    /* Calculating the diff b/w Curr Z and Prev Z */
+    d.z_count_diff = d.curr_z_count - d.prev_z_count;
+    /* Getting the abs diff b/w TIM2_ARR and count at Z ttrig */
+    d.count_diff_at_z = fabsf((TIM2_ARR + 1) - d.count_at_z);
+
     /* Gathering the ADC1 data */
     ADC1_Analog_Val_Update();
-
-    /* Gathering speed feedback data and setting motor start flag */
-		Speed_Sense(d.mech_angle);
-		FOC_LivGguard_U.MtrSpd = fabsf(d.rad_s);
-    if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START) {
-      d.motor_start = 1;
-    }
 
     /* MCU Proctections Model input update */
     Model_Params_Input();
@@ -1097,7 +1104,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
     /* Not Resetting mech angle and TIM2 reg on every z index pulse, only getting the TIM2 count */
 		if (cS == FOC_START) {
-			d.count_at_z = __HAL_TIM_GET_COUNTER(&htim2);
+      /* Getting TIM2 count at Z trig */
+      d.count_at_z = __HAL_TIM_GET_COUNTER(&htim2);
+      /* Getting the A and B pulse states at every TIM2 interrupt trigger and getting the A XOR B */
+      d.A_Pulse = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15);
+      d.B_Pulse = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
+      d.A_B_XOR = d.A_Pulse ^ d.B_Pulse;
 //			d.mech_angle = 0.0f;
 //			__HAL_TIM_SET_COUNTER(&htim2, 0);
 		}
@@ -1251,6 +1263,12 @@ void rt_OneStep(void)
     OverrunFlags[1] = true;
 
     /* Set model inputs associated with subrates here */
+    /* Gathering speed feedback data and setting motor start flag */
+		Speed_Sense(d.mech_angle);
+		FOC_LivGguard_U.MtrSpd = fabsf(d.rad_s);
+    if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START) {
+      d.motor_start = 1;
+    }
 
     /* Step the model for subrate 1 */
     FOC_LivGguard_step1();

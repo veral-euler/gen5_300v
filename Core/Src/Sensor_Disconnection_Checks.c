@@ -4,11 +4,7 @@
 extern uint16_t adc1_buffer[5];
 
 uint8_t encoder_ab_error_check(void) {
-  /* Check for encoder errors based on count_diff */
-  if (d.count_diff_at_z > ENCODER_ERROR_THRESHOLD) {
-    return !HAL_OK; // Error detected
-  }
-
+  /* Checking A and B error based on A and B states and Id and Iq ref vals */
   if (d.A_Pulse == GPIO_PIN_SET && d.B_Pulse == GPIO_PIN_SET && d.A_B_XOR == GPIO_PIN_RESET && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f) {
     return !HAL_OK; // A and B pulses are the same, which is an error
   } else if (d.A_Pulse == GPIO_PIN_SET && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f) {
@@ -22,9 +18,13 @@ uint8_t encoder_ab_error_check(void) {
 
 uint8_t encoder_z_index_check(void) {
   /* Check for Z index errors based on z_count */
-  /* Run at every 100ms, assuming 100RPM */
-  if (d.z_count_diff >= 2) {
+  /* Run at every 20ms*/
+  if (HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_7) == GPIO_PIN_SET && d.count_diff_at_z >= 60) {
     return !HAL_OK; // No Z index pulse detected
+  }
+
+  if (d.z_count_diff >= 2) {
+    return !HAL_OK;
   }
 
   return HAL_OK; // Z index pulse detected
@@ -111,13 +111,7 @@ void ADC1_Analog_Val_Update(void) {
   /* Placeholder for updating any analog values from ADC1 if necessary */
   // This function can be used to update any global variables or data structures with the latest analog values read from ADC1
 
-  /* Gathering Vdc, Auxdc and temp data and throttle voltage */
-  d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
-  d.mtc_analog_val = adc1_buffer[CONTRL_TEMP];
-  d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
-  d.mtr_analog_val = adc1_buffer[MOTOR_TEMP];
-  d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
-  d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
+  /* Gathering throttle voltage */
   d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
 }
 
@@ -133,11 +127,7 @@ void Sensor_Disconnection_Check(void) {
 
     if (encoder_z_index_check() == !HAL_OK) {
       count++;
-    }
-
-    if(encoder_ab_error_check() == !HAL_OK) {
-      count++;
-    } else {
+    }else {
       if (count <= 0) {
         count = 0;
       } else {

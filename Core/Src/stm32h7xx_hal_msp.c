@@ -304,7 +304,7 @@ void HAL_FDCAN_MspInit(FDCAN_HandleTypeDef* hfdcan)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* FDCAN2 interrupt Init */
-    HAL_NVIC_SetPriority(FDCAN2_IT1_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(FDCAN2_IT1_IRQn, 6, 0);
     HAL_NVIC_EnableIRQ(FDCAN2_IT1_IRQn);
   /* USER CODE BEGIN FDCAN2_MspInit 1 */
 
@@ -475,7 +475,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     /* Peripheral clock enable */
     __HAL_RCC_TIM17_CLK_ENABLE();
     /* TIM17 interrupt Init */
-    HAL_NVIC_SetPriority(TIM17_IRQn, 3, 0);
+    HAL_NVIC_SetPriority(TIM17_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(TIM17_IRQn);
   /* USER CODE BEGIN TIM17_MspInit 1 */
 

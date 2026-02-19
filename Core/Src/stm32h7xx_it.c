@@ -271,10 +271,7 @@ void TIM2_IRQHandler(void)
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
-  /* Getting the A and B pulse states at every TIM2 interrupt trigger and getting the A XOR B */
-  d.A_Pulse = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15);
-  d.B_Pulse = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
-  d.A_B_XOR = d.A_Pulse ^ d.B_Pulse;
+
   /* USER CODE END TIM2_IRQn 1 */
 }
 
