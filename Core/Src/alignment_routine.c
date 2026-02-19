@@ -21,13 +21,11 @@ void Motor_Alignment_Routine(void)
             __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
             __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 
-            for (uint8_t i = 0; i < 4; i++) {
-                __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, ALIGN_DUTY);
-                __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, ALIGN_DUTY);
-                __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ALIGN_DUTY);
+            __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, ALIGN_DUTY);
+            __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, ALIGN_DUTY);
+            __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ALIGN_DUTY);
 
-                HAL_Delay(50);
-            }
+            HAL_Delay(200);
 
             __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
             __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);

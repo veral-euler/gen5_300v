@@ -213,12 +213,6 @@ int main(void)
       fnr_state = REVERSE;
     }
 
-    d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
-    d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
-
-    d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
-    d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
-
     FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
   }
   /* USER CODE END 3 */
@@ -957,10 +951,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         /* Running initial fault check */
 				d.init_check = Initial_Fault_Check();
 
-        /* Gathering initial Bus Vdc and Aux Vdc */
-			    d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
-			    d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
-
         /* Checking if inital fault check is OK and turning on the Gate drivers*/
 				if (d.init_check == HAL_OK) {
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
@@ -1062,67 +1052,28 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM17) {
+    /* Time counter for CAN transmission */
     static uint16_t can_counter = 0;
     can_counter++;
 
-    /* Gathering throttle voltage and speed feedback data */
+    /* Gathering the ADC1 data */
+    ADC1_Analog_Val_Update();
+
+    /* Gathering speed feedback data and setting motor start flag */
 		Speed_Sense(d.mech_angle);
 		FOC_LivGguard_U.MtrSpd = fabsf(d.rad_s);
-    if (fabsf(d.RPM) >= 80.0f) {
+    if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START) {
       d.motor_start = 1;
     }
-		d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
 
-    /* Populating MCU Protections input data structures */
-		MCU_Protections_U.I_a = FOC_LivGguard_U.PhaseCurrent[2];
-		MCU_Protections_U.I_b = FOC_LivGguard_U.PhaseCurrent[1];
-		MCU_Protections_U.I_c = FOC_LivGguard_U.PhaseCurrent[0];
-		MCU_Protections_U.MC_Temperature_C = d.Mtc_temp;
-		MCU_Protections_U.Motor_Temperature_C = d.Mtr_temp;
-		MCU_Protections_U.Bus_Voltage_V = d.Vdc;
-		MCU_Protections_U.Aux_Voltage_V = d.Aux_dc;
-
+    /* MCU Proctections Model input update */
+    Model_Params_Input();
     /* Running MCU protections model */
 		MCU_Protections_step();
     Sensor_Disconnection_Check();
 
-    /* Checking for error flag and changing the STATE */
-		if (MCU_Protections_Y.Aux_Voltage_Flag == OV_Error) {
-			er.error_triggered = 1;
-      er.aux_voltage_ov_error = 1;
-      err = AUX_VOLTAGE_OV_ERROR;
-			cS = CONT_ERROR;
-		} else if (MCU_Protections_Y.Aux_Voltage_Flag == UV_Error) {
-      er.error_triggered = 1;
-      er.aux_voltage_uv_error = 1;
-      err = AUX_VOLTAGE_UV_ERROR;
-      cS = CONT_ERROR;
-    } else if (MCU_Protections_Y.Bus_Voltage_Flag == OV_Error) {
-      er.error_triggered = 1;
-      er.bus_voltage_ov_error = 1;
-      err = BUS_VOLTAGE_OV_ERROR;
-      cS = CONT_ERROR;
-    } else if (MCU_Protections_Y.Bus_Voltage_Flag == UV_Error) {
-      er.error_triggered = 1;
-      er.bus_voltage_uv_error = 1;
-      err = BUS_VOLTAGE_UV_ERROR;
-      cS = CONT_ERROR;
-    } else if (MCU_Protections_Y.Motor_TempFlag == OT_Error) {
-      er.error_triggered = 1;
-      er.mtr_temp_ot_error = 1;
-      err = MTR_TEMP_OT_ERROR;
-      cS = CONT_ERROR;
-    } else if (MCU_Protections_Y.MC_TempFlag == OT_Error) {
-      er.error_triggered = 1;
-      er.mtc_temp_ot_error = 1;
-      err = MTC_TEMP_OT_ERROR;
-      cS = CONT_ERROR;
-    } else if (MCU_Protections_Y.Current_Flag == OC_Error) {
-      er.error_triggered = 1;
-      er.phase_curr_error = 1;
-      err = PHASE_CURR_ERROR;
-      cS = CONT_ERROR;
-    }
+    /* Checking the MCU Protections Model output flags and setting error flags */
+    Model_Output_Flag_Checks();
 
     /* Sending data on CAN bus every 500ms */
     if (can_counter >= CAN_BUS_CYCLE) {
@@ -1343,12 +1294,24 @@ uint8_t Initial_Fault_Check(void) {
 }
 
 void set_Initial_angle(void) {
+  /* Calculating the startup angle and converting to TIM2 counts */
   d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - HIGH_PULSE16_ERROR;
   d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
   d.Count_From_Duty = (uint16_t)((d.Angle_From_Duty / TWO_PI) * (TIM2_ARR + 1));
 
+  /* Checking for PWM disconnection error */
+  if (encoder_pwm_error_check() == !HAL_OK) {
+    er.error_triggered = 1;
+    er.pwm_error = 1;
+    err = ENCODER_PWM_ERROR;
+    cS = CONT_ERROR;
+
+    return;
+  }
+
   HAL_Delay(100);
 
+  /* Disabling the encoder PWM input capture */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
   HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_1);
   HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_2);

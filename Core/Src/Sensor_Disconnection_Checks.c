@@ -1,5 +1,8 @@
 #include "Sensor_Disconnection_Checks.h"
 
+/* Exporting this buffer from main.c */
+extern uint16_t adc1_buffer[5];
+
 uint8_t encoder_ab_error_check(void) {
   /* Check for encoder errors based on count_diff */
   if (d.count_diff_at_z > ENCODER_ERROR_THRESHOLD) {
@@ -27,15 +30,95 @@ uint8_t encoder_z_index_check(void) {
   return HAL_OK; // Z index pulse detected
 }
 
-uint8_t temp_sensor_disconnection_check(uint16_t temperature, uint16_t threshold) {
+uint8_t encoder_pwm_error_check(void) {
+  //TODO: Implement check for encoder PWM signal errors if necessary
+  if (d.ICvalue <= 0 || d.Frequency <= 0 || d.Duty < 0 || d.Duty > 100) {
+    return !HAL_OK; // Invalid PWM signal detected
+  }
+
+  return HAL_OK; // Placeholder return value
+}
+
+uint8_t temp_sensor_disconnection_check(uint16_t temperature_analog_val, uint16_t threshold) {
   /* Check for temperature sensor disconnection based on a threshold */
-  if (temperature >= threshold) {
+  if (temperature_analog_val >= threshold) {
     return !HAL_OK; // Sensor disconnection detected
-  } else if (temperature <= 0) {
+  } else if (temperature_analog_val <= 0) {
     return !HAL_OK; // Sensor disconnection detected
   }
 
   return HAL_OK; // Sensor is connected
+}
+
+void Model_Params_Input(void) {
+  /* Placeholder for any model parameter updates if necessary */
+  // This function can be used to update any parameters in the MCU Protections model based on sensor readings or other conditions
+
+  /* Populating MCU Protections input data structures */
+  MCU_Protections_U.I_a = FOC_LivGguard_U.PhaseCurrent[2];
+  MCU_Protections_U.I_b = FOC_LivGguard_U.PhaseCurrent[1];
+  MCU_Protections_U.I_c = FOC_LivGguard_U.PhaseCurrent[0];
+  MCU_Protections_U.MC_Temperature_C = d.Mtc_temp;
+  MCU_Protections_U.Motor_Temperature_C = d.Mtr_temp;
+  MCU_Protections_U.Bus_Voltage_V = d.Vdc;
+  MCU_Protections_U.Aux_Voltage_V = d.Aux_dc;
+}
+
+void Model_Output_Flag_Checks(void) {
+  /* Placeholder for checking model outputs and setting error flags if necessary */
+  // This function can be used to check the outputs of the MCU Protections model and set error flags or take other actions based on those outputs
+
+  /* Checking for error flag and changing the STATE */
+  if (MCU_Protections_Y.Aux_Voltage_Flag == OV_Error) {
+    er.error_triggered = 1;
+    er.aux_voltage_ov_error = 1;
+    err = AUX_VOLTAGE_OV_ERROR;
+    cS = CONT_ERROR;
+  } else if (MCU_Protections_Y.Aux_Voltage_Flag == UV_Error) {
+    er.error_triggered = 1;
+    er.aux_voltage_uv_error = 1;
+    err = AUX_VOLTAGE_UV_ERROR;
+    cS = CONT_ERROR;
+  } else if (MCU_Protections_Y.Bus_Voltage_Flag == OV_Error) {
+    er.error_triggered = 1;
+    er.bus_voltage_ov_error = 1;
+    err = BUS_VOLTAGE_OV_ERROR;
+    cS = CONT_ERROR;
+  } else if (MCU_Protections_Y.Bus_Voltage_Flag == UV_Error) {
+    er.error_triggered = 1;
+    er.bus_voltage_uv_error = 1;
+    err = BUS_VOLTAGE_UV_ERROR;
+    cS = CONT_ERROR;
+  } else if (MCU_Protections_Y.Motor_TempFlag == OT_Error) {
+    er.error_triggered = 1;
+    er.mtr_temp_ot_error = 1;
+    err = MTR_TEMP_OT_ERROR;
+    cS = CONT_ERROR;
+  } else if (MCU_Protections_Y.MC_TempFlag == OT_Error) {
+    er.error_triggered = 1;
+    er.mtc_temp_ot_error = 1;
+    err = MTC_TEMP_OT_ERROR;
+    cS = CONT_ERROR;
+  } else if (MCU_Protections_Y.Current_Flag == OC_Error) {
+    er.error_triggered = 1;
+    er.phase_curr_error = 1;
+    err = PHASE_CURR_ERROR;
+    cS = CONT_ERROR;
+  }
+}
+
+void ADC1_Analog_Val_Update(void) {
+  /* Placeholder for updating any analog values from ADC1 if necessary */
+  // This function can be used to update any global variables or data structures with the latest analog values read from ADC1
+
+  /* Gathering Vdc, Auxdc and temp data and throttle voltage */
+  d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
+  d.mtc_analog_val = adc1_buffer[CONTRL_TEMP];
+  d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
+  d.mtr_analog_val = adc1_buffer[MOTOR_TEMP];
+  d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
+  d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
+  d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
 }
 
 void Sensor_Disconnection_Check(void) {
@@ -98,14 +181,14 @@ void Sensor_Disconnection_Check(void) {
     encoder_ab_fault_check_count = 0;
   }
 
-  if (temp_sensor_disconnection_check(d.Mtc_temp, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
+  if (temp_sensor_disconnection_check(d.mtc_analog_val, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
     er.error_triggered = 1;
     er.mtc_temp_disconnection_error = 1;
     err = MTC_TEMP_DISCONNECTION_ERROR;
     cS = CONT_ERROR;
   }
 
-  if (temp_sensor_disconnection_check(d.Mtr_temp, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
+  if (temp_sensor_disconnection_check(d.mtr_analog_val, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
     er.error_triggered = 1;
     er.mtr_temp_disconnection_error = 1;
     err = MTR_TEMP_DISCONNECTION_ERROR;

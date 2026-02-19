@@ -63,6 +63,8 @@ typedef struct data {
 	uint16_t pwm_b;
 	uint16_t pwm_c;
 	uint16_t offset_angle_elec_16bit;
+	uint16_t mtc_analog_val;
+	uint16_t mtr_analog_val;
 	uint32_t count_at_alignment;
 	uint32_t encoder_count;
 	uint32_t Count_From_Duty;
@@ -126,6 +128,7 @@ typedef struct errors {
 	char eeprom_read_error;
 	char a_b_error;
 	char z_error;
+	char pwm_error;
 	char error_triggered;
 	char drive_off;
 } errors;
@@ -146,7 +149,8 @@ typedef enum errors_nums {
 	EEPROM_WRITE_ERROR,
 	EEPROM_READ_ERROR,
 	ENCODER_A_B_ERROR,
-	ENCODER_Z_ERROR
+	ENCODER_Z_ERROR,
+	ENCODER_PWM_ERROR,
 } errors_nums;
 
 typedef enum currSens {
@@ -199,38 +203,39 @@ void rt_OneStep(void);
 /* Private defines -----------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
-#define POLEPAIRS 			3.0f
-#define COUNTS_TO_RADS		0.001533981f //(2.0f * (PI / (TIM2_ARR+1)))
-#define TWO_PI				6.283185f
-#define TWO_ROOT2			2.828427f
-#define ROOT2				1.414213f
-#define	ROOT3				1.732051f
-#define ADC_TO_CURR			0.040246f
-#define ALIGN_DUTY			1000
-#define RS		  			0.0102f
-#define LQ					0.000148f
-#define LD					0.000064f
-#define LAMBDA				0.032f
-#define CURR_TORQUE_RATIO	0.1673f //(Max_Torque/Max_Arms)
-#define NO_OF_SAMPLES 		4096
-#define ADC_TO_V			0.00005030822f
-#define T_DOWN				0.0000001f
-#define T_UP				0.00001f
-#define DEG_TWO_PI_3		2.094395f
-#define DEG_4_PI_3			4.188790f
-#define OP_VOLTAGE			58.0f
-#define AUX_OP_VOLTAGE		12.0f
-#define SVM_VOLTAGE_LIMIT	(OP_VOLTAGE / ROOT3)
-#define MOTOR_PEAK_ARMS		338.0f
-#define MOTOR_PEAK_AC		(MOTOR_PEAK_ARMS * ROOT2)
-#define V_F_RATIO			0.2875f
-#define BUS_VDC_SCALE		0.00206f
-#define AUX_VDC_SCALE		0.000188658f
-#define CAN_BUS_CYCLE		500
-#define SPEED_REF_RPM_MAX	500.0f
-#define ENCODER_CHECK_MS	20
+#define POLEPAIRS 				3.0f
+#define COUNTS_TO_RADS			0.001533981f //(2.0f * (PI / (TIM2_ARR+1)))
+#define TWO_PI					6.283185f
+#define TWO_ROOT2				2.828427f
+#define ROOT2					1.414213f
+#define	ROOT3					1.732051f
+#define ADC_TO_CURR				0.040246f
+#define ALIGN_DUTY				1000
+#define RS		  				0.0102f
+#define LQ						0.000148f
+#define LD						0.000064f
+#define LAMBDA					0.032f
+#define CURR_TORQUE_RATIO		0.1673f //(Max_Torque/Max_Arms)
+#define NO_OF_SAMPLES 			4096
+#define ADC_TO_V				0.00005030822f
+#define T_DOWN					0.0000001f
+#define T_UP					0.00001f
+#define DEG_TWO_PI_3			2.094395f
+#define DEG_4_PI_3				4.188790f
+#define OP_VOLTAGE				58.0f
+#define AUX_OP_VOLTAGE			12.0f
+#define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
+#define MOTOR_PEAK_ARMS			338.0f
+#define MOTOR_PEAK_AC			(MOTOR_PEAK_ARMS * ROOT2)
+#define V_F_RATIO				0.2875f
+#define BUS_VDC_SCALE			0.00206f
+#define AUX_VDC_SCALE			0.000188658f
+#define CAN_BUS_CYCLE			500
+#define SPEED_REF_RPM_MAX		500.0f
+#define ENCODER_CHECK_MS		20
 #define ENCODER_FAULT_MAX_COUNT 5
-#define TEMP_SENS_FAULT_COUNT 65000
+#define TEMP_SENS_FAULT_COUNT 	65000
+#define MIN_RPM_FOR_MOTOR_START 80.0f
 
 #define TIM1_PSC			19
 #define TIM1_ARR			2499
