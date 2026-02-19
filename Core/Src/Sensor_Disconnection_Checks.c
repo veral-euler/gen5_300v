@@ -121,6 +121,13 @@ void Sensor_Disconnection_Check(void) {
   encoder_ab_fault_check_count++;
   encoder_z_fault_check_count++;
 
+  /* Calculating the diff b/w Curr Z and Prev Z */
+  d.z_count_diff = fabsf(d.curr_z_count - d.prev_z_count);
+  /* Storing the prev Z count */
+  d.prev_z_count = d.curr_z_count;
+  /* Getting the abs diff b/w TIM2_ARR and count at Z ttrig */
+  d.count_diff_at_z = fabsf((TIM2_ARR + 1) - d.count_at_z);
+
   /* Z disconnection error check */
   if (encoder_z_fault_check_count >= ENCODER_CHECK_MS && d.motor_start == 1) {
     static uint16_t count = 0;

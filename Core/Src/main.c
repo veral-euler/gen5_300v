@@ -1063,12 +1063,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     static uint16_t can_counter = 0;
     can_counter++;
 
-    /* Storing Curr Z count */
-    d.curr_z_count = d.z_count;
-    /* Calculating the diff b/w Curr Z and Prev Z */
-    d.z_count_diff = d.curr_z_count - d.prev_z_count;
-    /* Getting the abs diff b/w TIM2_ARR and count at Z ttrig */
-    d.count_diff_at_z = fabsf((TIM2_ARR + 1) - d.count_at_z);
 
     /* Gathering the ADC1 data */
     ADC1_Analog_Val_Update();
@@ -1097,6 +1091,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		d.z_pulse ^= 1;
 		d.z_count++;
 
+    /* Storing Curr Z count */
+    d.curr_z_count = d.z_count;
+
     /* Stopping uint32_t overflow */
 		if (d.z_count >= UINT32_MAX) {
 			d.z_count = 0;
@@ -1113,9 +1110,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 //			d.mech_angle = 0.0f;
 //			__HAL_TIM_SET_COUNTER(&htim2, 0);
 		}
-
-    /* Storing the prev Z count */
-    d.prev_z_count = d.curr_z_count;
 	}
 }
 
