@@ -121,6 +121,11 @@ void Sensor_Disconnection_Check(void) {
   encoder_ab_fault_check_count++;
   encoder_z_fault_check_count++;
 
+  /* Getting the A and B pulse states getting the A XOR B */
+  d.A_Pulse = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15);
+  d.B_Pulse = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
+  d.A_B_XOR = d.A_Pulse ^ d.B_Pulse;
+
   /* Calculating the diff b/w Curr Z and Prev Z */
   d.z_count_diff = fabsf(d.curr_z_count - d.prev_z_count);
   /* Storing the prev Z count */

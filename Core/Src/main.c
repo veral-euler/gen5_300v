@@ -1063,7 +1063,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     static uint16_t can_counter = 0;
     can_counter++;
 
-
     /* Gathering the ADC1 data */
     ADC1_Analog_Val_Update();
 
@@ -1103,10 +1102,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		if (cS == FOC_START) {
       /* Getting TIM2 count at Z trig */
       d.count_at_z = __HAL_TIM_GET_COUNTER(&htim2);
-      /* Getting the A and B pulse states at every TIM2 interrupt trigger and getting the A XOR B */
-      d.A_Pulse = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15);
-      d.B_Pulse = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
-      d.A_B_XOR = d.A_Pulse ^ d.B_Pulse;
 //			d.mech_angle = 0.0f;
 //			__HAL_TIM_SET_COUNTER(&htim2, 0);
 		}
