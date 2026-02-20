@@ -39,6 +39,14 @@ uint8_t encoder_pwm_error_check(void) {
   return HAL_OK; // Placeholder return value
 }
 
+uint8_t encoder_5v_error_check(void) {
+  if (d.A_Pulse == GPIO_PIN_RESET && d.B_Pulse == GPIO_PIN_RESET && d.A_B_XOR == GPIO_PIN_RESET && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_RESET && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f) {
+    return !HAL_OK;
+  }
+
+  return HAL_OK;
+}
+
 uint8_t temp_sensor_disconnection_check(uint16_t temperature_analog_val, uint16_t threshold) {
   /* Check for temperature sensor disconnection based on a threshold */
   if (temperature_analog_val >= threshold) {
@@ -118,8 +126,10 @@ void ADC1_Analog_Val_Update(void) {
 void Sensor_Disconnection_Check(void) {
   static uint16_t encoder_z_fault_check_count = 0;
   static uint16_t encoder_ab_fault_check_count = 0;
+  static uint16_t encoder_5v_fault_check_count = 0;
   encoder_ab_fault_check_count++;
   encoder_z_fault_check_count++;
+  encoder_5v_fault_check_count++;
 
   /* Getting the A and B pulse states getting the A XOR B */
   d.A_Pulse = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15);
@@ -181,6 +191,28 @@ void Sensor_Disconnection_Check(void) {
     }
 
     encoder_ab_fault_check_count = 0;
+  }
+
+  if (encoder_5v_fault_check_count >= ENCODER_CHECK_MS && d.motor_start == 1) {
+    static uint16_t count = 0;
+
+    if (encoder_5v_error_check() == !HAL_OK) {
+      count++;
+    } else {
+      if (count <= 0) {
+        count = 0;
+      } else {
+        count--;
+      }
+    }
+
+    if (count >= ENCODER_FAULT_MAX_COUNT) {
+      count = 0;
+      er.error_triggered = 1;
+      er.enc_5v_error = 1;
+      err = ENCODER_5V_ERROR;
+      cS = CONT_ERROR;
+    }
   }
 
   if (temp_sensor_disconnection_check(d.mtc_analog_val, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {

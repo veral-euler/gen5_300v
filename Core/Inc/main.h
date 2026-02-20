@@ -129,6 +129,7 @@ typedef struct errors {
 	char a_b_error;
 	char z_error;
 	char pwm_error;
+	char enc_5v_error;
 	char error_triggered;
 	char drive_off;
 } errors;
@@ -151,6 +152,7 @@ typedef enum errors_nums {
 	ENCODER_A_B_ERROR,
 	ENCODER_Z_ERROR,
 	ENCODER_PWM_ERROR,
+	ENCODER_5V_ERROR
 } errors_nums;
 
 typedef enum currSens {
