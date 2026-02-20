@@ -1102,9 +1102,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		d.z_pulse ^= 1;
 		d.z_count++;
 
-    /* Storing Curr Z count */
-    d.curr_z_count = d.z_count;
-
     /* Stopping uint32_t overflow */
 		if (d.z_count >= UINT32_MAX) {
 			d.z_count = 0;
@@ -1117,6 +1114,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 //			d.mech_angle = 0.0f;
 //			__HAL_TIM_SET_COUNTER(&htim2, 0);
 		}
+
+    /* Storing the prev Z count */
+    d.prev_z_count = d.curr_z_count;
 	}
 }
 
@@ -1137,67 +1137,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
       }
     }
   }
-}
-
-float throttle_to_rpm(float v_throttle) {
-    const float V_MIN = 1.2f;
-    const float V_MAX = 3.4f;
-    const float RPM_MAX = 3000.0f;
-
-    // Clamp voltage
-    if (v_throttle <= V_MIN)
-        return 0.0f;
-
-    if (v_throttle >= V_MAX)
-        return RPM_MAX;
-
-    // Linear map
-    return RPM_MAX * (v_throttle - V_MIN) / (V_MAX - V_MIN);
-}
-
-float map_speed_to_id_ref(float speed_rpm)
-{
-    const float BASE_SPEED_RPM = 750.0f;   // start of flux weakening
-    const float MAX_SPEED_RPM  = 3000.0f;   // full weakening
-    const float ID_FW_MAX      = 3.0f;     // max |Id| in amps
-
-    float speed = fabsf(speed_rpm);
-
-    if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET) {
-    	if (speed <= BASE_SPEED_RPM)
-    	{
-        	return 0.0f;
-    	}
-    	else if (speed >= MAX_SPEED_RPM)
-    	{
-        	return -ID_FW_MAX;
-    	}
-    	else
-    	{
-        	float k = (speed - BASE_SPEED_RPM) /
-                  (MAX_SPEED_RPM - BASE_SPEED_RPM);
-
-        	return -ID_FW_MAX * k;
-    	}
-    } else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET) {
-    	if (speed <= BASE_SPEED_RPM)
-    	{
-        	return 0.0f;
-    	}
-    	else if (speed >= MAX_SPEED_RPM)
-    	{
-        	return ID_FW_MAX;
-    	}
-    	else
-    	{
-        	float k = (speed - BASE_SPEED_RPM) /
-                  (MAX_SPEED_RPM - BASE_SPEED_RPM);
-
-        	return ID_FW_MAX * k;
-    	}
-    } else {
-    	return 0;
-    }
 }
 
 void rt_OneStep(void)
@@ -1284,32 +1223,6 @@ void rt_OneStep(void)
   /* Disable interrupts here */
   /* Restore FPU context here (if necessary) */
   /* Enable interrupts here */
-}
-
-uint8_t Initial_Fault_Check(void) {
-	if (injectedVal[0] <= 14000 || injectedVal[1] <= 14000 || injectedVal[0] >= 40000 || injectedVal[1] >= 40000) {
-		er.curr_sens_error = 1;
-    err = CURR_SENS_ERROR;
-		er.error_triggered = 1;
-	}
-
-	if (d.Vdc >= MCU_Protections_U.Thresholds.OV_Error_Limit_V) {
-		er.bus_voltage_ov_error = 1;
-    err = BUS_VOLTAGE_OV_ERROR;
-		er.error_triggered = 1;
-	}
-
-	if (d.Vdc <= MCU_Protections_U.Thresholds.UV_Error_Limit_V) {
-		er.bus_voltage_uv_error = 1;
-    err = BUS_VOLTAGE_UV_ERROR;
-		er.error_triggered = 1;
-	}
-
-	if (er.error_triggered) {
-		return !HAL_OK;
-	} else {
-		return HAL_OK;
-	}
 }
 
 void set_Initial_angle(void) {

@@ -194,10 +194,6 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-uint32_t GetMicroseconds(void);
-float throttle_to_rpm(float v_throttle);
-float map_speed_to_id_ref(float speed_rpm);
-uint8_t Initial_Fault_Check(void);
 void set_Initial_angle(void);
 void rt_OneStep(void);
 /* USER CODE END EFP */

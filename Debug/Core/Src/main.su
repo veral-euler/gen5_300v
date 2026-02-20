@@ -4,11 +4,8 @@
 ../Core/Src/main.c:1092:6:HAL_FDCAN_TxBufferCompleteCallback	8	static
 ../Core/Src/main.c:1100:6:HAL_GPIO_EXTI_Callback	0	static
 ../Core/Src/main.c:1123:6:HAL_TIM_IC_CaptureCallback	16	static
-../Core/Src/main.c:1142:7:throttle_to_rpm	0	static
-../Core/Src/main.c:1158:7:map_speed_to_id_ref	0	static
-../Core/Src/main.c:1203:6:rt_OneStep	8	static
-../Core/Src/main.c:1289:9:Initial_Fault_Check	0	static
+../Core/Src/main.c:1142:6:rt_OneStep	8	static
 ../Core/Src/main.c:929:6:HAL_ADCEx_InjectedConvCpltCallback	24	static
-../Core/Src/main.c:1315:6:set_Initial_angle	16	static
+../Core/Src/main.c:1228:6:set_Initial_angle	16	static
 ../Core/Src/main.c:98:5:main	192	static,ignoring_inline_asm
-../Core/Src/main.c:1347:6:Error_Handler	0	static,ignoring_inline_asm
+../Core/Src/main.c:1260:6:Error_Handler	0	static,ignoring_inline_asm

@@ -2,6 +2,7 @@
 
 /* Exporting this buffer from main.c */
 extern uint16_t adc1_buffer[5];
+extern uint16_t injectedVal[2];
 
 uint8_t encoder_ab_error_check(void) {
   /* Checking A and B error based on A and B states and Id and Iq ref vals */
@@ -121,6 +122,32 @@ void ADC1_Analog_Val_Update(void) {
 
   /* Gathering throttle voltage */
   d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
+}
+
+uint8_t Initial_Fault_Check(void) {
+	if (injectedVal[0] <= 14000 || injectedVal[1] <= 14000 || injectedVal[0] >= 40000 || injectedVal[1] >= 40000) {
+		er.curr_sens_error = 1;
+    err = CURR_SENS_ERROR;
+		er.error_triggered = 1;
+	}
+
+	if (d.Vdc >= MCU_Protections_U.Thresholds.OV_Error_Limit_V) {
+		er.bus_voltage_ov_error = 1;
+    err = BUS_VOLTAGE_OV_ERROR;
+		er.error_triggered = 1;
+	}
+
+	if (d.Vdc <= MCU_Protections_U.Thresholds.UV_Error_Limit_V) {
+		er.bus_voltage_uv_error = 1;
+    err = BUS_VOLTAGE_UV_ERROR;
+		er.error_triggered = 1;
+	}
+
+	if (er.error_triggered) {
+		return !HAL_OK;
+	} else {
+		return HAL_OK;
+	}
 }
 
 void Sensor_Disconnection_Check(void) {
