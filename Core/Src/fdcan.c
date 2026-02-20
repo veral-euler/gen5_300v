@@ -2,12 +2,124 @@
 
 extern FDCAN_HandleTypeDef hfdcan2;
 
+CAN_TxQueue_t can_tx_queue = {0};
+
+/* Initialize the queue */
+void CAN_Queue_Init(void)
+{
+    can_tx_queue.head = 0;
+    can_tx_queue.tail = 0;
+    can_tx_queue.count = 0;
+}
+
+/* Add message to queue - ISR safe */
+uint8_t CAN_Queue_Push(uint32_t arbitration_id, uint8_t format, uint8_t *data, uint8_t dlc)
+{
+    // Check if queue is full (read-only, safe without critical section)
+    if (can_tx_queue.count >= CAN_TX_QUEUE_SIZE) {
+        return 0;  // Queue full
+    }
+    
+    // Get current head position
+    uint16_t current_head = can_tx_queue.head;
+    
+    // Copy message to queue buffer
+    can_tx_queue.buffer[current_head].arbitration_id = arbitration_id;
+    can_tx_queue.buffer[current_head].format = format;
+    can_tx_queue.buffer[current_head].dlc = dlc;
+    
+    for (uint8_t i = 0; i < dlc && i < 8; i++) {
+        can_tx_queue.buffer[current_head].data[i] = data[i];
+    }
+    
+    // Critical section only for updating pointers
+    // uint32_t primask = __get_PRIMASK();
+    // __disable_irq();
+    
+    can_tx_queue.head = (current_head + 1) % CAN_TX_QUEUE_SIZE;
+    can_tx_queue.count++;
+    
+    // __set_PRIMASK(primask);
+    
+    return 1;  // Success
+}
+
+/* Check if queue has messages */
+uint8_t CAN_Queue_IsEmpty(void)
+{
+    return (can_tx_queue.count == 0);
+}
+
+/* Process queue - send one message if available - CALL FROM MAIN LOOP ONLY */
+void CAN_Queue_Process(void)
+{
+    // Quick check without critical section
+    if (can_tx_queue.count == 0) {
+        return;  // Nothing to send
+    }
+    
+    // Check if FDCAN Tx FIFO has space
+    if (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan2) == 0) {
+        return;  // FDCAN FIFO is full, try again later
+    }
+    
+    // Get current tail position
+    uint16_t current_tail = can_tx_queue.tail;
+    
+    // Read message data (safe to read without lock)
+    CAN_TxMessage_t *msg = &can_tx_queue.buffer[current_tail];
+    
+    FDCAN_TxHeaderTypeDef TxMsg;
+    TxMsg.IdType = msg->format;
+    TxMsg.TxFrameType = FDCAN_DATA_FRAME;
+    TxMsg.Identifier = msg->arbitration_id;
+    TxMsg.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    TxMsg.BitRateSwitch = FDCAN_BRS_OFF;
+    TxMsg.FDFormat = FDCAN_CLASSIC_CAN;
+    TxMsg.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    TxMsg.MessageMarker = 0;
+    TxMsg.DataLength = msg->dlc;
+    
+    // Try to send
+    if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxMsg, msg->data) == HAL_OK) {
+        // Message sent successfully, update tail pointer atomically
+        // uint32_t primask = __get_PRIMASK();
+        // __disable_irq();
+        
+        can_tx_queue.tail = (current_tail + 1) % CAN_TX_QUEUE_SIZE;
+        can_tx_queue.count--;
+        
+        // __set_PRIMASK(primask);
+    }
+}
+
+/* Get queue status */
+uint16_t CAN_Queue_GetCount(void)
+{
+    return can_tx_queue.count;
+}
+
+/* Kick-start transmission when first message is queued */
+void CAN_Queue_Push_And_Kickstart(uint32_t arbitration_id, uint8_t format, uint8_t *data, uint8_t dlc)
+{
+    uint8_t was_empty = CAN_Queue_IsEmpty();
+    
+    if (CAN_Queue_Push(arbitration_id, format, data, dlc)) {
+        // If queue was empty, kickstart transmission
+        if (was_empty) {
+            CAN_Queue_Process();
+        }
+    }
+}
+
 void FDCAN_SETUP()
 {
 	if(HAL_FDCAN_Start(&hfdcan2) != HAL_OK)
 	{
 		Error_Handler();
-	};
+	}
+
+	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_TX_COMPLETE, 0);
 }
 
 void _fdcan_transmit_on_can(uint32_t arbitration_id, uint8_t format, uint8_t * can_data, uint8_t dlc)
@@ -46,7 +158,8 @@ void Send_Data_On_CAN_401(void)
 	can_data[6] = (uint8_t)(Iq & 0xFF);
 	can_data[7] = (uint8_t)((Iq >> 8) & 0xFF);
 
-	_fdcan_transmit_on_can(0x401, 0, can_data, 0x08);
+	// _fdcan_transmit_on_can(0x401, 0, can_data, 0x08);
+	CAN_Queue_Push_And_Kickstart(0x401, 0, can_data, 0x08);
 }
 
 void Send_Data_On_CAN_402(void)
@@ -70,7 +183,8 @@ void Send_Data_On_CAN_402(void)
 	can_data[6] = (uint8_t)(enc_cnt & 0xFF);
 	can_data[7] = (uint8_t)((enc_cnt >> 8) & 0xFF);
 
-	_fdcan_transmit_on_can(0x402, 0, can_data, 0x08);
+	// _fdcan_transmit_on_can(0x402, 0, can_data, 0x08);
+	CAN_Queue_Push_And_Kickstart(0x402, 0, can_data, 0x08);
 }
 
 void Send_Data_On_CAN_403(void)
@@ -91,5 +205,6 @@ void Send_Data_On_CAN_403(void)
 	can_data[6] = (uint8_t)err;
 	can_data[7] = 0;
 
-	_fdcan_transmit_on_can(0x403, 0, can_data, 0x08);
+	// _fdcan_transmit_on_can(0x403, 0, can_data, 0x08);
+	CAN_Queue_Push_And_Kickstart(0x403, 0, can_data, 0x08);
 }

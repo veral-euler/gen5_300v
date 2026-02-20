@@ -176,8 +176,9 @@ int main(void)
   RateLimiter_Init(&limiter, 50.0f, 100.0f, 0.0f);
   HAL_Delay(100);
 
-  /*Starting FDCAN2*/
+  /*Starting FDCAN2 and Queue Init*/
   FDCAN_SETUP();
+  CAN_Queue_Init();
 
   /*Sending Heartbeat message once at init*/
   _fdcan_transmit_on_can(0x400, 0, heart_beat_init, 0x08);
@@ -1074,15 +1075,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
     /* Checking the MCU Protections Model output flags and setting error flags */
     Model_Output_Flag_Checks();
-
-    /* Sending data on CAN bus every 500ms */
+    
+    /* Queue messages every 500ms */
     if (can_counter >= CAN_BUS_CYCLE) {
-        can_counter = 0;
-        Send_Data_On_CAN_401();
-        Send_Data_On_CAN_402();
-        Send_Data_On_CAN_403();
+      can_counter = 0;
+      
+      // Only queue - don't process here
+      Send_Data_On_CAN_401();
+      Send_Data_On_CAN_402();
+      Send_Data_On_CAN_403();
     }
 	}
+}
+
+/* FDCAN TX Complete Callback - automatically sends next message */
+void HAL_FDCAN_TxBufferCompleteCallback(FDCAN_HandleTypeDef *hfdcan, uint32_t BufferIndexes)
+{
+  if (hfdcan->Instance == FDCAN2) {
+      // Transmission complete, send next message from queue
+      CAN_Queue_Process();
+  }
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
