@@ -4,7 +4,7 @@
 #include "main.h"
 
 /* CAN Message Queue Configuration */
-#define CAN_TX_QUEUE_SIZE 32
+#define CAN_TX_QUEUE_SIZE 3
 
 typedef struct {
     uint32_t arbitration_id;

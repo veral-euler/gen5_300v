@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_LivGguard'.
  *
- * Model version                  : 18.309
+ * Model version                  : 18.321
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Thu Feb  5 16:05:38 2026
+ * C/C++ source code generated on : Wed Feb 11 17:44:19 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M

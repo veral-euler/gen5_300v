@@ -5,6 +5,6 @@
 ../Core/Src/Sensor_Disconnection_Checks.c:51:9:temp_sensor_disconnection_check	0	static
 ../Core/Src/Sensor_Disconnection_Checks.c:62:6:Model_Params_Input	0	static
 ../Core/Src/Sensor_Disconnection_Checks.c:76:6:Model_Output_Flag_Checks	0	static
-../Core/Src/Sensor_Disconnection_Checks.c:119:6:ADC1_Analog_Val_Update	0	static
-../Core/Src/Sensor_Disconnection_Checks.c:127:9:Initial_Fault_Check	0	static
-../Core/Src/Sensor_Disconnection_Checks.c:153:6:Sensor_Disconnection_Check	16	static
+../Core/Src/Sensor_Disconnection_Checks.c:119:6:ADC1_Analog_Val_Update	24	static
+../Core/Src/Sensor_Disconnection_Checks.c:133:9:Initial_Fault_Check	0	static
+../Core/Src/Sensor_Disconnection_Checks.c:159:6:Sensor_Disconnection_Check	16	static

@@ -212,20 +212,17 @@ int main(void)
       fnr_state = NEUTRAL;
       d.speed_ref = 0.0f;
       Open_FOC0_U.Speed_ref = 0.0f;
+      FOC_LivGguard_U.Drive_State = NEUTRAL;
       FOC_LivGguard_U.Ref_Speed_mech_rpm = 0.0f;
     } else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET) {
       fnr_state = FORWARD;
+      FOC_LivGguard_U.Drive_State = FORWARD;
     } else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET) {
       fnr_state = REVERSE;
+      FOC_LivGguard_U.Drive_State = REVERSE;
     }
 
-    /* Gathering MTR Temp, CNT Temp, VDC and AUX DC in while loop */
-    d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
-    d.mtc_analog_val = adc1_buffer[CONTRL_TEMP];
-    d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
-    d.mtr_analog_val = adc1_buffer[MOTOR_TEMP];
-    d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
-    d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
+    ADC1_Analog_Val_Update();
 
     FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
   }
@@ -970,7 +967,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 					HAL_TIM_Base_Start_IT(&htim17);
           d.speed_ref = SPEED_REF_RPM_MAX;
           Open_FOC0_U.Speed_ref = SPEED_REF_RPM_MAX;
-					cS = OPEN_FOC_START;
+					cS = FOC_START;
 				} else if (d.init_check == !HAL_OK) {
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
 					HAL_TIM_Base_Start_IT(&htim17);
@@ -1107,9 +1104,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     /* Time counter for CAN transmission */
     static uint16_t can_counter = 0;
     can_counter++;
-
-    /* Gathering the ADC1 data */
-    ADC1_Analog_Val_Update();
 
     /* MCU Proctections Model input update */
     Model_Params_Input();
@@ -1249,7 +1243,7 @@ void rt_OneStep(void)
     /* Set model inputs associated with subrates here */
     /* Gathering speed feedback data and setting motor start flag */
 		Speed_Sense(d.mech_angle);
-		FOC_LivGguard_U.MtrSpd = fabsf(d.rad_s);
+		FOC_LivGguard_U.ActualSpeed_mech_radsec = fabsf(d.rad_s);
     if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START) {
       d.motor_start = 1;
     }

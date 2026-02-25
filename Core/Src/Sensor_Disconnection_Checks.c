@@ -120,7 +120,13 @@ void ADC1_Analog_Val_Update(void) {
   /* Placeholder for updating any analog values from ADC1 if necessary */
   // This function can be used to update any global variables or data structures with the latest analog values read from ADC1
 
-  /* Gathering throttle voltage */
+  /* Gathering MTR Temp, CNT Temp, VDC and AUX DC in while loop also throttle voltage */
+  d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
+  d.mtc_analog_val = adc1_buffer[CONTRL_TEMP];
+  d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
+  d.mtr_analog_val = adc1_buffer[MOTOR_TEMP];
+  d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
+  d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
   d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
 }
 

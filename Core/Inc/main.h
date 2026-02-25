@@ -222,7 +222,7 @@ void rt_OneStep(void);
 #define T_UP					0.00001f
 #define DEG_TWO_PI_3			2.094395f
 #define DEG_4_PI_3				4.188790f
-#define OP_VOLTAGE				58.0f
+#define OP_VOLTAGE				96.0f
 #define AUX_OP_VOLTAGE			12.0f
 #define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
 #define MOTOR_PEAK_ARMS			338.0f
@@ -236,6 +236,7 @@ void rt_OneStep(void);
 #define ENCODER_FAULT_MAX_COUNT 5
 #define TEMP_SENS_FAULT_COUNT 	65000
 #define MIN_RPM_FOR_MOTOR_START 80.0f
+#define RAD_S_TO_RPM   			9.549296f
 
 #define TIM1_PSC			19
 #define TIM1_ARR			2499
