@@ -173,6 +173,7 @@ int main(void)
   /* Initializing FOC and Protections model */
   FOC_LivGguard_initialize();
   MCU_Protections_initialize();
+  Open_FOC0_initialize();
   RateLimiter_Init(&limiter, 50.0f, 100.0f, 0.0f);
   HAL_Delay(100);
 
@@ -210,6 +211,7 @@ int main(void)
     if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_SET) {
       fnr_state = NEUTRAL;
       d.speed_ref = 0.0f;
+      Open_FOC0_U.Speed_ref = 0.0f;
       FOC_LivGguard_U.Ref_Speed_mech_rpm = 0.0f;
     } else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET) {
       fnr_state = FORWARD;
@@ -967,7 +969,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 					HAL_TIM_Base_Start_IT(&htim17);
           d.speed_ref = SPEED_REF_RPM_MAX;
-					cS = FOC_START;
+					cS = OPEN_FOC_START;
 				} else if (d.init_check == !HAL_OK) {
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
 					HAL_TIM_Base_Start_IT(&htim17);
@@ -975,6 +977,47 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				}
 			}
 		}
+
+    if (cS == OPEN_FOC_START) {
+      /* Updating phase current data */
+      Open_FOC0_U.Phase_current[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+			Open_FOC0_U.Phase_current[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
+			Open_FOC0_U.Phase_current[0] = 0.0f - Open_FOC0_U.Phase_current[1] - Open_FOC0_U.Phase_current[2];
+
+      /* Running Open FOC model */
+      Open_FOC0_step();
+
+      /* SVM and PWM update */
+			d.Va_SVM = Open_FOC0_Y.Va;
+			d.Vb_SVM = Open_FOC0_Y.Vb;
+			d.Vc_SVM = Open_FOC0_Y.Vc;
+
+			if (d.Va_SVM > d.Vmax_SVM) {
+				d.Va_SVM = d.Vmax_SVM;
+			} else if (d.Va_SVM < -d.Vmax_SVM) {
+				d.Va_SVM = -d.Vmax_SVM;
+			}
+
+			if (d.Vb_SVM > d.Vmax_SVM) {
+				d.Vb_SVM = d.Vmax_SVM;
+			} else if (d.Vb_SVM < -d.Vmax_SVM) {
+				d.Vb_SVM = -d.Vmax_SVM;
+			}
+
+			if (d.Vc_SVM > d.Vmax_SVM) {
+				d.Vc_SVM = d.Vmax_SVM;
+			} else if (d.Vc_SVM < -d.Vmax_SVM) {
+				d.Vc_SVM = -d.Vmax_SVM;
+			}
+
+			d.pwm_a = (uint16_t)((d.Va_SVM / d.Vmax_SVM) * TIM1_ARR_HALF + TIM1_ARR_HALF);
+			d.pwm_b = (uint16_t)((d.Vb_SVM / d.Vmax_SVM) * TIM1_ARR_HALF + TIM1_ARR_HALF);
+			d.pwm_c = (uint16_t)((d.Vc_SVM / d.Vmax_SVM) * TIM1_ARR_HALF + TIM1_ARR_HALF);
+
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, d.pwm_a);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, d.pwm_b);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, d.pwm_c);
+    }
 
 		if (cS == FOC_START) {
       /* Updating pahse current data */

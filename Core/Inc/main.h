@@ -44,6 +44,7 @@ extern "C" {
 #include "alignment_routine.h"
 #include "Eeprom.h"
 #include "Sensor_Disconnection_Checks.h"
+#include "Open_FOC0.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -160,6 +161,7 @@ typedef enum currSens {
 	ANGLE_CALIB,
 	ANGLE_CALIB_DONE,
 	ANGLE_OFFSET_STORE,
+	OPEN_FOC_START,
 	CURR_SENS_CALIB,
 	FOC_START,
 	CONT_ERROR

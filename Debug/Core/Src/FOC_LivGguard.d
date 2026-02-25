@@ -41,6 +41,8 @@ Core/Src/FOC_LivGguard.o: ../Core/Src/FOC_LivGguard.c \
  ../Core/Inc/FOC_LivGguard.h ../Core/Inc/fdcan.h \
  ../Core/Inc/Rate_Limiter.h ../Core/Inc/alignment_routine.h \
  ../Core/Inc/Eeprom.h ../Core/Inc/Sensor_Disconnection_Checks.h \
+ ../Core/Inc/Open_FOC0.h ../Core/Inc/rt_nonfinite.h \
+ ../Core/Inc/Open_FOC0_types.h ../Core/Inc/rtGetNaN.h \
  ../Core/Inc/FOC_LivGguard_types.h ../Core/Inc/FOC_LivGguard_private.h
 ../Core/Inc/FOC_LivGguard.h:
 ../Core/Inc/complex_types.h:
@@ -93,5 +95,9 @@ Core/Src/FOC_LivGguard.o: ../Core/Src/FOC_LivGguard.c \
 ../Core/Inc/alignment_routine.h:
 ../Core/Inc/Eeprom.h:
 ../Core/Inc/Sensor_Disconnection_Checks.h:
+../Core/Inc/Open_FOC0.h:
+../Core/Inc/rt_nonfinite.h:
+../Core/Inc/Open_FOC0_types.h:
+../Core/Inc/rtGetNaN.h:
 ../Core/Inc/FOC_LivGguard_types.h:
 ../Core/Inc/FOC_LivGguard_private.h:

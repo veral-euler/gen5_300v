@@ -41,7 +41,9 @@ Core/Src/Rate_Limiter.o: ../Core/Src/Rate_Limiter.c \
  ../Core/Inc/zero_crossing_types.h ../Core/Inc/FOC_LivGguard.h \
  ../Core/Inc/FOC_LivGguard_types.h ../Core/Inc/fdcan.h \
  ../Core/Inc/Rate_Limiter.h ../Core/Inc/alignment_routine.h \
- ../Core/Inc/Eeprom.h ../Core/Inc/Sensor_Disconnection_Checks.h
+ ../Core/Inc/Eeprom.h ../Core/Inc/Sensor_Disconnection_Checks.h \
+ ../Core/Inc/Open_FOC0.h ../Core/Inc/rt_nonfinite.h \
+ ../Core/Inc/Open_FOC0_types.h ../Core/Inc/rtGetNaN.h
 ../Core/Inc/Rate_Limiter.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
@@ -94,3 +96,7 @@ Core/Src/Rate_Limiter.o: ../Core/Src/Rate_Limiter.c \
 ../Core/Inc/alignment_routine.h:
 ../Core/Inc/Eeprom.h:
 ../Core/Inc/Sensor_Disconnection_Checks.h:
+../Core/Inc/Open_FOC0.h:
+../Core/Inc/rt_nonfinite.h:
+../Core/Inc/Open_FOC0_types.h:
+../Core/Inc/rtGetNaN.h:

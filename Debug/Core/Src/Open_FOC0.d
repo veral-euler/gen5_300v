@@ -1,6 +1,6 @@
-Core/Src/FOC_H12_data.o: ../Core/Src/FOC_H12_data.c ../Core/Inc/FOC_H12.h \
- ../Core/Inc/complex_types.h ../Core/Inc/main.h \
- ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
+Core/Src/Open_FOC0.o: ../Core/Src/Open_FOC0.c ../Core/Inc/Open_FOC0.h \
+ ../Core/Inc/complex_types.h ../Core/Inc/rt_nonfinite.h \
+ ../Core/Inc/main.h ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h \
@@ -42,10 +42,11 @@ Core/Src/FOC_H12_data.o: ../Core/Src/FOC_H12_data.c ../Core/Inc/FOC_H12.h \
  ../Core/Inc/fdcan.h ../Core/Inc/Rate_Limiter.h \
  ../Core/Inc/alignment_routine.h ../Core/Inc/Eeprom.h \
  ../Core/Inc/Sensor_Disconnection_Checks.h ../Core/Inc/Open_FOC0.h \
- ../Core/Inc/rt_nonfinite.h ../Core/Inc/Open_FOC0_types.h \
- ../Core/Inc/rtGetNaN.h ../Core/Inc/FOC_H12_types.h
-../Core/Inc/FOC_H12.h:
+ ../Core/Inc/Open_FOC0_types.h ../Core/Inc/rtGetNaN.h \
+ ../Core/Inc/rt_nonfinite.h
+../Core/Inc/Open_FOC0.h:
 ../Core/Inc/complex_types.h:
+../Core/Inc/rt_nonfinite.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -97,7 +98,6 @@ Core/Src/FOC_H12_data.o: ../Core/Src/FOC_H12_data.c ../Core/Inc/FOC_H12.h \
 ../Core/Inc/Eeprom.h:
 ../Core/Inc/Sensor_Disconnection_Checks.h:
 ../Core/Inc/Open_FOC0.h:
-../Core/Inc/rt_nonfinite.h:
 ../Core/Inc/Open_FOC0_types.h:
 ../Core/Inc/rtGetNaN.h:
-../Core/Inc/FOC_H12_types.h:
+../Core/Inc/rt_nonfinite.h:
