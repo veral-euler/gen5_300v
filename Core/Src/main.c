@@ -969,6 +969,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 					HAL_TIM_Base_Start_IT(&htim17);
           d.speed_ref = SPEED_REF_RPM_MAX;
+          Open_FOC0_U.Speed_ref = SPEED_REF_RPM_MAX;
 					cS = OPEN_FOC_START;
 				} else if (d.init_check == !HAL_OK) {
 					HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);

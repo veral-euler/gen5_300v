@@ -519,7 +519,7 @@ void Open_FOC0_initialize(void)
   Open_FOC0_U.Iq_ref = 10.0f;
 
   /* Rate Limiter Settings */
-  Open_FOC0_U.Speed_ref = 500.0f;
+  Open_FOC0_U.Speed_ref = 0.0f;
   Open_FOC0_U.Speed_up_rate = 0.001 * 10000.0f;
   Open_FOC0_U.Speed_down_rate = -0.1 * 10000.0f;
   
