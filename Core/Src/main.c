@@ -148,15 +148,15 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   Read_EEPROM_at_init();
 
-  if (cS == INIT)
-  {
-    cS = ANGLE_CALIB;
-    Motor_Alignment_Routine();
-  }
-  else if (cS == ANGLE_CALIB_DONE)
-  {
+  // if (cS == INIT)
+  // {
+  //   cS = ANGLE_CALIB;
+  //   Motor_Alignment_Routine();
+  // }
+  // else if (cS == ANGLE_CALIB_DONE)
+  // {
     set_Initial_angle();
-  }
+  // }
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -231,7 +231,14 @@ int main(void)
       FOC_LivGguard_U.Drive_State = REVERSE;
     }
 
+    /* Gathering ADC1 values */
     ADC1_Analog_Val_Update();
+    /* MCU Proctections Model input update */
+    Model_Params_Input();
+    /* Running MCU protections model */
+    MCU_Protections_step();
+    /* Checking the MCU Protections Model output flags and setting error flags */
+    Model_Output_Flag_Checks();
 
     FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
   }
@@ -1136,14 +1143,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     static uint16_t can_counter = 0;
     can_counter++;
 
-    /* MCU Proctections Model input update */
-    Model_Params_Input();
-    /* Running MCU protections model */
-    MCU_Protections_step();
+    /* Temperature and Encoder disconnection errors */
     Sensor_Disconnection_Check();
-
-    /* Checking the MCU Protections Model output flags and setting error flags */
-    Model_Output_Flag_Checks();
 
     /* Queue messages every 500ms */
     if (can_counter >= CAN_BUS_CYCLE)
@@ -1154,6 +1155,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       Send_Data_On_CAN_401();
       Send_Data_On_CAN_402();
       Send_Data_On_CAN_403();
+      Send_Data_On_CAN_404();
     }
   }
 }

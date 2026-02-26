@@ -204,7 +204,7 @@ void rt_OneStep(void);
 
 /* USER CODE BEGIN Private defines */
 #define POLEPAIRS 				3.0f
-#define COUNTS_TO_RADS			0.001533981f //(2.0f * (PI / (TIM2_ARR+1)))
+#define COUNTS_TO_RADS			0.003067962f //(2.0f * (PI / (TIM2_ARR+1)))
 #define TWO_PI					6.283185f
 #define TWO_ROOT2				2.828427f
 #define ROOT2					1.414213f
@@ -215,7 +215,7 @@ void rt_OneStep(void);
 #define LQ						0.000148f
 #define LD						0.000064f
 #define LAMBDA					0.032f
-#define CURR_TORQUE_RATIO		0.1673f //(Max_Torque/Max_Arms)
+#define CURR_TORQUE_RATIO		0.2366f //(Max_Torque/Max_Arms)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
 #define T_DOWN					0.0000001f
@@ -242,7 +242,7 @@ void rt_OneStep(void);
 #define TIM1_ARR			2499
 #define TIM1_DEAD_TIME		100
 #define TIM1_ARR_HALF		1250.0f
-#define TIM2_ARR			4095//(MAX_COUNT of your position sensor - 1)
+#define TIM2_ARR			2047//(MAX_COUNT of your position sensor - 1)
 #define TIM5_PSC			99
 #define TIM5_ARR			0xFFFFFFFF
 #define TIM17_PSC			39
@@ -250,7 +250,7 @@ void rt_OneStep(void);
 #define HIGH_PULSE16_ERROR	0.024574f
 #define OFFSET_CALC_ELEC 	1.1913f
 
-#define MTR_NTC_R25			10000.0f
+#define MTR_NTC_R25			49000.0f
 #define MTC_NTC_R25			10000.0f
 
 typedef enum ADC2_CHANNELS {

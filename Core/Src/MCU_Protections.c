@@ -1243,10 +1243,10 @@ void MCU_Protections_initialize(void)
   MCU_Protections_U.Thresholds.OC_Error_Limit_A = 450.0f;
   MCU_Protections_U.Thresholds.Current_count_limit = 100.0f;
 
-  MCU_Protections_U.Thresholds.OV_Warning_Limit_V = 68.0f;
-  MCU_Protections_U.Thresholds.OV_Error_Limit_V = 72.0f;
-  MCU_Protections_U.Thresholds.UV_Warning_Limit_V = 50.0f;
-  MCU_Protections_U.Thresholds.UV_Error_Limit_V = 48.0f;
+  MCU_Protections_U.Thresholds.OV_Warning_Limit_V = 110.0f;
+  MCU_Protections_U.Thresholds.OV_Error_Limit_V = 115.0f;
+  MCU_Protections_U.Thresholds.UV_Warning_Limit_V = 80.0f;
+  MCU_Protections_U.Thresholds.UV_Error_Limit_V = 75.0f;
 
   MCU_Protections_U.Thresholds.Voltage_Protection_Timeout_msec = 150.0f;
   MCU_Protections_U.Thresholds.Temp_Protection_Timeout_msec = 150.0f;

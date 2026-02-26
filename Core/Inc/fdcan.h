@@ -25,6 +25,7 @@ void _fdcan_transmit_on_can(uint32_t arbitration_id, uint8_t format, uint8_t * c
 void Send_Data_On_CAN_401(void);
 void Send_Data_On_CAN_402(void);
 void Send_Data_On_CAN_403(void);
+void Send_Data_On_CAN_404(void);
 
 void CAN_Queue_Init(void);
 uint8_t CAN_Queue_Push(uint32_t arbitration_id, uint8_t format, uint8_t *data, uint8_t dlc);

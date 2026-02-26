@@ -1176,8 +1176,8 @@ void FOC_LivGguard_initialize(void)
   FOC_LivGguard_U.Id_Iq_MTPA_limit.Id_low_limit = -300.0f;
   
   /* Speed Ref Rate Limiter Settings */
-  FOC_LivGguard_U.Ref_Speed_rate_up = 1.0f * 10000.0f;
-  FOC_LivGguard_U.Ref_Speed_rate_down = -1000.0f * 10000.0f;
+  FOC_LivGguard_U.Ref_Speed_rate_up = 100.0f * 10000.0f;
+  FOC_LivGguard_U.Ref_Speed_rate_down = -100.0f * 10000.0f;
 
   /* Rate Limiter Settings */
   FOC_LivGguard_U.Rate_limiter.Torque_gen_ramp_up = 50.0f * 10000.0f;

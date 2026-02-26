@@ -169,8 +169,8 @@ void Send_Data_On_CAN_402(void)
 
 	uint16_t Vd = (uint16_t)(FOC_LivGguard_Y.Vd + SVM_VOLTAGE_LIMIT);
 	uint16_t Vq = (uint16_t)(FOC_LivGguard_Y.Vq + SVM_VOLTAGE_LIMIT);
-	uint16_t Iq_ref = (uint16_t)(FOC_LivGguard_Y.Iq_ref + 512.0f);
-	uint16_t Id_ref = (uint16_t)(FOC_LivGguard_Y.Id_ref + 512.0f);
+	uint16_t Iq_ref = (uint16_t)(FOC_LivGguard_Y.Iq_ref_sat + 512.0f);
+	uint16_t Id_ref = (uint16_t)(FOC_LivGguard_Y.Id_ref_sat + 512.0f);
 	uint16_t enc_cnt = (uint16_t)(d.encoder_count);
 
 	// Fill can_data with appropriate values for message 402
@@ -203,8 +203,26 @@ void Send_Data_On_CAN_403(void)
 	can_data[4] = (uint8_t)(motor_temp);
 	can_data[5] = (uint8_t)(mc_temp);
 	can_data[6] = (uint8_t)err;
-	can_data[7] = 0;
+	can_data[7] = (uint8_t)((uint16_t)FOC_LivGguard_Y.T_gen);
 
 	// _fdcan_transmit_on_can(0x403, 0, can_data, 0x08);
 	CAN_Queue_Push_And_Kickstart(0x403, 0, can_data, 0x08);
+}
+
+void Send_Data_On_CAN_404(void) {
+	uint8_t can_data[8] = {0};
+
+	uint16_t Ld_LUT = (uint16_t)(FOC_LivGguard_Y.Ld * 10000.0f);
+	uint16_t Lq_LUT = (uint16_t)(FOC_LivGguard_Y.Lq * 10000.0f);
+	uint16_t lambda_LUT = (uint16_t)(FOC_LivGguard_Y.Lambda * 10000.0f);
+
+	can_data[0] = (uint8_t)(Ld_LUT & 0xFF);
+	can_data[1] = (uint8_t)((Ld_LUT >> 8) & 0xFF);
+	can_data[2] = (uint8_t)(Lq_LUT & 0xFF);
+	can_data[3] = (uint8_t)((Lq_LUT >> 8) & 0xFF);
+	can_data[4] = (uint8_t)(lambda_LUT & 0xFF);
+	can_data[5] = (uint8_t)((lambda_LUT >> 8) & 0xFF);
+
+	// _fdcan_transmit_on_can(0x404, 0, can_data, 0x08);
+	CAN_Queue_Push_And_Kickstart(0x404, 0, can_data, 0x08);
 }
