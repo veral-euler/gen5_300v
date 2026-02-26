@@ -75,6 +75,7 @@ typedef struct data {
 	uint32_t prev_z_count;
 	uint32_t curr_z_count;
 	uint32_t z_count_diff;
+	uint32_t cycles;
 	float offset_angle_elec;
 	float speed_ref;
 	float Aux_dc;

@@ -212,9 +212,9 @@ void Send_Data_On_CAN_403(void)
 void Send_Data_On_CAN_404(void) {
 	uint8_t can_data[8] = {0};
 
-	uint16_t Ld_LUT = (uint16_t)(FOC_LivGguard_Y.Ld * 10000.0f);
-	uint16_t Lq_LUT = (uint16_t)(FOC_LivGguard_Y.Lq * 10000.0f);
-	uint16_t lambda_LUT = (uint16_t)(FOC_LivGguard_Y.Lambda * 10000.0f);
+	uint16_t Ld_LUT = (uint16_t)(FOC_LivGguard_Y.Ld * 1.0E8f);
+	uint16_t Lq_LUT = (uint16_t)(FOC_LivGguard_Y.Lq * 1.0E7f);
+	uint16_t lambda_LUT = (uint16_t)(FOC_LivGguard_Y.Lambda * 1.0E5f);
 
 	can_data[0] = (uint8_t)(Ld_LUT & 0xFF);
 	can_data[1] = (uint8_t)((Ld_LUT >> 8) & 0xFF);
@@ -222,6 +222,8 @@ void Send_Data_On_CAN_404(void) {
 	can_data[3] = (uint8_t)((Lq_LUT >> 8) & 0xFF);
 	can_data[4] = (uint8_t)(lambda_LUT & 0xFF);
 	can_data[5] = (uint8_t)((lambda_LUT >> 8) & 0xFF);
+	can_data[6] = (uint8_t)((uint16_t)d.cycles & 0xFF);
+	can_data[7] = (uint8_t)(((uint16_t)d.cycles >> 8) & 0xFF);
 
 	// _fdcan_transmit_on_can(0x404, 0, can_data, 0x08);
 	CAN_Queue_Push_And_Kickstart(0x404, 0, can_data, 0x08);
