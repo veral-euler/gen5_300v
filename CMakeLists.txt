@@ -54,7 +54,7 @@ project(Pegasus_v4
 # ── STM32H7 (uncomment to use) ────────────────────────────────────────────────
 set(MCU_FAMILY     STM32H7xx)
 set(MCU_MODEL      STM32H743xx)
-set(CPU_PARAMETERS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard --specs=nano.specs)
+set(CPU_PARAMETERS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard)
 
 # ── STM32L4 (uncomment to use) ────────────────────────────────────────────────
 # set(MCU_FAMILY     STM32L4xx)
@@ -191,6 +191,7 @@ set(CXX_FLAGS
 set(ASM_FLAGS
     ${CPU_PARAMETERS}
     -x assembler-with-cpp      # Allows #include in .s files
+    -g3
 )
 
 set(LINKER_FLAGS
@@ -241,6 +242,7 @@ target_link_options(${PROJECT_NAME} PRIVATE
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:${PROJECT_NAME}> ${PROJECT_NAME}.hex
     COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}> ${PROJECT_NAME}.bin
+    COMMAND ${CMAKE_OBJDUMP} -h -S $<TARGET_FILE:${PROJECT_NAME}> > ${PROJECT_NAME}.list
     COMMAND ${CMAKE_SIZE}    --format=berkeley $<TARGET_FILE:${PROJECT_NAME}>
     COMMENT ">>> Generating ${PROJECT_NAME}.hex / .bin and printing size"
 )
