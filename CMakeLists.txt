@@ -54,7 +54,7 @@ project(Pegasus_v4
 # ── STM32H7 (uncomment to use) ────────────────────────────────────────────────
 set(MCU_FAMILY     STM32H7xx)
 set(MCU_MODEL      STM32H743xx)
-set(CPU_PARAMETERS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard)
+set(CPU_PARAMETERS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard)
 
 # ── STM32L4 (uncomment to use) ────────────────────────────────────────────────
 # set(MCU_FAMILY     STM32L4xx)
@@ -173,7 +173,7 @@ set(COMMON_FLAGS
     # -Og                      # Optimize for debug (good default for dev)
     # -Os                      # Optimize for size  (good for release)
     # -O2                      # Optimize for speed
-    -O1
+    -O2
 )
 
 set(C_FLAGS

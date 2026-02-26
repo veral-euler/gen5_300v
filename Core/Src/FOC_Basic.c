@@ -32,14 +32,14 @@ RT_MODEL_FOC_Basic_T *const FOC_Basic_M = &FOC_Basic_M_;
 /* Model step function for TID0 */
 void FOC_Basic_step0(void)             /* Sample time: [0.0001s, 0.0s] */
 {
-  double rtb_Add1;
-  double rtb_Add3;
-  double rtb_NProdOut_l;
-  double rtb_Sum;
-  double rtb_Sum_f;
-  double rtb_Switch2_d;
-  double rtb_Switch_f_idx_0;
-  double rtb_add_c;
+  float rtb_Add1;
+  float rtb_Add3;
+  float rtb_NProdOut_l;
+  float rtb_Sum;
+  float rtb_Sum_f;
+  float rtb_Switch2_d;
+  float rtb_Switch_f_idx_0;
+  float rtb_add_c;
   float rtb_algDD_o1_d;
   float rtb_algDD_o2_o;
   float tmp;
@@ -65,13 +65,13 @@ void FOC_Basic_step0(void)             /* Sample time: [0.0001s, 0.0s] */
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function1'
    */
-  rtb_Add3 = sin(FOC_Basic_U.MtrElcPos);
+  rtb_Add3 = sinf(FOC_Basic_U.MtrElcPos);
 
   /* Trigonometry: '<S4>/Trigonometric Function1' incorporates:
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function'
    */
-  rtb_Add1 = cos(FOC_Basic_U.MtrElcPos);
+  rtb_Add1 = cosf(FOC_Basic_U.MtrElcPos);
 
   /* Outputs for Atomic SubSystem: '<S12>/Two inputs CRL' */
   /* Outputs for Atomic SubSystem: '<S13>/Two phase CRL wrap' */
@@ -505,10 +505,10 @@ void FOC_Basic_step0(void)             /* Sample time: [0.0001s, 0.0s] */
 /* Model step function for TID1 */
 void FOC_Basic_step1(void)             /* Sample time: [0.001s, 0.0s] */
 {
-  double rtb_NProdOut_n;
-  double rtb_Sum;
-  double rtb_UkYk1_l;
-  double rtb_deltafalllimit_d;
+  float rtb_NProdOut_n;
+  float rtb_Sum;
+  float rtb_UkYk1_l;
+  float rtb_deltafalllimit_d;
 
   /* Product: '<S185>/NProd Out' incorporates:
    *  DiscreteIntegrator: '<S177>/Filter'

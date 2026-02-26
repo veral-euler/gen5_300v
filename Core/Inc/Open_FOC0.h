@@ -39,77 +39,77 @@
 
 /* Block signals (default storage) */
 typedef struct {
-  double DiscreteTimeIntegrator;       /* '<S1>/Discrete-Time Integrator' */
-  double Switch;                       /* '<S1>/Switch' */
-  double TrigonometricFunction;        /* '<S1>/Trigonometric Function' */
-  double TrigonometricFunction1;       /* '<S1>/Trigonometric Function1' */
-  double Sum;                          /* '<S1>/Sum' */
-  double PProdOut;                     /* '<S52>/PProd Out' */
-  double Integrator;                   /* '<S47>/Integrator' */
-  double DProdOut;                     /* '<S40>/DProd Out' */
-  double Filter;                       /* '<S42>/Filter' */
-  double SumD;                         /* '<S42>/SumD' */
-  double NProdOut;                     /* '<S50>/NProd Out' */
-  double Sum_p;                        /* '<S57>/Sum' */
-  double Sum1;                         /* '<S1>/Sum1' */
-  double PProdOut_a;                   /* '<S105>/PProd Out' */
-  double Integrator_k;                 /* '<S100>/Integrator' */
-  double DProdOut_a;                   /* '<S93>/DProd Out' */
-  double Filter_m;                     /* '<S95>/Filter' */
-  double SumD_d;                       /* '<S95>/SumD' */
-  double NProdOut_h;                   /* '<S103>/NProd Out' */
-  double Sum_d;                        /* '<S110>/Sum' */
-  double TrigonometricFunction2;       /* '<S1>/Trigonometric Function2' */
-  double TrigonometricFunction3;       /* '<S1>/Trigonometric Function3' */
-  double one_by_two;                   /* '<S125>/one_by_two' */
-  double sqrt3_by_two;                 /* '<S125>/sqrt3_by_two' */
-  double add_b;                        /* '<S125>/add_b' */
-  double add_c;                        /* '<S125>/add_c' */
-  double Max;                          /* '<S122>/Max' */
-  double Min;                          /* '<S122>/Min' */
-  double Add;                          /* '<S122>/Add' */
-  double one_by_two_m;                 /* '<S122>/one_by_two' */
-  double Add3;                         /* '<S121>/Add3' */
-  double Add1;                         /* '<S121>/Add1' */
-  double Add2;                         /* '<S121>/Add2' */
-  double Gain[3];                      /* '<S121>/Gain' */
-  double sampletime;                   /* '<S8>/sample time' */
-  double deltariselimit;               /* '<S8>/delta rise limit' */
-  double Yk1;                          /* '<S8>/Delay' */
-  double UkYk1;                        /* '<S8>/Difference Inputs1' */
-  double Switch2_a;                    /* '<S128>/Switch2' */
-  double DifferenceInputs2;            /* '<S8>/Difference Inputs2' */
-  double Product;                      /* '<S1>/Product' */
-  double Gain_o;                       /* '<S1>/Gain' */
-  double IProdOut;                     /* '<S44>/IProd Out' */
-  double IProdOut_m;                   /* '<S97>/IProd Out' */
-  double deltafalllimit;               /* '<S8>/delta fall limit' */
-  double Switch_c;                     /* '<S128>/Switch' */
-  double acos_b;                       /* '<S126>/acos' */
-  double bsin;                         /* '<S126>/bsin' */
-  double sum_Ds;                       /* '<S126>/sum_Ds' */
-  double bcos;                         /* '<S126>/bcos' */
-  double asin_e;                       /* '<S126>/asin' */
-  double sum_Qs;                       /* '<S126>/sum_Qs' */
-  double Switch_p[2];                  /* '<S127>/Switch' */
-  double algDD_o1;
-  double algDD_o2;
-  double Switch_i;                     /* '<S108>/Switch' */
-  double Switch_k;                     /* '<S55>/Switch' */
-  double ModulobyConstant;             /* '<S1>/Modulo by Constant' */
-  double qcos;                         /* '<S11>/qcos' */
-  double dsin;                         /* '<S11>/dsin' */
-  double sum_beta;                     /* '<S11>/sum_beta' */
-  double dcos;                         /* '<S11>/dcos' */
-  double qsin;                         /* '<S11>/qsin' */
-  double sum_alpha;                    /* '<S11>/sum_alpha' */
-  double Switch_l[2];                  /* '<S12>/Switch' */
-  double algDD_o1_p;
-  double algDD_o2_m;
-  double a_plus_2b;                    /* '<S10>/a_plus_2b' */
-  double one_by_sqrt3;                 /* '<S10>/one_by_sqrt3' */
-  double algDD_o1_g;
-  double algDD_o2_o;
+  float DiscreteTimeIntegrator;       /* '<S1>/Discrete-Time Integrator' */
+  float Switch;                       /* '<S1>/Switch' */
+  float TrigonometricFunction;        /* '<S1>/Trigonometric Function' */
+  float TrigonometricFunction1;       /* '<S1>/Trigonometric Function1' */
+  float Sum;                          /* '<S1>/Sum' */
+  float PProdOut;                     /* '<S52>/PProd Out' */
+  float Integrator;                   /* '<S47>/Integrator' */
+  float DProdOut;                     /* '<S40>/DProd Out' */
+  float Filter;                       /* '<S42>/Filter' */
+  float SumD;                         /* '<S42>/SumD' */
+  float NProdOut;                     /* '<S50>/NProd Out' */
+  float Sum_p;                        /* '<S57>/Sum' */
+  float Sum1;                         /* '<S1>/Sum1' */
+  float PProdOut_a;                   /* '<S105>/PProd Out' */
+  float Integrator_k;                 /* '<S100>/Integrator' */
+  float DProdOut_a;                   /* '<S93>/DProd Out' */
+  float Filter_m;                     /* '<S95>/Filter' */
+  float SumD_d;                       /* '<S95>/SumD' */
+  float NProdOut_h;                   /* '<S103>/NProd Out' */
+  float Sum_d;                        /* '<S110>/Sum' */
+  float TrigonometricFunction2;       /* '<S1>/Trigonometric Function2' */
+  float TrigonometricFunction3;       /* '<S1>/Trigonometric Function3' */
+  float one_by_two;                   /* '<S125>/one_by_two' */
+  float sqrt3_by_two;                 /* '<S125>/sqrt3_by_two' */
+  float add_b;                        /* '<S125>/add_b' */
+  float add_c;                        /* '<S125>/add_c' */
+  float Max;                          /* '<S122>/Max' */
+  float Min;                          /* '<S122>/Min' */
+  float Add;                          /* '<S122>/Add' */
+  float one_by_two_m;                 /* '<S122>/one_by_two' */
+  float Add3;                         /* '<S121>/Add3' */
+  float Add1;                         /* '<S121>/Add1' */
+  float Add2;                         /* '<S121>/Add2' */
+  float Gain[3];                      /* '<S121>/Gain' */
+  float sampletime;                   /* '<S8>/sample time' */
+  float deltariselimit;               /* '<S8>/delta rise limit' */
+  float Yk1;                          /* '<S8>/Delay' */
+  float UkYk1;                        /* '<S8>/Difference Inputs1' */
+  float Switch2_a;                    /* '<S128>/Switch2' */
+  float DifferenceInputs2;            /* '<S8>/Difference Inputs2' */
+  float Product;                      /* '<S1>/Product' */
+  float Gain_o;                       /* '<S1>/Gain' */
+  float IProdOut;                     /* '<S44>/IProd Out' */
+  float IProdOut_m;                   /* '<S97>/IProd Out' */
+  float deltafalllimit;               /* '<S8>/delta fall limit' */
+  float Switch_c;                     /* '<S128>/Switch' */
+  float acos_b;                       /* '<S126>/acos' */
+  float bsin;                         /* '<S126>/bsin' */
+  float sum_Ds;                       /* '<S126>/sum_Ds' */
+  float bcos;                         /* '<S126>/bcos' */
+  float asin_e;                       /* '<S126>/asin' */
+  float sum_Qs;                       /* '<S126>/sum_Qs' */
+  float Switch_p[2];                  /* '<S127>/Switch' */
+  float algDD_o1;
+  float algDD_o2;
+  float Switch_i;                     /* '<S108>/Switch' */
+  float Switch_k;                     /* '<S55>/Switch' */
+  float ModulobyConstant;             /* '<S1>/Modulo by Constant' */
+  float qcos;                         /* '<S11>/qcos' */
+  float dsin;                         /* '<S11>/dsin' */
+  float sum_beta;                     /* '<S11>/sum_beta' */
+  float dcos;                         /* '<S11>/dcos' */
+  float qsin;                         /* '<S11>/qsin' */
+  float sum_alpha;                    /* '<S11>/sum_alpha' */
+  float Switch_l[2];                  /* '<S12>/Switch' */
+  float algDD_o1_p;
+  float algDD_o2_m;
+  float a_plus_2b;                    /* '<S10>/a_plus_2b' */
+  float one_by_sqrt3;                 /* '<S10>/one_by_sqrt3' */
+  float algDD_o1_g;
+  float algDD_o2_o;
   bool LowerRelop1;                    /* '<S55>/LowerRelop1' */
   bool LowerRelop1_l;                  /* '<S108>/LowerRelop1' */
   bool LowerRelop1_m;                  /* '<S128>/LowerRelop1' */
@@ -120,12 +120,12 @@ typedef struct {
 
 /* Block states (default storage) for system '<Root>' */
 typedef struct {
-  double DiscreteTimeIntegrator_DSTATE;/* '<S1>/Discrete-Time Integrator' */
-  double Integrator_DSTATE;            /* '<S47>/Integrator' */
-  double Filter_DSTATE;                /* '<S42>/Filter' */
-  double Integrator_DSTATE_n;          /* '<S100>/Integrator' */
-  double Filter_DSTATE_i;              /* '<S95>/Filter' */
-  double Delay_DSTATE;                 /* '<S8>/Delay' */
+  float DiscreteTimeIntegrator_DSTATE;/* '<S1>/Discrete-Time Integrator' */
+  float Integrator_DSTATE;            /* '<S47>/Integrator' */
+  float Filter_DSTATE;                /* '<S42>/Filter' */
+  float Integrator_DSTATE_n;          /* '<S100>/Integrator' */
+  float Filter_DSTATE_i;              /* '<S95>/Filter' */
+  float Delay_DSTATE;                 /* '<S8>/Delay' */
   fixed_system_ModByConstant_Op_T obj; /* '<S1>/Modulo by Constant' */
   bool icLoad;                         /* '<S8>/Delay' */
   bool objisempty;                     /* '<S1>/Modulo by Constant' */
@@ -133,36 +133,36 @@ typedef struct {
 
 /* External inputs (root inport signals with default storage) */
 typedef struct {
-  double Iq_ref;                       /* '<Root>/Iq_ref' */
-  double Id_ref;                       /* '<Root>/Id_ref' */
-  double Theta_e_ref;                  /* '<Root>/Theta_e_ref' */
-  double Theta_1_Speed_0;              /* '<Root>/Theta_1_Speed_0' */
-  double Speed_ref;                    /* '<Root>/Speed_ref' */
-  double Speed_up_rate;                /* '<Root>/Speed_up_rate' */
-  double Speed_down_rate;              /* '<Root>/Speed_down_rate' */
-  double Pole_pairs;                   /* '<Root>/Pole_pairs' */
-  double Phase_current[3];             /* '<Root>/Phase_current' */
-  double Kp_d_axis;                    /* '<Root>/Kp_d_axis' */
-  double Ki_d_axis;                    /* '<Root>/Ki_d_axis' */
-  double Kd__d_axis;                   /* '<Root>/Kd__d_axis' */
-  double Filter_d_axis;                /* '<Root>/Filter_d_axis' */
-  double Vd_up_limit;                  /* '<Root>/Vd_up_limit' */
-  double Vd_low_limit;                 /* '<Root>/Vd_low_limit' */
-  double Kp_q_axis;                    /* '<Root>/Kp_q_axis' */
-  double Ki_q_axis;                    /* '<Root>/Ki_q_axis' */
-  double Kd_q_axis;                    /* '<Root>/Kd_q_axis' */
-  double Filter_q_axis;                /* '<Root>/Filter_q_axis' */
-  double Vq_up_limit;                  /* '<Root>/Vq_up_limit' */
-  double Vq_low_limit;                 /* '<Root>/Vq_low_limit' */
+  float Iq_ref;                       /* '<Root>/Iq_ref' */
+  float Id_ref;                       /* '<Root>/Id_ref' */
+  float Theta_e_ref;                  /* '<Root>/Theta_e_ref' */
+  float Theta_1_Speed_0;              /* '<Root>/Theta_1_Speed_0' */
+  float Speed_ref;                    /* '<Root>/Speed_ref' */
+  float Speed_up_rate;                /* '<Root>/Speed_up_rate' */
+  float Speed_down_rate;              /* '<Root>/Speed_down_rate' */
+  float Pole_pairs;                   /* '<Root>/Pole_pairs' */
+  float Phase_current[3];             /* '<Root>/Phase_current' */
+  float Kp_d_axis;                    /* '<Root>/Kp_d_axis' */
+  float Ki_d_axis;                    /* '<Root>/Ki_d_axis' */
+  float Kd__d_axis;                   /* '<Root>/Kd__d_axis' */
+  float Filter_d_axis;                /* '<Root>/Filter_d_axis' */
+  float Vd_up_limit;                  /* '<Root>/Vd_up_limit' */
+  float Vd_low_limit;                 /* '<Root>/Vd_low_limit' */
+  float Kp_q_axis;                    /* '<Root>/Kp_q_axis' */
+  float Ki_q_axis;                    /* '<Root>/Ki_q_axis' */
+  float Kd_q_axis;                    /* '<Root>/Kd_q_axis' */
+  float Filter_q_axis;                /* '<Root>/Filter_q_axis' */
+  float Vq_up_limit;                  /* '<Root>/Vq_up_limit' */
+  float Vq_low_limit;                 /* '<Root>/Vq_low_limit' */
 } ExtU_Open_FOC0_T;
 
 /* External outputs (root outports fed by signals with default storage) */
 typedef struct {
-  double Va;                           /* '<Root>/Va' */
-  double Vb;                           /* '<Root>/Vb' */
-  double Vc;                           /* '<Root>/Vc' */
-  double Vd;                           /* '<Root>/Vd' */
-  double Vq;                           /* '<Root>/Vq' */
+  float Va;                           /* '<Root>/Va' */
+  float Vb;                           /* '<Root>/Vb' */
+  float Vc;                           /* '<Root>/Vc' */
+  float Vd;                           /* '<Root>/Vd' */
+  float Vq;                           /* '<Root>/Vq' */
 } ExtY_Open_FOC0_T;
 
 /* Real-time Model Data Structure */

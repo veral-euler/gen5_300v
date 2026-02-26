@@ -21,8 +21,8 @@
 #include "FOC_H12_types.h"
 #include "FOC_H12.h"
 
-extern double look2_pbinlxpw(double u0, double u1, const double bp0[], const
-  double bp1[], const double table[], uint32_t prevIndex[], const uint32_t
+extern float look2_pbinlxpw(float u0, float u1, const float bp0[], const
+  float bp1[], const float table[], uint32_t prevIndex[], const uint32_t
   maxIndex[], uint32_t stride);
 
 #endif                                 /* FOC_H12_private_h_ */

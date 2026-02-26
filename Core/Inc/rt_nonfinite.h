@@ -17,15 +17,15 @@
 #define rt_nonfinite_h_
 #include <stdbool.h>
 
-extern double rtInf;
-extern double rtMinusInf;
-extern double rtNaN;
+extern float rtInf;
+extern float rtMinusInf;
+extern float rtNaN;
 extern float rtInfF;
 extern float rtMinusInfF;
 extern float rtNaNF;
-extern bool rtIsInf(double value);
+extern bool rtIsInf(float value);
 extern bool rtIsInfF(float value);
-extern bool rtIsNaN(double value);
+extern bool rtIsNaN(float value);
 extern bool rtIsNaNF(float value);
 
 #endif                                 /* rt_nonfinite_h_ */

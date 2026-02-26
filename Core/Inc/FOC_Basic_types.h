@@ -19,10 +19,10 @@
 #define DEFINED_TYPEDEF_FOR_Speed_PID_MTPA_
 
 typedef struct {
-  double Kp_speed_PID_MTPA;
-  double Ki_speed_PID_MTPA;
-  double Kd_speed_PID_MTPA;
-  double Filter_speed_PID_MTPA;
+  float Kp_speed_PID_MTPA;
+  float Ki_speed_PID_MTPA;
+  float Kd_speed_PID_MTPA;
+  float Filter_speed_PID_MTPA;
 } Speed_PID_MTPA;
 
 #endif
@@ -31,10 +31,10 @@ typedef struct {
 #define DEFINED_TYPEDEF_FOR_Flux_PID_MTPA_
 
 typedef struct {
-  double Kp_flux_PID_MTPA;
-  double Ki_flux_PID_MTPA;
-  double Kd_flux_PID_MTPA;
-  double Filter_flux_PID_MTPA;
+  float Kp_flux_PID_MTPA;
+  float Ki_flux_PID_MTPA;
+  float Kd_flux_PID_MTPA;
+  float Filter_flux_PID_MTPA;
 } Flux_PID_MTPA;
 
 #endif
@@ -43,10 +43,10 @@ typedef struct {
 #define DEFINED_TYPEDEF_FOR_Torque_PID_MTPA_
 
 typedef struct {
-  double Kp_torque_PID_MTPA;
-  double Ki_torque_PID_MTPA;
-  double Kd_torque_PID_MTPA;
-  double Filter_torque_PID_MTPA;
+  float Kp_torque_PID_MTPA;
+  float Ki_torque_PID_MTPA;
+  float Kd_torque_PID_MTPA;
+  float Filter_torque_PID_MTPA;
 } Torque_PID_MTPA;
 
 #endif
@@ -58,12 +58,12 @@ typedef struct {
   Speed_PID_MTPA Speed_PID_MTPA;
   Flux_PID_MTPA Flux_PID_MTPA;
   Torque_PID_MTPA Torque_PID_MTPA;
-  double Up_Limit_speed_PID_MTPA;
-  double Low_Limit_speed_PID_MTPA;
-  double Up_Limit_flux_PID;
-  double Low_Limit_flux_PID;
-  double Up_Limit_torque_PID;
-  double Low_Limit_torque_PID;
+  float Up_Limit_speed_PID_MTPA;
+  float Low_Limit_speed_PID_MTPA;
+  float Up_Limit_flux_PID;
+  float Low_Limit_flux_PID;
+  float Up_Limit_torque_PID;
+  float Low_Limit_torque_PID;
 } PID_MTPABus;
 
 #endif

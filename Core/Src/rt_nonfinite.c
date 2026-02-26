@@ -17,15 +17,15 @@
 #include "rt_nonfinite.h"
 #include "math.h"
 
-double rtNaN = -(double)NAN;
-double rtInf = (double)INFINITY;
-double rtMinusInf = -(double)INFINITY;
+float rtNaN = -(float)NAN;
+float rtInf = (float)INFINITY;
+float rtMinusInf = -(float)INFINITY;
 float rtNaNF = -(float)NAN;
 float rtInfF = (float)INFINITY;
 float rtMinusInfF = -(float)INFINITY;
 
 /* Test if value is infinite */
-bool rtIsInf(double value)
+bool rtIsInf(float value)
 {
   return (bool)isinf(value);
 }
@@ -37,7 +37,7 @@ bool rtIsInfF(float value)
 }
 
 /* Test if value is not a number */
-bool rtIsNaN(double value)
+bool rtIsNaN(float value)
 {
   return (bool)(isnan(value) != 0);
 }

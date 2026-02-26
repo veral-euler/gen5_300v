@@ -37,8 +37,8 @@ RT_MODEL_Open_FOC0_T *const Open_FOC0_M = &Open_FOC0_M_;
 /* Model step function */
 void Open_FOC0_step(void)
 {
-  double q;
-  double yTemp;
+  float q;
+  float yTemp;
   bool rEQ0;
 
   /* Outputs for Atomic SubSystem: '<S9>/Two phase CRL wrap' */
@@ -107,7 +107,7 @@ void Open_FOC0_step(void)
   /* Trigonometry: '<S1>/Trigonometric Function' incorporates:
    *  Trigonometry: '<S1>/Trigonometric Function2'
    */
-  yTemp = sin(Open_FOC0_B.Switch);
+  yTemp = sinf(Open_FOC0_B.Switch);
 
   /* Trigonometry: '<S1>/Trigonometric Function' */
   Open_FOC0_B.TrigonometricFunction = yTemp;
@@ -115,7 +115,7 @@ void Open_FOC0_step(void)
   /* Trigonometry: '<S1>/Trigonometric Function1' incorporates:
    *  Trigonometry: '<S1>/Trigonometric Function3'
    */
-  q = cos(Open_FOC0_B.Switch);
+  q = cosf(Open_FOC0_B.Switch);
 
   /* Trigonometry: '<S1>/Trigonometric Function1' */
   Open_FOC0_B.TrigonometricFunction1 = q;

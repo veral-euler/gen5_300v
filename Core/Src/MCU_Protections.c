@@ -81,7 +81,7 @@ void MCU_Protec_NEGATIVEEdge_Disable(DW_NEGATIVEEdge_MCU_Protectio_T *localDW)
  *    '<S6>/NEGATIVE Edge'
  *    '<S11>/NEGATIVE Edge'
  */
-void MCU_Protections_NEGATIVEEdge(double rtu_Enable, bool rtu_IN, bool
+void MCU_Protections_NEGATIVEEdge(float rtu_Enable, bool rtu_IN, bool
   rtu_INprevious, bool *rty_OUT, DW_NEGATIVEEdge_MCU_Protectio_T *localDW)
 {
   /* Outputs for Enabled SubSystem: '<S6>/NEGATIVE Edge' incorporates:
@@ -116,7 +116,7 @@ void MCU_Protec_POSITIVEEdge_Disable(DW_POSITIVEEdge_MCU_Protectio_T *localDW)
  *    '<S6>/POSITIVE Edge'
  *    '<S11>/POSITIVE Edge'
  */
-void MCU_Protections_POSITIVEEdge(double rtu_Enable, bool rtu_IN, bool
+void MCU_Protections_POSITIVEEdge(float rtu_Enable, bool rtu_IN, bool
   rtu_INprevious, bool *rty_OUT, DW_POSITIVEEdge_MCU_Protectio_T *localDW)
 {
   /* Outputs for Enabled SubSystem: '<S6>/POSITIVE Edge' incorporates:
@@ -140,7 +140,7 @@ void MCU_Protections_POSITIVEEdge(double rtu_Enable, bool rtu_IN, bool
 static void MCU_Protecti_Current_Protection(const bool *LogicalOperator1, const
   bool *LogicalOperator1_g)
 {
-  double tmp;
+  float tmp;
   bool c_out;
   bool guard1;
   bool guard2;
@@ -201,7 +201,7 @@ static void MCU_Protecti_Current_Protection(const bool *LogicalOperator1, const
             }
 
             /* Inport: '<Root>/Thresholds' */
-            c_out = ((double)MCU_Protections_DW.durationCounter_1 >
+            c_out = ((float)MCU_Protections_DW.durationCounter_1 >
                      MCU_Protections_U.Thresholds.Time_current_limit_normal_msec
                      * 10.0F);
           } else {
@@ -218,7 +218,7 @@ static void MCU_Protecti_Current_Protection(const bool *LogicalOperator1, const
               }
 
               /* Inport: '<Root>/Thresholds' */
-              c_out = ((double)MCU_Protections_DW.durationCounter_2 >
+              c_out = ((float)MCU_Protections_DW.durationCounter_2 >
                        MCU_Protections_U.Thresholds.Time_current_limit_normal_msec
                        * 10.0F);
             } else {
@@ -317,7 +317,7 @@ static void MCU_Protecti_Current_Protection(const bool *LogicalOperator1, const
 /* Function for Chart: '<S1>/Chart' */
 static void MCU_Prot_Bus_Voltage_Protection(void)
 {
-  double tmp;
+  float tmp;
   switch (MCU_Protections_DW.is_Bus_Voltage_Protection) {
    case MCU_Protections_IN_OV_Error:
     /* Outport: '<Root>/Bus_Voltage_Flag' */
@@ -488,7 +488,7 @@ static void MCU_Prot_Bus_Voltage_Protection(void)
 static void MCU_Protections_Protections(const bool *LogicalOperator1, const bool
   *LogicalOperator1_g)
 {
-  double tmp;
+  float tmp;
   MCU_Protecti_Current_Protection(LogicalOperator1, LogicalOperator1_g);
   switch (MCU_Protections_DW.is_MC_Temperature_Protection) {
    case MCU_Protection_IN_HighTempError:
@@ -841,7 +841,7 @@ static void MCU_Protections_Protections(const bool *LogicalOperator1, const bool
 /* Model step function */
 void MCU_Protections_step(void)
 {
-  double rtb_Min;
+  float rtb_Min;
   bool rtb_RelationalOperator_idx_0;
   bool rtb_RelationalOperator_idx_1;
   bool tmp;
@@ -1189,7 +1189,7 @@ void MCU_Protections_step(void)
    * overflow during the application lifespan selected.
    */
   MCU_Protections_M->Timing.t[0] =
-    ((double)(++MCU_Protections_M->Timing.clockTick0)) *
+    ((float)(++MCU_Protections_M->Timing.clockTick0)) *
     MCU_Protections_M->Timing.stepSize0;
 
   {

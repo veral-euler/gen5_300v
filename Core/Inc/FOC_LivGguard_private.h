@@ -21,8 +21,8 @@
 #include "FOC_LivGguard_types.h"
 #include "FOC_LivGguard.h"
 
-extern double look2_binlx(double u0, double u1, const double bp0[], const double
-  bp1[], const double table[], const uint32_t maxIndex[], uint32_t stride);
+extern float look2_binlx(float u0, float u1, const float bp0[], const float
+  bp1[], const float table[], const uint32_t maxIndex[], uint32_t stride);
 
 #endif                                 /* FOC_LivGguard_private_h_ */
 

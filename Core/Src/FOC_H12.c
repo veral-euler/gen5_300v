@@ -33,14 +33,14 @@ ExtY_FOC_H12_T FOC_H12_Y;
 /* Real-time model */
 static RT_MODEL_FOC_H12_T FOC_H12_M_;
 RT_MODEL_FOC_H12_T *const FOC_H12_M = &FOC_H12_M_;
-double look2_pbinlxpw(double u0, double u1, const double bp0[], const double
-                      bp1[], const double table[], uint32_t prevIndex[], const
+float look2_pbinlxpw(float u0, float u1, const float bp0[], const float
+                      bp1[], const float table[], uint32_t prevIndex[], const
                       uint32_t maxIndex[], uint32_t stride)
 {
-  double fractions[2];
-  double frac;
-  double yL_0d0;
-  double yL_0d1;
+  float fractions[2];
+  float frac;
+  float yL_0d0;
+  float yL_0d1;
   uint32_t bpIndices[2];
   uint32_t bpIdx;
   uint32_t found;
@@ -148,15 +148,15 @@ double look2_pbinlxpw(double u0, double u1, const double bp0[], const double
 /* Model step function for TID0 */
 void FOC_H12_step0(void)               /* Sample time: [0.0001s, 0.0s] */
 {
-  double rtb_Add1;
-  double rtb_Add3;
-  double rtb_IqTable;
-  double rtb_NProdOut_l;
-  double rtb_Product;
-  double rtb_Sum;
-  double rtb_Switch2_e;
-  double rtb_Switch_h_idx_0;
-  double rtb_add_c;
+  float rtb_Add1;
+  float rtb_Add3;
+  float rtb_IqTable;
+  float rtb_NProdOut_l;
+  float rtb_Product;
+  float rtb_Sum;
+  float rtb_Switch2_e;
+  float rtb_Switch_h_idx_0;
+  float rtb_add_c;
   float rtb_algDD_o1_h;
   float rtb_algDD_o2_n;
   bool tmp;
@@ -360,13 +360,13 @@ void FOC_H12_step0(void)               /* Sample time: [0.0001s, 0.0s] */
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function1'
    */
-  rtb_Add1 = sin(FOC_H12_U.MtrElcPos);
+  rtb_Add1 = sinf(FOC_H12_U.MtrElcPos);
 
   /* Trigonometry: '<S4>/Trigonometric Function1' incorporates:
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function'
    */
-  rtb_Add3 = cos(FOC_H12_U.MtrElcPos);
+  rtb_Add3 = cosf(FOC_H12_U.MtrElcPos);
 
   /* Outputs for Atomic SubSystem: '<S30>/Two inputs CRL' */
   /* Outputs for Atomic SubSystem: '<S20>/Two phase CRL wrap' */
@@ -1039,8 +1039,8 @@ void FOC_H12_step0(void)               /* Sample time: [0.0001s, 0.0s] */
 /* Model step function for TID1 */
 void FOC_H12_step1(void)               /* Sample time: [0.001s, 0.0s] */
 {
-  double rtb_NProdOut_n;
-  double rtb_Sum;
+  float rtb_NProdOut_n;
+  float rtb_Sum;
 
   /* Product: '<S211>/NProd Out' incorporates:
    *  DiscreteIntegrator: '<S203>/Filter'

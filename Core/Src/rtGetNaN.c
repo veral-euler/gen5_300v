@@ -17,7 +17,7 @@
 #include <stdint.h>
 
 /* Return rtNaN needed by the generated code. */
-double rtGetNaN(void)
+float rtGetNaN(void)
 {
   return rtNaN;
 }

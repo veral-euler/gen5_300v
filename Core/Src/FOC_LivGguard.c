@@ -32,14 +32,14 @@ ExtY_FOC_LivGguard_T FOC_LivGguard_Y;
 /* Real-time model */
 static RT_MODEL_FOC_LivGguard_T FOC_LivGguard_M_;
 RT_MODEL_FOC_LivGguard_T *const FOC_LivGguard_M = &FOC_LivGguard_M_;
-double look2_binlx(double u0, double u1, const double bp0[], const double bp1[],
-                   const double table[], const uint32_t maxIndex[], uint32_t
+float look2_binlx(float u0, float u1, const float bp0[], const float bp1[],
+                   const float table[], const uint32_t maxIndex[], uint32_t
                    stride)
 {
-  double fractions[2];
-  double frac;
-  double yL_0d0;
-  double yL_0d1;
+  float fractions[2];
+  float frac;
+  float yL_0d0;
+  float yL_0d1;
   uint32_t bpIndices[2];
   uint32_t bpIdx;
   uint32_t iLeft;
@@ -137,14 +137,14 @@ double look2_binlx(double u0, double u1, const double bp0[], const double bp1[],
 /* Model step function for TID0 */
 void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
 {
-  double rtb_Add1_l;
-  double rtb_Add3;
-  double rtb_Sum_f;
-  double rtb_Switch;
-  double rtb_Switch_f_idx_0;
-  double rtb_UkYk1_f;
-  double rtb_add_c;
-  double rtb_deltafalllimit_a;
+  float rtb_Add1_l;
+  float rtb_Add3;
+  float rtb_Sum_f;
+  float rtb_Switch;
+  float rtb_Switch_f_idx_0;
+  float rtb_UkYk1_f;
+  float rtb_add_c;
+  float rtb_deltafalllimit_a;
   float rtb_Gain_j;
   float rtb_algDD_o1_d;
   float rtb_algDD_o2_o;
@@ -419,13 +419,13 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function1'
    */
-  rtb_Add3 = sin(FOC_LivGguard_U.MtrElcPos);
+  rtb_Add3 = sinf(FOC_LivGguard_U.MtrElcPos);
 
   /* Trigonometry: '<S4>/Trigonometric Function1' incorporates:
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function'
    */
-  rtb_Add1_l = cos(FOC_LivGguard_U.MtrElcPos);
+  rtb_Add1_l = cosf(FOC_LivGguard_U.MtrElcPos);
 
   /* Outputs for Atomic SubSystem: '<S14>/Two inputs CRL' */
   /* Outputs for Atomic SubSystem: '<S15>/Two phase CRL wrap' */
@@ -1074,8 +1074,8 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
 /* Model step function for TID1 */
 void FOC_LivGguard_step1(void)         /* Sample time: [0.001s, 0.0s] */
 {
-  double rtb_NProdOut_j;
-  double rtb_Sum_o;
+  float rtb_NProdOut_j;
+  float rtb_Sum_o;
 
   /* Product: '<S203>/NProd Out' incorporates:
    *  DiscreteIntegrator: '<S195>/Filter'

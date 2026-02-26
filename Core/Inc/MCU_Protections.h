@@ -66,8 +66,8 @@ typedef struct {
 
 /* Block states (default storage) for system '<Root>' */
 typedef struct {
-  double count_current_error;          /* '<S1>/Chart' */
-  double count_current_warning;        /* '<S1>/Chart' */
+  float count_current_error;          /* '<S1>/Chart' */
+  float count_current_warning;        /* '<S1>/Chart' */
   uint32_t durationCounter_1;          /* '<S1>/Chart' */
   uint32_t durationCounter_2;          /* '<S1>/Chart' */
   uint32_t durationCounter_1_e;        /* '<S1>/Chart' */
@@ -120,20 +120,20 @@ typedef struct {
 
 /* Invariant block signals (default storage) */
 typedef struct {
-  const double MultiportSwitch[2];     /* '<S6>/Multiport Switch' */
-  const double MultiportSwitch_n[2];   /* '<S11>/Multiport Switch' */
+  const float MultiportSwitch[2];     /* '<S6>/Multiport Switch' */
+  const float MultiportSwitch_n[2];   /* '<S11>/Multiport Switch' */
 } ConstB_MCU_Protections_T;
 
 /* External inputs (root inport signals with default storage) */
 typedef struct {
   ThresholdsBus Thresholds;            /* '<Root>/Thresholds' */
-  double MC_Temperature_C;             /* '<Root>/MC_Temperature_C' */
-  double Motor_Temperature_C;          /* '<Root>/Motor_Temperature_C' */
-  double I_a;                          /* '<Root>/I_a' */
-  double I_b;                          /* '<Root>/I_b' */
-  double I_c;                          /* '<Root>/I_c' */
-  double Bus_Voltage_V;                /* '<Root>/Bus_Voltage_V' */
-  double Aux_Voltage_V;                /* '<Root>/Aux_Voltage_V' */
+  float MC_Temperature_C;             /* '<Root>/MC_Temperature_C' */
+  float Motor_Temperature_C;          /* '<Root>/Motor_Temperature_C' */
+  float I_a;                          /* '<Root>/I_a' */
+  float I_b;                          /* '<Root>/I_b' */
+  float I_c;                          /* '<Root>/I_c' */
+  float Bus_Voltage_V;                /* '<Root>/Bus_Voltage_V' */
+  float Aux_Voltage_V;                /* '<Root>/Aux_Voltage_V' */
 } ExtU_MCU_Protections_T;
 
 /* External outputs (root outports fed by signals with default storage) */
@@ -157,11 +157,11 @@ struct tag_RTM_MCU_Protections_T {
    */
   struct {
     uint32_t clockTick0;
-    double stepSize0;
+    float stepSize0;
     uint32_t clockTick1;
     SimTimeStep simTimeStep;
-    double *t;
-    double tArray[2];
+    float *t;
+    float tArray[2];
   } Timing;
 };
 

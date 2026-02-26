@@ -37,15 +37,15 @@
 
 /* Block states (default storage) for system '<Root>' */
 typedef struct {
-  double Integrator_DSTATE;            /* '<S122>/Integrator' */
-  double Filter_DSTATE;                /* '<S117>/Filter' */
-  double Integrator_DSTATE_h;          /* '<S68>/Integrator' */
-  double Filter_DSTATE_d;              /* '<S63>/Filter' */
-  double Delay_DSTATE;                 /* '<S3>/Delay' */
-  double Integrator_DSTATE_b;          /* '<S188>/Integrator' */
-  double Filter_DSTATE_i;              /* '<S183>/Filter' */
-  double Delay_DSTATE_h;               /* '<S7>/Delay' */
-  double RateTransition_Buffer0;       /* '<S2>/Rate Transition' */
+  float Integrator_DSTATE;            /* '<S122>/Integrator' */
+  float Filter_DSTATE;                /* '<S117>/Filter' */
+  float Integrator_DSTATE_h;          /* '<S68>/Integrator' */
+  float Filter_DSTATE_d;              /* '<S63>/Filter' */
+  float Delay_DSTATE;                 /* '<S3>/Delay' */
+  float Integrator_DSTATE_b;          /* '<S188>/Integrator' */
+  float Filter_DSTATE_i;              /* '<S183>/Filter' */
+  float Delay_DSTATE_h;               /* '<S7>/Delay' */
+  float RateTransition_Buffer0;       /* '<S2>/Rate Transition' */
   float UnitDelay_DSTATE;              /* '<S17>/Unit Delay' */
   float UnitDelay_DSTATE_f;            /* '<S20>/Unit Delay' */
   bool icLoad;                         /* '<S3>/Delay' */
@@ -54,39 +54,39 @@ typedef struct {
 
 /* External inputs (root inport signals with default storage) */
 typedef struct {
-  double Ref_Speed_mech_rpm;           /* '<Root>/Ref_Speed_mech_rpm' */
-  double Ref_Speed_rate_up;            /* '<Root>/Ref_Speed_rate_up' */
-  double Ref_Speed_rate_down;          /* '<Root>/Ref_Speed_rate_down' */
-  double MtrSpd;                       /* '<Root>/Actual Speed_mech_rad//sec' */
-  double MtrElcPos;                    /* '<Root>/angle' */
-  double PhaseCurrent[3];              /* '<Root>/Phase Current' */
+  float Ref_Speed_mech_rpm;           /* '<Root>/Ref_Speed_mech_rpm' */
+  float Ref_Speed_rate_up;            /* '<Root>/Ref_Speed_rate_up' */
+  float Ref_Speed_rate_down;          /* '<Root>/Ref_Speed_rate_down' */
+  float MtrSpd;                       /* '<Root>/Actual Speed_mech_rad//sec' */
+  float MtrElcPos;                    /* '<Root>/angle' */
+  float PhaseCurrent[3];              /* '<Root>/Phase Current' */
   PID_MTPABus MTPA_PID;                /* '<Root>/MTPA_PID' */
   Rate_limiterBus Rate_limiter;        /* '<Root>/Rate_limiter' */
   IIR_FilterBus IIR_Filter_Coefficient;/* '<Root>/IIR_Filter_Coefficient' */
-  double Id_ref_in;                    /* '<Root>/Id_ref_in' */
-  double Ld;                           /* '<Root>/Ld' */
-  double Lq;                           /* '<Root>/Lq' */
-  double Lambda;                       /* '<Root>/Lambda' */
+  float Id_ref_in;                    /* '<Root>/Id_ref_in' */
+  float Ld;                           /* '<Root>/Ld' */
+  float Lq;                           /* '<Root>/Lq' */
+  float Lambda;                       /* '<Root>/Lambda' */
   float BusVoltage_V;                  /* '<Root>/Bus_Voltage' */
 } ExtU_FOC_Basic_FF_T;
 
 /* External outputs (root outports fed by signals with default storage) */
 typedef struct {
-  double Va;                           /* '<Root>/Va' */
-  double Vb;                           /* '<Root>/Vb' */
-  double Vc;                           /* '<Root>/Vc' */
-  double Id;                           /* '<Root>/Id' */
-  double Iq;                           /* '<Root>/Iq' */
-  double Iq_ref;                       /* '<Root>/Iq_ref' */
-  double Id_ref;                       /* '<Root>/Id_ref' */
-  double Iq_gen;                       /* '<Root>/Iq_gen' */
-  double Vd_PID;                       /* '<Root>/Vd_PID' */
-  double Vq_PID;                       /* '<Root>/Vq_PID' */
-  double Vd;                           /* '<Root>/Vd' */
-  double Vq;                           /* '<Root>/Vq' */
-  double Id_error;                     /* '<Root>/Id_error' */
-  double Iq_error;                     /* '<Root>/Iq_error' */
-  double Speed_error;                  /* '<Root>/Speed_error' */
+  float Va;                           /* '<Root>/Va' */
+  float Vb;                           /* '<Root>/Vb' */
+  float Vc;                           /* '<Root>/Vc' */
+  float Id;                           /* '<Root>/Id' */
+  float Iq;                           /* '<Root>/Iq' */
+  float Iq_ref;                       /* '<Root>/Iq_ref' */
+  float Id_ref;                       /* '<Root>/Id_ref' */
+  float Iq_gen;                       /* '<Root>/Iq_gen' */
+  float Vd_PID;                       /* '<Root>/Vd_PID' */
+  float Vq_PID;                       /* '<Root>/Vq_PID' */
+  float Vd;                           /* '<Root>/Vd' */
+  float Vq;                           /* '<Root>/Vq' */
+  float Id_error;                     /* '<Root>/Id_error' */
+  float Iq_error;                     /* '<Root>/Iq_error' */
+  float Speed_error;                  /* '<Root>/Speed_error' */
 } ExtY_FOC_Basic_FF_T;
 
 /* Real-time Model Data Structure */

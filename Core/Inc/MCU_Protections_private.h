@@ -39,11 +39,11 @@
 
 extern void MCU_Protec_NEGATIVEEdge_Disable(DW_NEGATIVEEdge_MCU_Protectio_T
   *localDW);
-extern void MCU_Protections_NEGATIVEEdge(double rtu_Enable, bool rtu_IN, bool
+extern void MCU_Protections_NEGATIVEEdge(float rtu_Enable, bool rtu_IN, bool
   rtu_INprevious, bool *rty_OUT, DW_NEGATIVEEdge_MCU_Protectio_T *localDW);
 extern void MCU_Protec_POSITIVEEdge_Disable(DW_POSITIVEEdge_MCU_Protectio_T
   *localDW);
-extern void MCU_Protections_POSITIVEEdge(double rtu_Enable, bool rtu_IN, bool
+extern void MCU_Protections_POSITIVEEdge(float rtu_Enable, bool rtu_IN, bool
   rtu_INprevious, bool *rty_OUT, DW_POSITIVEEdge_MCU_Protectio_T *localDW);
 
 #endif                                 /* MCU_Protections_private_h_ */

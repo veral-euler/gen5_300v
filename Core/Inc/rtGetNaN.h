@@ -17,7 +17,7 @@
 #define rtGetNaN_h_
 #include "rt_nonfinite.h"
 
-extern double rtGetNaN(void);
+extern float rtGetNaN(void);
 extern float rtGetNaNF(void);
 
 #endif                                 /* rtGetNaN_h_ */

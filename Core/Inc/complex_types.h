@@ -28,8 +28,8 @@ typedef struct {
 } creal32_T;
 
 typedef struct {
-  double re;
-  double im;
+  float re;
+  float im;
 } creal_T;
 
 typedef creal_T creal64_T;
