@@ -1,5 +1,0 @@
-../Core/Src/FOC_H12.c:36:8:look2_pbinlxpw	20	static
-../Core/Src/FOC_H12.c:149:6:FOC_H12_step0	128	static
-../Core/Src/FOC_H12.c:1040:6:FOC_H12_step1	0	static
-../Core/Src/FOC_H12.c:1127:6:FOC_H12_initialize	0	static
-../Core/Src/FOC_H12.c:1196:6:FOC_H12_terminate	0	static

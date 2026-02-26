@@ -1,7 +1,0 @@
-../Core/Src/MCU_Protections.c:74:6:MCU_Protec_NEGATIVEEdge_Disable	0	static
-../Core/Src/MCU_Protections.c:84:6:MCU_Protections_NEGATIVEEdge	0	static
-../Core/Src/MCU_Protections.c:109:6:MCU_Protec_POSITIVEEdge_Disable	0	static
-../Core/Src/MCU_Protections.c:119:6:MCU_Protections_POSITIVEEdge	0	static
-../Core/Src/MCU_Protections.c:842:6:MCU_Protections_step	24	static
-../Core/Src/MCU_Protections.c:1207:6:MCU_Protections_initialize	0	static
-../Core/Src/MCU_Protections.c:1257:6:MCU_Protections_terminate	0	static

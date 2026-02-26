@@ -1,5 +1,0 @@
-../Core/Src/FOC_LivGguard.c:35:8:look2_binlx	16	static
-../Core/Src/FOC_LivGguard.c:138:6:FOC_LivGguard_step0	232	static
-../Core/Src/FOC_LivGguard.c:1075:6:FOC_LivGguard_step1	0	static
-../Core/Src/FOC_LivGguard.c:1154:6:FOC_LivGguard_initialize	0	static
-../Core/Src/FOC_LivGguard.c:1225:6:FOC_LivGguard_terminate	0	static

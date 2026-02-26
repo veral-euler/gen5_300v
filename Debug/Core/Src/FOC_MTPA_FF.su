@@ -1,4 +1,0 @@
-../Core/Src/FOC_MTPA_FF.c:33:6:FOC_MTPA_FF_step0	88	static
-../Core/Src/FOC_MTPA_FF.c:680:6:FOC_MTPA_FF_step1	16	static
-../Core/Src/FOC_MTPA_FF.c:835:6:FOC_MTPA_FF_initialize	0	static
-../Core/Src/FOC_MTPA_FF.c:900:6:FOC_MTPA_FF_terminate	0	static
