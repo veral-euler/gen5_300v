@@ -25,7 +25,7 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/arm-none-eabi.cmake"
 # ==============================================================================
 # [2] PROJECT
 # ==============================================================================
-project(Pegsus_v4
+project(Pegasus_v4
     VERSION 1.0.0
     LANGUAGES C CXX ASM
 )
@@ -54,7 +54,7 @@ project(Pegsus_v4
 # ── STM32H7 (uncomment to use) ────────────────────────────────────────────────
 set(MCU_FAMILY     STM32H7xx)
 set(MCU_MODEL      STM32H743xx)
-set(CPU_PARAMETERS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard)
+set(CPU_PARAMETERS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard --specs=nano.specs)
 
 # ── STM32L4 (uncomment to use) ────────────────────────────────────────────────
 # set(MCU_FAMILY     STM32L4xx)
@@ -253,8 +253,12 @@ if(OPENOCD)
     add_custom_target(flash
         COMMAND ${OPENOCD}
             -f interface/stlink.cfg
-            -f target/stm32h7x.cfg        # ← STM32H7 target config
-            -c "program ${PROJECT_NAME}.bin verify reset exit"
+            -f target/stm32h7x.cfg
+            -c "init; reset halt; stm32h7x mass_erase 0; exit"
+        COMMAND ${OPENOCD}
+            -f interface/stlink.cfg
+            -f target/stm32h7x.cfg
+            -c "program ${PROJECT_NAME}.bin verify reset exit 0x8000000"
         DEPENDS ${PROJECT_NAME}
         COMMENT ">>> Flashing ${PROJECT_NAME}.bin via OpenOCD"
     )
