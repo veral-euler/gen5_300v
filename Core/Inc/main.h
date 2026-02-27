@@ -216,7 +216,7 @@ void rt_OneStep(void);
 #define LQ						0.000148f
 #define LD						0.000064f
 #define LAMBDA					0.032f
-#define CURR_TORQUE_RATIO		0.2366f //(Max_Torque/Max_Arms)
+#define CURR_TORQUE_RATIO		0.1673f //(Max_Torque/Max_Arms)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
 #define T_DOWN					0.0000001f
@@ -250,6 +250,8 @@ void rt_OneStep(void);
 #define TIM17_ARR			2499
 #define HIGH_PULSE16_ERROR	0.024574f
 #define OFFSET_CALC_ELEC 	1.1913f
+
+#define EST_CYC_CNT			1
 
 #define MTR_NTC_R25			49000.0f
 #define MTC_NTC_R25			10000.0f

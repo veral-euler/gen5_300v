@@ -77,6 +77,7 @@ static void MX_I2C2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 uint8_t heart_beat_init[8] = {0x01, 0x00};
+uint8_t rxMsg[8] = {0};
 uint16_t injectedVal[2] = {0};
 uint16_t currSensOff[2] = {0.0f};
 uint16_t adc1_buffer[5] = {0};
@@ -117,9 +118,11 @@ int main(void)
   PeriphCommonClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  #if EST_CYC_CNT
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
   DWT->CYCCNT = 0;
   DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+  #endif
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -192,6 +195,7 @@ int main(void)
 
   /*Starting ADC2 Injected conversions first*/
   HAL_ADCEx_InjectedStart_IT(&hadc2);
+  HAL_TIM_Base_Start_IT(&htim17);
 
   /*Then starting TIM1 complementary channels and trigger channel*/
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
@@ -219,8 +223,8 @@ int main(void)
       fnr_state = NEUTRAL;
       d.speed_ref = 0.0f;
       Open_FOC0_U.Speed_ref = 0.0f;
-      FOC_LivGguard_U.Drive_State = NEUTRAL;
       FOC_LivGguard_U.Ref_Speed_mech_rpm = 0.0f;
+      FOC_LivGguard_U.Drive_State = NEUTRAL;
     }
     else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
     {
@@ -242,7 +246,7 @@ int main(void)
     /* Checking the MCU Protections Model output flags and setting error flags */
     Model_Output_Flag_Checks();
 
-    FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
+    Open_FOC0_U.Speed_ref = FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
   }
   /* USER CODE END 3 */
 }
@@ -977,15 +981,13 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         if (d.init_check == HAL_OK)
         {
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-          HAL_TIM_Base_Start_IT(&htim17);
-          d.speed_ref = SPEED_REF_RPM_MAX;
-          Open_FOC0_U.Speed_ref = SPEED_REF_RPM_MAX;
+  
           cS = FOC_START;
         }
         else if (d.init_check == !HAL_OK)
         {
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
-          HAL_TIM_Base_Start_IT(&htim17);
+  
           cS = CONT_ERROR;
         }
       }
@@ -1044,8 +1046,10 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
     if (cS == FOC_START)
     {
+      #if EST_CYC_CNT
       /* Current count for time estimation */
       uint32_t start = DWT->CYCCNT;
+      #endif
       /* Updating pahse current data */
       FOC_LivGguard_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
       FOC_LivGguard_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
@@ -1102,9 +1106,11 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, d.pwm_b);
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, d.pwm_c);
 
+      #if EST_CYC_CNT
       /* Finally calculating the total time taken */
       uint32_t end = DWT->CYCCNT;
       d.cycles = end - start;
+      #endif
     }
 
     if (cS == CONT_ERROR)
@@ -1137,7 +1143,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         er.eeprom_write_error = 1;
         err = EEPROM_WRITE_ERROR;
       }
-      HAL_TIM_Base_Start_IT(&htim17);
       HAL_NVIC_SystemReset();
     }
   }
@@ -1152,7 +1157,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     can_counter++;
 
     /* Temperature and Encoder disconnection errors */
-    Sensor_Disconnection_Check();
+    // Sensor_Disconnection_Check();
 
     /* Queue messages every 500ms */
     if (can_counter >= CAN_BUS_CYCLE)
@@ -1165,6 +1170,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       Send_Data_On_CAN_403();
       Send_Data_On_CAN_404();
     }
+  }
+}
+
+/* FDCAN Rx Callback */
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
+{
+  HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxMessageBuf, rxMsg);
+
+  if (RxMessageBuf.Identifier == 0x102) {
+    d.speed_ref = (float)((rxMsg[1] << 8) | rxMsg[0]);
   }
 }
 

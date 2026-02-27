@@ -173,7 +173,7 @@ set(COMMON_FLAGS
     # -Og                      # Optimize for debug (good default for dev)
     # -Os                      # Optimize for size  (good for release)
     # -O2                      # Optimize for speed
-    -O2
+    -O1
 )
 
 set(C_FLAGS
