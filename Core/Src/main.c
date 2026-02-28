@@ -1160,13 +1160,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (cS == FOC_START) {
       /* Temperature and Encoder disconnection errors */
       Sensor_Disconnection_Check();
-      /* Checking for Aux DC UV Error explicitly */
-      if (d.Aux_dc <= 9.5 && d.motor_start == 1) {
-        er.error_triggered = 1;
-        er.aux_voltage_uv_error = 1;
-        err = AUX_VOLTAGE_OV_ERROR;
-        cS = CONT_ERROR;
-      }
+      /* Limit Error Checks */
+      Error_Check();
     }
 
     /* Queue messages every 500ms */

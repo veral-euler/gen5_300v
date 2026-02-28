@@ -44,6 +44,7 @@ extern "C" {
 #include "alignment_routine.h"
 #include "Eeprom.h"
 #include "Sensor_Disconnection_Checks.h"
+#include "Limit_Errors.h"
 #include "Open_FOC0.h"
 /* USER CODE END Includes */
 
@@ -255,6 +256,8 @@ void rt_OneStep(void);
 
 #define MTR_NTC_R25			49000.0f
 #define MTC_NTC_R25			10000.0f
+
+#define MAX_PHASE_CURRENT	512.0f
 
 typedef enum ADC2_CHANNELS {
 	PHASE_U,
