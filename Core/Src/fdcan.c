@@ -275,6 +275,12 @@ void Send_Data_On_CAN_405(void) {
 	uint8_t can_data[8] = {0};
 
 	can_data[0] = (uint8_t)(fnr_state);
+	can_data[1] = (uint8_t)(cS);
+	if (rtmGetErrorStatus(FOC_LivGguard_M) == "Overrun") {
+		can_data[2] = 0x01;
+	} else {
+		can_data[2] = 0x00;
+	}
 
 	CAN_Queue_Push_And_Kickstart(0x405, 0, can_data, 0x08);
 }

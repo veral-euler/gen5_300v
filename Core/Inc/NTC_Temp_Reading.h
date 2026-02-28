@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-float NTC_Read(uint16_t analog_val, float R0);
+int16_t NTC_Read(uint16_t analog_val, float R0);
 
 #endif

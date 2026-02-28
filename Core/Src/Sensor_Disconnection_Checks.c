@@ -59,6 +59,7 @@ uint8_t temp_sensor_disconnection_check(uint16_t temperature_analog_val, uint16_
   return HAL_OK; // Sensor is connected
 }
 
+#if PROTECTION_MODEL
 void Model_Params_Input(void) {
   /* Placeholder for any model parameter updates if necessary */
   // This function can be used to update any parameters in the MCU Protections model based on sensor readings or other conditions
@@ -115,6 +116,7 @@ void Model_Output_Flag_Checks(void) {
     cS = CONT_ERROR;
   }
 }
+#endif
 
 void ADC1_Analog_Val_Update(void) {
   /* Placeholder for updating any analog values from ADC1 if necessary */
@@ -125,25 +127,25 @@ void ADC1_Analog_Val_Update(void) {
   d.mtc_analog_val = adc1_buffer[CONTRL_TEMP];
   d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
   d.mtr_analog_val = adc1_buffer[MOTOR_TEMP];
-  d.Vdc = (float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE;
-  d.Aux_dc = (float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE;
+  d.Vdc = (uint16_t)((float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE);
+  d.Aux_dc = (uint16_t)((float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE);
   d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
 }
 
 uint8_t Initial_Fault_Check(void) {
-	if (injectedVal[0] <= 14000 || injectedVal[1] <= 14000 || injectedVal[0] >= 40000 || injectedVal[1] >= 40000) {
+	if (injectedVal[0] <= CURR_SEN_ANLG_LOW || injectedVal[1] <= CURR_SEN_ANLG_LOW || injectedVal[0] >= CURR_SEN_ANLG_HIGH || injectedVal[1] >= CURR_SEN_ANLG_HIGH) {
 		er.curr_sens_error = 1;
     err = CURR_SENS_ERROR;
 		er.error_triggered = 1;
 	}
 
-	if (d.Vdc >= MCU_Protections_U.Thresholds.OV_Error_Limit_V) {
+	if (d.Vdc >= BUS_DC_OV_LIMIT) {
 		er.bus_voltage_ov_error = 1;
     err = BUS_VOLTAGE_OV_ERROR;
 		er.error_triggered = 1;
 	}
 
-	if (d.Vdc <= MCU_Protections_U.Thresholds.UV_Error_Limit_V) {
+	if (d.Vdc <= BUS_DC_UV_LIMIT) {
 		er.bus_voltage_uv_error = 1;
     err = BUS_VOLTAGE_UV_ERROR;
 		er.error_triggered = 1;
@@ -170,11 +172,11 @@ void Sensor_Disconnection_Check(void) {
   d.A_B_XOR = d.A_Pulse ^ d.B_Pulse;
 
   /* Calculating the diff b/w Curr Z and Prev Z */
-  d.z_count_diff = fabsf(d.curr_z_count - d.prev_z_count);
+  d.z_count_diff = (d.curr_z_count > d.prev_z_count) ? (d.curr_z_count - d.prev_z_count) : (d.prev_z_count - d.curr_z_count);
   /* Storing the prev Z count */
   d.prev_z_count = d.curr_z_count;
   /* Getting the abs diff b/w TIM2_ARR and count at Z ttrig */
-  d.count_diff_at_z = fabsf((TIM2_ARR + 1) - d.count_at_z);
+  d.count_diff_at_z = (d.count_at_z > (TIM2_ARR + 1)) ? (d.count_at_z - (TIM2_ARR + 1)) : ((TIM2_ARR + 1) - d.count_at_z);
 
   /* Z disconnection error check */
   if (encoder_z_fault_check_count >= ENCODER_CHECK_MS && d.motor_start == 1) {

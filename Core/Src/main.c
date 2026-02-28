@@ -86,7 +86,7 @@ uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 
 fnr_state_t fnr_state = NEUTRAL;
-currSens cS = ANGLE_CALIB_DONE;
+currSession cS = ANGLE_CALIB_DONE;
 errors_nums err = NO_ERROR;
 errors er = {0};
 data d = {.Kvf = V_F_RATIO, .speed_ref = 0.0f, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
@@ -160,7 +160,7 @@ int main(void)
   // }
   // else if (cS == ANGLE_CALIB_DONE)
   // {
-    set_Initial_angle();
+  set_Initial_angle();
   // }
   /* USER CODE END WHILE */
 
@@ -239,12 +239,14 @@ int main(void)
 
     /* Gathering ADC1 values */
     ADC1_Analog_Val_Update();
+    #if PROTECTION_MODEL
     /* MCU Proctections Model input update */
     Model_Params_Input();
     /* Running MCU protections model */
     MCU_Protections_step();
     /* Checking the MCU Protections Model output flags and setting error flags */
     Model_Output_Flag_Checks();
+    #endif
 
     Open_FOC0_U.Speed_ref = FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
   }
@@ -972,7 +974,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         __HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
 
         /* Setting elec angle to 0 */
-        d.elec_angle = d.elec_angle_120 = d.elec_angle_240 = 0.0f;
+        d.elec_angle = 0.0f;
 
         /* Running initial fault check */
         d.init_check = Initial_Fault_Check();
@@ -981,18 +983,23 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         if (d.init_check == HAL_OK)
         {
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-  
+          #if OPEN_FOC
+          cS = OPEN_FOC_START;
+          #endif
+          
+          #if CLOSED_FOC
           cS = FOC_START;
+          #endif
         }
         else if (d.init_check == !HAL_OK)
         {
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
-  
           cS = CONT_ERROR;
         }
       }
     }
 
+    #if OPEN_FOC
     if (cS == OPEN_FOC_START)
     {
       /* Updating phase current data */
@@ -1043,7 +1050,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, d.pwm_b);
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, d.pwm_c);
     }
+    #endif
 
+    #if CLOSED_FOC
     if (cS == FOC_START)
     {
       #if EST_CYC_CNT
@@ -1112,6 +1121,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.cycles = end - start;
       #endif
     }
+    #endif
 
     if (cS == CONT_ERROR)
     {
@@ -1156,7 +1166,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     static uint16_t can_counter = 0;
     can_counter++;
 
-    /* Temperature and Encoder disconnection errors */
     if (cS == FOC_START) {
       /* Temperature and Encoder disconnection errors */
       Sensor_Disconnection_Check();

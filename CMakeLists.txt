@@ -117,6 +117,7 @@ set(APP_SOURCES
     Core/Src/rtGetNaN.c
     Core/Src/Sensor_Disconnection_Checks.c
     Core/Src/Speed_Sensing.c
+    Core/Src/Limit_Errors.c
     Core/Startup/startup_stm32h743zitx.s   # ← generated startup file
     # Core/Src/myfile.c
     # Core/Src/mydriver.cpp

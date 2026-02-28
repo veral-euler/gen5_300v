@@ -61,6 +61,10 @@ typedef struct data {
 	uint8_t forward_pin;
 	uint8_t reverse_pin;
 	uint8_t init_check;
+	uint8_t Vdc;
+	uint8_t Aux_dc;
+	int16_t Mtr_temp;
+	int16_t Mtc_temp;
 	uint16_t pwm_a;
 	uint16_t pwm_b;
 	uint16_t pwm_c;
@@ -79,9 +83,6 @@ typedef struct data {
 	uint32_t cycles;
 	float offset_angle_elec;
 	float speed_ref;
-	float Aux_dc;
-	float Mtr_temp;
-	float Mtc_temp;
 	float count_delta;
 	float Kvf;
 	float freq;
@@ -91,7 +92,6 @@ typedef struct data {
 	float Angle_From_Duty;
 	float Frequency;
 	float pole_pair;
-	float Vdc;
 	float Va;
 	float Vb;
 	float Vc;
@@ -158,7 +158,7 @@ typedef enum errors_nums {
 	ENCODER_5V_ERROR
 } errors_nums;
 
-typedef enum currSens {
+typedef enum currSession {
 	INIT,
 	ANGLE_CALIB,
 	ANGLE_CALIB_DONE,
@@ -167,7 +167,7 @@ typedef enum currSens {
 	CURR_SENS_CALIB,
 	FOC_START,
 	CONT_ERROR
-} currSens;
+} currSession;
 
 typedef enum fnr_state_t {
 	FORWARD = 1,
@@ -176,7 +176,7 @@ typedef enum fnr_state_t {
 } fnr_state_t;
 
 extern fnr_state_t fnr_state;
-extern currSens cS;
+extern currSession cS;
 extern data d;
 extern errors er;
 extern errors_nums err;
@@ -220,8 +220,6 @@ void rt_OneStep(void);
 #define CURR_TORQUE_RATIO		0.1673f //(Max_Torque/Max_Arms)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
-#define T_DOWN					0.0000001f
-#define T_UP					0.00001f
 #define DEG_TWO_PI_3			2.094395f
 #define DEG_4_PI_3				4.188790f
 #define OP_VOLTAGE				96.0f
@@ -230,13 +228,7 @@ void rt_OneStep(void);
 #define MOTOR_PEAK_ARMS			338.0f
 #define MOTOR_PEAK_AC			(MOTOR_PEAK_ARMS * ROOT2)
 #define V_F_RATIO				0.2875f
-#define BUS_VDC_SCALE			0.00206f
-#define AUX_VDC_SCALE			0.000188658f
-#define CAN_BUS_CYCLE			500
 #define SPEED_REF_RPM_MAX		500.0f
-#define ENCODER_CHECK_MS		20
-#define ENCODER_FAULT_MAX_COUNT 5
-#define TEMP_SENS_FAULT_COUNT 	65000
 #define MIN_RPM_FOR_MOTOR_START 80.0f
 #define RAD_S_TO_RPM   			9.549296f
 
@@ -253,11 +245,31 @@ void rt_OneStep(void);
 #define OFFSET_CALC_ELEC 	1.1913f
 
 #define EST_CYC_CNT			1
+#define OPEN_FOC			0
+#define CLOSED_FOC			1
+#define PROTECTION_MODEL	0
 
 #define MTR_NTC_R25			49000.0f
 #define MTC_NTC_R25			10000.0f
+#define CAN_BUS_CYCLE		500
+#define BUS_VDC_SCALE		0.00206f
+#define AUX_VDC_SCALE		0.000188658f
 
-#define MAX_PHASE_CURRENT	512.0f
+#define MAX_PHASE_CURRENT		512.0f
+#define BUS_DC_OV_LIMIT			115
+#define BUS_DC_UV_LIMIT			70
+#define AUX_UV_LIMIT			9
+#define MOTOR_TEMP_OT_LIMIT		120
+#define CONTRL_TEMP_OT_LIMIT	80
+#define PHASE_OC_COUNT			10
+#define ID_IQ_OC_COUNT			10
+#define BUS_DC_OV_COUNT			5
+#define BUS_DC_UV_COUNT			5
+#define CURR_SEN_ANLG_HIGH		40000
+#define CURR_SEN_ANLG_LOW		14000
+#define TEMP_SENS_FAULT_COUNT 	65000
+#define ENCODER_CHECK_MS		20
+#define ENCODER_FAULT_MAX_COUNT 5
 
 typedef enum ADC2_CHANNELS {
 	PHASE_U,

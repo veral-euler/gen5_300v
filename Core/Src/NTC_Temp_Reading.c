@@ -1,6 +1,6 @@
 #include "NTC_Temp_Reading.h"
 
-float NTC_Read(uint16_t analog_val, float R0)
+int16_t NTC_Read(uint16_t analog_val, float R0)
 {
     float resistance = (analog_val * 10000.0f)/(65536.0f - analog_val);
     float temp_K = resistance/R0;
@@ -11,5 +11,5 @@ float NTC_Read(uint16_t analog_val, float R0)
     temp_K = 1.0/temp_K;
     temp_K -= 273.15;
 
-    return temp_K;
+    return (int16_t)temp_K;
 }
