@@ -155,6 +155,7 @@ set(INCLUDE_DIRS
 # [8] PREPROCESSOR DEFINITIONS — ⚠️ Match your MCU and HAL config
 # ==============================================================================
 set(COMPILE_DEFINITIONS
+    DEBUG
     USE_HAL_DRIVER
     ${MCU_MODEL}            # e.g. STM32F411xE  → enables correct HAL headers
     # HSE_VALUE=8000000     # External crystal frequency in Hz (if used)
@@ -173,7 +174,7 @@ set(COMMON_FLAGS
     # -Og                      # Optimize for debug (good default for dev)
     # -Os                      # Optimize for size  (good for release)
     # -O2                      # Optimize for speed
-    -O1
+    -O2
 )
 
 set(C_FLAGS
@@ -190,8 +191,9 @@ set(CXX_FLAGS
 
 set(ASM_FLAGS
     ${CPU_PARAMETERS}
-    -x assembler-with-cpp      # Allows #include in .s files
+    -DDEBUG
     -g3
+    -x assembler-with-cpp      # Allows #include in .s files
 )
 
 set(LINKER_FLAGS

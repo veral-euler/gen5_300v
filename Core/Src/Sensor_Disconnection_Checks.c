@@ -6,11 +6,11 @@ extern uint16_t injectedVal[2];
 
 uint8_t encoder_ab_error_check(void) {
   /* Checking A and B error based on A and B states and Id and Iq ref vals */
-  if (d.A_Pulse == GPIO_PIN_SET && d.B_Pulse == GPIO_PIN_SET && d.A_B_XOR == GPIO_PIN_RESET && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f) {
+  if (d.A_Pulse == GPIO_PIN_SET && d.B_Pulse == GPIO_PIN_SET && d.A_B_XOR == GPIO_PIN_RESET && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f && d.count_diff_at_z >= 60) {
     return !HAL_OK; // A and B pulses are the same, which is an error
-  } else if (d.A_Pulse == GPIO_PIN_SET && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f) {
+  } else if (d.A_Pulse == GPIO_PIN_SET && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f && d.count_diff_at_z >= 60) {
     return !HAL_OK; // A pulse is set but B pulse is not, which is an error
-  } else if (d.B_Pulse == GPIO_PIN_SET && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f) {
+  } else if (d.B_Pulse == GPIO_PIN_SET && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f && d.count_diff_at_z >= 60) {
     return !HAL_OK; // B pulse is set but A pulse is not, which is an error
   }
 

@@ -99,7 +99,7 @@ data d = {.Kvf = V_F_RATIO, .speed_ref = 0.0f, .freq = 0.0f, .t_req = 0.0f, .sta
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  SCB_EnableICache();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -1157,7 +1157,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     can_counter++;
 
     /* Temperature and Encoder disconnection errors */
-    // Sensor_Disconnection_Check();
+    if (cS == FOC_START) {
+      /* Temperature and Encoder disconnection errors */
+      Sensor_Disconnection_Check();
+      /* Checking for Aux DC UV Error explicitly */
+      if (d.Aux_dc <= 9.5 && d.motor_start == 1) {
+        er.error_triggered = 1;
+        er.aux_voltage_uv_error = 1;
+        err = AUX_VOLTAGE_OV_ERROR;
+        cS = CONT_ERROR;
+      }
+    }
 
     /* Queue messages every 500ms */
     if (can_counter >= CAN_BUS_CYCLE)
@@ -1169,6 +1179,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       Send_Data_On_CAN_402();
       Send_Data_On_CAN_403();
       Send_Data_On_CAN_404();
+      Send_Data_On_CAN_405();
     }
   }
 }

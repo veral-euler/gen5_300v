@@ -270,3 +270,11 @@ void Send_Data_On_CAN_404(void) {
 	// _fdcan_transmit_on_can(0x404, 0, can_data, 0x08);
 	CAN_Queue_Push_And_Kickstart(0x404, 0, can_data, 0x08);
 }
+
+void Send_Data_On_CAN_405(void) {
+	uint8_t can_data[8] = {0};
+
+	can_data[0] = (uint8_t)(fnr_state);
+
+	CAN_Queue_Push_And_Kickstart(0x405, 0, can_data, 0x08);
+}
