@@ -199,6 +199,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void set_Initial_angle(void);
+void disable_drive(void);
 void rt_OneStep(void);
 /* USER CODE END EFP */
 
@@ -259,14 +260,14 @@ void rt_OneStep(void);
 
 #define MAX_PHASE_CURRENT		512.0f
 #define BUS_DC_OV_LIMIT			115
-#define BUS_DC_UV_LIMIT			70
+#define BUS_DC_UV_LIMIT			90
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
 #define CONTRL_TEMP_OT_LIMIT	80
-#define PHASE_OC_COUNT			10
-#define ID_IQ_OC_COUNT			10
-#define BUS_DC_OV_COUNT			5
-#define BUS_DC_UV_COUNT			5
+#define PHASE_OC_COUNT			1
+#define ID_IQ_OC_COUNT			1
+#define BUS_DC_OV_COUNT			1
+#define BUS_DC_UV_COUNT			1
 #define CURR_SEN_ANLG_HIGH		40000
 #define CURR_SEN_ANLG_LOW		14000
 #define TEMP_SENS_FAULT_COUNT 	65000

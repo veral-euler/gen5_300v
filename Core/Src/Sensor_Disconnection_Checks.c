@@ -263,4 +263,6 @@ void Sensor_Disconnection_Check(void) {
     err = MTR_TEMP_DISCONNECTION_ERROR;
     cS = CONT_ERROR;
   }
+
+  disable_drive();
 }

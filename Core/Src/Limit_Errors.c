@@ -164,4 +164,6 @@ void Error_Check(void) {
         err = MTC_TEMP_OT_ERROR;
         cS = CONT_ERROR;
     }
+
+    disable_drive();
 }

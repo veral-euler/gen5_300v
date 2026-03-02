@@ -1136,27 +1136,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
     }
     #endif
 
-    #if ENABLE_FAULTS
-    if (cS == CONT_ERROR)
-    {
-      /* Checking is error is triggered and shutting off gate drivers and TIM1 */
-      if (er.error_triggered)
-      {
-        er.drive_off = 1;
-
-        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
-        __HAL_TIM_MOE_DISABLE(&htim1);
-      }
-
-      /* Resetting FOC data structures after error trigger */
-      (void)memset(&FOC_LivGguard_U, 0, sizeof(ExtU_FOC_LivGguard_T));
-      (void)memset(&FOC_LivGguard_Y, 0, sizeof(ExtY_FOC_LivGguard_T));
-    }
-    #endif
-
     if (cS == ANGLE_OFFSET_STORE)
     {
       // TODO: Store the angle offset in flash memory and read it on startup to avoid doing the offset calibration on every power cycle
@@ -1381,6 +1360,8 @@ void set_Initial_angle(void)
     err = ENCODER_PWM_ERROR;
     cS = CONT_ERROR;
 
+    disable_drive();
+
     return;
   }
 
@@ -1393,6 +1374,31 @@ void set_Initial_angle(void)
   HAL_TIM_IC_DeInit(&htim5);
   HAL_TIM_Base_MspDeInit(&htim5);
   cS = CURR_SENS_CALIB;
+}
+
+void disable_drive(void) 
+{
+  #if ENABLE_FAULTS
+  if (cS == CONT_ERROR)
+  {
+    /* Checking is error is triggered and shutting off gate drivers and TIM1 */
+    if (er.error_triggered)
+    {
+      er.drive_off = 1;
+
+      HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, TIM1_ARR_HALF);
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, TIM1_ARR_HALF);
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, TIM1_ARR_HALF);
+      __HAL_TIM_MOE_DISABLE(&htim1);
+      HAL_ADCEx_InjectedStop_IT(&hadc2);
+    }
+
+    /* Resetting FOC data structures after error trigger */
+    (void)memset(&FOC_LivGguard_U, 0, sizeof(ExtU_FOC_LivGguard_T));
+    (void)memset(&FOC_LivGguard_Y, 0, sizeof(ExtY_FOC_LivGguard_T));
+  }
+  #endif
 }
 /* USER CODE END 4 */
 
