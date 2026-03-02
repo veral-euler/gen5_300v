@@ -41,7 +41,7 @@ uint8_t encoder_pwm_error_check(void) {
 }
 
 uint8_t encoder_5v_error_check(void) {
-  if (d.A_Pulse == GPIO_PIN_RESET && d.B_Pulse == GPIO_PIN_RESET && d.A_B_XOR == GPIO_PIN_RESET && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_RESET && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f) {
+  if (d.A_Pulse == GPIO_PIN_RESET && d.B_Pulse == GPIO_PIN_RESET && d.A_B_XOR == GPIO_PIN_RESET && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_RESET && fabsf(FOC_LivGguard_Y.Id_ref) >= 250.0f && fabsf(FOC_LivGguard_Y.Iq_ref) >= 250.0f && d.count_diff_at_z >= 60) {
     return !HAL_OK;
   }
 

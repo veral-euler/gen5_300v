@@ -248,6 +248,8 @@ void rt_OneStep(void);
 #define OPEN_FOC			0
 #define CLOSED_FOC			1
 #define PROTECTION_MODEL	0
+#define ENABLE_FAULTS		1
+#define DISABLE_FAULTS		0
 
 #define MTR_NTC_R25			49000.0f
 #define MTC_NTC_R25			10000.0f

@@ -976,6 +976,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         /* Setting elec angle to 0 */
         d.elec_angle = 0.0f;
 
+        #if ENABLE_FAULTS
         /* Running initial fault check */
         d.init_check = Initial_Fault_Check();
 
@@ -996,6 +997,18 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
           cS = CONT_ERROR;
         }
+        #endif
+
+        #if DISABLE_FAULTS
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+        #if OPEN_FOC
+        cS = OPEN_FOC_START;
+        #endif
+        
+        #if CLOSED_FOC
+        cS = FOC_START;
+        #endif
+        #endif
       }
     }
 
@@ -1123,6 +1136,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
     }
     #endif
 
+    #if ENABLE_FAULTS
     if (cS == CONT_ERROR)
     {
       /* Checking is error is triggered and shutting off gate drivers and TIM1 */
@@ -1141,6 +1155,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       (void)memset(&FOC_LivGguard_U, 0, sizeof(ExtU_FOC_LivGguard_T));
       (void)memset(&FOC_LivGguard_Y, 0, sizeof(ExtY_FOC_LivGguard_T));
     }
+    #endif
 
     if (cS == ANGLE_OFFSET_STORE)
     {
@@ -1166,12 +1181,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     static uint16_t can_counter = 0;
     can_counter++;
 
+    #if ENABLE_FAULTS
     if (cS == FOC_START) {
       /* Temperature and Encoder disconnection errors */
       Sensor_Disconnection_Check();
       /* Limit Error Checks */
       Error_Check();
     }
+    #endif
 
     /* Queue messages every 500ms */
     if (can_counter >= CAN_BUS_CYCLE)
