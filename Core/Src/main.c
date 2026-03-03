@@ -1254,17 +1254,16 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 
 void rt_OneStep(void)
 {
-  static bool OverrunFlags[2] = {0, 0};
+  static bool OverrunFlags[2] = { 0, 0 };
 
-  static bool eventFlags[2] = {0, 0}; /* Model has 2 rates */
+  static bool eventFlags[2] = { 0, 0 };/* Model has 2 rates */
 
-  static int taskCounter[2] = {0, 0};
+  static int taskCounter[2] = { 0, 0 };
 
   /* Disable interrupts here */
 
   /* Check base rate for overrun */
-  if (OverrunFlags[0])
-  {
+  if (OverrunFlags[0]) {
     rtmSetErrorStatus(FOC_LivGguard_M, "Overrun");
     return;
   }
@@ -1279,10 +1278,8 @@ void rt_OneStep(void)
    * following code checks whether any subrate overruns,
    * and also sets the rates that need to run this time step.
    */
-  if (taskCounter[1] == 0)
-  {
-    if (eventFlags[1])
-    {
+  if (taskCounter[1] == 0) {
+    if (eventFlags[1]) {
       OverrunFlags[0] = false;
       OverrunFlags[1] = true;
 
@@ -1295,9 +1292,8 @@ void rt_OneStep(void)
   }
 
   taskCounter[1]++;
-  if (taskCounter[1] == 10)
-  {
-    taskCounter[1] = 0;
+  if (taskCounter[1] == 10) {
+    taskCounter[1]= 0;
   }
 
   /* Set model inputs associated with base rate here */
@@ -1311,20 +1307,18 @@ void rt_OneStep(void)
   OverrunFlags[0] = false;
 
   /* If task 1 is running, do not run any lower priority task */
-  if (OverrunFlags[1])
-  {
+  if (OverrunFlags[1]) {
     return;
   }
 
   /* Step the model for subrate */
-  if (eventFlags[1])
-  {
+  if (eventFlags[1]) {
     OverrunFlags[1] = true;
 
     /* Set model inputs associated with subrates here */
     /* Gathering speed feedback data and setting motor start flag */
     Speed_Sense(d.mech_angle);
-    FOC_LivGguard_U.ActualSpeed_mech_radsec = fabsf(d.rad_s);
+    FOC_LivGguard_U.MtrSpd= fabsf(d.rad_s);
     if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START)
     {
       d.motor_start = 1;

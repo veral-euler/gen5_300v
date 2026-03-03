@@ -12,8 +12,6 @@ uint8_t Over_Current_Phase_Error(float a, float b, float c) {
         if (error_counter >= PHASE_OC_COUNT) {
             error_counter = 0;
             return !HAL_OK;
-        } else {
-            return HAL_OK;
         }
     } else {
         if (error_counter <= 0) {
@@ -21,9 +19,9 @@ uint8_t Over_Current_Phase_Error(float a, float b, float c) {
         } else {
             error_counter--;
         }
-
-        return HAL_OK;
     }
+
+    return HAL_OK;
 }
 
 uint8_t Over_Current_Id_Iq_Error(float Id, float Iq) {
@@ -35,8 +33,6 @@ uint8_t Over_Current_Id_Iq_Error(float Id, float Iq) {
         if (error_counter >= ID_IQ_OC_COUNT) {
             error_counter = 0;
             return !HAL_OK;
-        } else {
-            return HAL_OK;
         }
     } else {
         if (error_counter <= 0) {
@@ -44,9 +40,9 @@ uint8_t Over_Current_Id_Iq_Error(float Id, float Iq) {
         } else {
             error_counter--;
         }
-
-        return HAL_OK;
     }
+
+    return HAL_OK;
 }
 
 uint8_t Bus_Voltage_Error(float Bus_DC) {
@@ -59,8 +55,6 @@ uint8_t Bus_Voltage_Error(float Bus_DC) {
         if (error_counter_ov >= BUS_DC_OV_COUNT) {
             error_counter_ov = 0;
             return (uint8_t)1;
-        } else {
-            return HAL_OK;
         }
     } else {
         if (error_counter_ov <= 0) {
@@ -68,8 +62,6 @@ uint8_t Bus_Voltage_Error(float Bus_DC) {
         } else {
             error_counter_ov--;
         }
-
-        return HAL_OK;
     }
 
     if (Bus_DC <= BUS_DC_UV_LIMIT) {
@@ -78,8 +70,6 @@ uint8_t Bus_Voltage_Error(float Bus_DC) {
         if (error_counter_uv >= BUS_DC_UV_COUNT) {
             error_counter_uv = 0;
             return (uint8_t)2;
-        } else {
-            return HAL_OK;
         }
     } else {
         if (error_counter_uv <= 0) {
@@ -87,9 +77,9 @@ uint8_t Bus_Voltage_Error(float Bus_DC) {
         } else {
             error_counter_uv--;
         }
-
-        return HAL_OK;
     }
+
+    return HAL_OK;
 }
 
 uint8_t Aux_Voltage_Error(float Aux_DC) {
@@ -137,7 +127,9 @@ void Error_Check(void) {
         er.bus_voltage_ov_error = 1;
         err = BUS_VOLTAGE_OV_ERROR;
         cS = CONT_ERROR;
-    } else if (Bus_Voltage_Error(d.Vdc) == 2) {
+    }
+
+    if (Bus_Voltage_Error(d.Vdc) == 2) {
         er.error_triggered = 1;
         er.bus_voltage_uv_error = 1;
         err = BUS_VOLTAGE_UV_ERROR;

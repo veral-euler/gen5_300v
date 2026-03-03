@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_LivGguard'.
  *
- * Model version                  : 18.321
+ * Model version                  : 18.314
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Wed Feb 11 17:44:19 2026
+ * C/C++ source code generated on : Tue Mar  3 14:30:14 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -139,11 +139,11 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
 {
   float rtb_Add1_l;
   float rtb_Add3;
+  float rtb_NProdOut_l;
   float rtb_Sum_f;
   float rtb_Switch;
   float rtb_Switch_f_idx_0;
   float rtb_UkYk1_f;
-  float rtb_add_c;
   float rtb_deltafalllimit_a;
   float rtb_Gain_j;
   float rtb_algDD_o1_d;
@@ -156,16 +156,23 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
     FOC_LivGguard_M->Timing.RateInteraction.TID0_1 = 0;
   }
 
-  /* Gain: '<S7>/Rad//sec to RPM' incorporates:
+  /* Switch: '<S132>/Switch2' incorporates:
+   *  DataTypeConversion: '<S29>/Data Type Conversion4'
+   *  Inport: '<Root>/MTPA_PID'
+   */
+  FOC_LivGguard_Y.Vd_PID = FOC_LivGguard_U.MTPA_PID.Up_Limit_flux_PID;
+
+  /* Abs: '<S7>/Abs' incorporates:
+   *  Abs: '<S10>/Abs'
+   *  Gain: '<S7>/Rad//sec to RPM'
    *  Inport: '<Root>/Actual Speed_mech_rad//sec'
    */
-  rtb_deltafalllimit_a = 9.5492965855137211 *
-    FOC_LivGguard_U.ActualSpeed_mech_radsec;
+  rtb_NProdOut_l = fabs(9.5492965855137211 * FOC_LivGguard_U.MtrSpd);
 
   /* RateTransition: '<S2>/Rate Transition' */
   if (FOC_LivGguard_M->Timing.RateInteraction.TID0_1 == 1) {
     /* RateTransition: '<S2>/Rate Transition' */
-    FOC_LivGguard_B.RateTransition = FOC_LivGguard_DW.RateTransition_Buffer0;
+    FOC_LivGguard_B.T_ref = FOC_LivGguard_DW.RateTransition_Buffer0;
   }
 
   /* End of RateTransition: '<S2>/Rate Transition' */
@@ -177,8 +184,7 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  Product: '<S2>/Product1'
    */
   if (FOC_LivGguard_U.Speed_1_Torque_0 > 0.0) {
-    rtb_Switch = FOC_LivGguard_U.Iq_Torque_ratio *
-      FOC_LivGguard_B.RateTransition;
+    rtb_Switch = FOC_LivGguard_U.Iq_Torque_ratio * FOC_LivGguard_B.T_ref;
   } else {
     rtb_Switch = FOC_LivGguard_U.RefTrq;
   }
@@ -247,31 +253,26 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   FOC_LivGguard_Y.T_gen = FOC_LivGguard_Y.Id_ref_sat +
     FOC_LivGguard_DW.Delay_DSTATE;
 
-  /* Lookup_n-D: '<S7>/Id_Table' incorporates:
-   *  DataTypeConversion: '<S4>/Data Type Conversion'
-   *  Sum: '<S8>/Difference Inputs2'
-   *
-   * Block description for '<S8>/Difference Inputs2':
-   *
-   *  Add in CPU
+  /* Abs: '<S7>/Abs1' incorporates:
+   *  Abs: '<S10>/Abs1'
    */
-  FOC_LivGguard_Y.Id_LUT = look2_binlx(rtb_deltafalllimit_a,
-    FOC_LivGguard_Y.T_gen, FOC_LivGguard_ConstP.pooled4,
-    FOC_LivGguard_ConstP.pooled5, FOC_LivGguard_ConstP.Id_Table_tableData,
-    FOC_LivGguard_ConstP.pooled11, 27U);
+  rtb_Sum_f = fabs(FOC_LivGguard_Y.T_gen);
+
+  /* Lookup_n-D: '<S7>/Id_Table' incorporates:
+   *  Abs: '<S7>/Abs'
+   *  Abs: '<S7>/Abs1'
+   */
+  FOC_LivGguard_Y.Id_LUT = look2_binlx(rtb_NProdOut_l, rtb_Sum_f,
+    FOC_LivGguard_ConstP.pooled5, FOC_LivGguard_ConstP.pooled6,
+    FOC_LivGguard_ConstP.Id_Table_tableData, FOC_LivGguard_ConstP.pooled12, 27U);
 
   /* Lookup_n-D: '<S7>/Iq_Table' incorporates:
-   *  DataTypeConversion: '<S4>/Data Type Conversion'
-   *  Sum: '<S8>/Difference Inputs2'
-   *
-   * Block description for '<S8>/Difference Inputs2':
-   *
-   *  Add in CPU
+   *  Abs: '<S7>/Abs'
+   *  Abs: '<S7>/Abs1'
    */
-  FOC_LivGguard_Y.Iq_LUT = look2_binlx(rtb_deltafalllimit_a,
-    FOC_LivGguard_Y.T_gen, FOC_LivGguard_ConstP.pooled4,
-    FOC_LivGguard_ConstP.pooled5, FOC_LivGguard_ConstP.Iq_Table_tableData,
-    FOC_LivGguard_ConstP.pooled11, 27U);
+  FOC_LivGguard_Y.Iq_LUT = look2_binlx(rtb_NProdOut_l, rtb_Sum_f,
+    FOC_LivGguard_ConstP.pooled5, FOC_LivGguard_ConstP.pooled6,
+    FOC_LivGguard_ConstP.Iq_Table_tableData, FOC_LivGguard_ConstP.pooled12, 27U);
 
   /* If: '<S158>/If' incorporates:
    *  Inport: '<Root>/Drive_State'
@@ -409,9 +410,8 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  Inport: '<Root>/Phase Current'
    *  Sum: '<S16>/a_plus_2b'
    */
-  rtb_deltafalllimit_a = ((FOC_LivGguard_U.PhaseCurrent[0] +
-    FOC_LivGguard_U.PhaseCurrent[1]) + FOC_LivGguard_U.PhaseCurrent[1]) *
-    0.57735026918962584;
+  rtb_Switch = ((FOC_LivGguard_U.PhaseCurrent[0] + FOC_LivGguard_U.PhaseCurrent
+                 [1]) + FOC_LivGguard_U.PhaseCurrent[1]) * 0.57735026918962584;
 
   /* End of Outputs for SubSystem: '<S15>/Two phase CRL wrap' */
 
@@ -419,13 +419,13 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function1'
    */
-  rtb_Add3 = sinf(FOC_LivGguard_U.MtrElcPos);
+  rtb_Add3 = sin(FOC_LivGguard_U.MtrElcPos);
 
   /* Trigonometry: '<S4>/Trigonometric Function1' incorporates:
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function'
    */
-  rtb_Add1_l = cosf(FOC_LivGguard_U.MtrElcPos);
+  rtb_Add1_l = cos(FOC_LivGguard_U.MtrElcPos);
 
   /* Outputs for Atomic SubSystem: '<S14>/Two inputs CRL' */
   /* Outputs for Atomic SubSystem: '<S15>/Two phase CRL wrap' */
@@ -443,8 +443,8 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  Trigonometry: '<S4>/Trigonometric Function1'
    */
   rtb_algDD_o1_d = (float)(FOC_LivGguard_U.PhaseCurrent[0] * rtb_Add1_l +
-    rtb_deltafalllimit_a * rtb_Add3);
-  rtb_algDD_o2_o = (float)(rtb_deltafalllimit_a * rtb_Add1_l -
+    rtb_Switch * rtb_Add3);
+  rtb_algDD_o2_o = (float)(rtb_Switch * rtb_Add1_l -
     FOC_LivGguard_U.PhaseCurrent[0] * rtb_Add3);
 
   /* End of Outputs for SubSystem: '<S15>/Two phase CRL wrap' */
@@ -481,44 +481,47 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   FOC_LivGguard_Y.Id_error = FOC_LivGguard_Y.Id_ref_sat - rtb_Gain_j;
 
   /* Product: '<S127>/NProd Out' incorporates:
+   *  DataTypeConversion: '<S29>/Data Type Conversion2'
+   *  DataTypeConversion: '<S29>/Data Type Conversion3'
    *  DiscreteIntegrator: '<S119>/Filter'
    *  Inport: '<Root>/MTPA_PID'
    *  Product: '<S117>/DProd Out'
    *  Sum: '<S119>/SumD'
    */
-  rtb_deltafalllimit_a = (FOC_LivGguard_Y.Id_error *
-    FOC_LivGguard_U.MTPA_PID.Flux_PID_MTPA.Kd_flux_PID_MTPA -
-    FOC_LivGguard_DW.Filter_DSTATE) *
+  rtb_Switch = (FOC_LivGguard_Y.Id_error *
+                FOC_LivGguard_U.MTPA_PID.Flux_PID_MTPA.Kd_flux_PID_MTPA -
+                FOC_LivGguard_DW.Filter_DSTATE) *
     FOC_LivGguard_U.MTPA_PID.Flux_PID_MTPA.Filter_flux_PID_MTPA;
 
   /* Sum: '<S134>/Sum' incorporates:
+   *  DataTypeConversion: '<S29>/Data Type Conversion'
    *  DiscreteIntegrator: '<S124>/Integrator'
    *  Inport: '<Root>/MTPA_PID'
    *  Product: '<S129>/PProd Out'
    */
-  rtb_Switch = (FOC_LivGguard_Y.Id_error *
-                FOC_LivGguard_U.MTPA_PID.Flux_PID_MTPA.Kp_flux_PID_MTPA +
-                FOC_LivGguard_DW.Integrator_DSTATE) + rtb_deltafalllimit_a;
+  rtb_deltafalllimit_a = (FOC_LivGguard_Y.Id_error *
+    FOC_LivGguard_U.MTPA_PID.Flux_PID_MTPA.Kp_flux_PID_MTPA +
+    FOC_LivGguard_DW.Integrator_DSTATE) + rtb_Switch;
 
   /* Switch: '<S132>/Switch2' incorporates:
+   *  DataTypeConversion: '<S29>/Data Type Conversion4'
    *  Inport: '<Root>/MTPA_PID'
    *  RelationalOperator: '<S132>/LowerRelop1'
-   *  RelationalOperator: '<S132>/UpperRelop'
-   *  Switch: '<S132>/Switch'
    */
-  if (rtb_Switch > FOC_LivGguard_U.MTPA_PID.Up_Limit_flux_PID) {
-    /* Switch: '<S132>/Switch2' */
-    FOC_LivGguard_Y.Vd_PID = FOC_LivGguard_U.MTPA_PID.Up_Limit_flux_PID;
-  } else if (rtb_Switch < FOC_LivGguard_U.MTPA_PID.Low_Limit_flux_PID) {
-    /* Switch: '<S132>/Switch2' incorporates:
-     *  Switch: '<S132>/Switch'
+  if (!(rtb_deltafalllimit_a > FOC_LivGguard_U.MTPA_PID.Up_Limit_flux_PID)) {
+    /* Switch: '<S132>/Switch' incorporates:
+     *  DataTypeConversion: '<S29>/Data Type Conversion5'
+     *  RelationalOperator: '<S132>/UpperRelop'
      */
-    FOC_LivGguard_Y.Vd_PID = FOC_LivGguard_U.MTPA_PID.Low_Limit_flux_PID;
-  } else {
-    /* Switch: '<S132>/Switch2' incorporates:
-     *  Switch: '<S132>/Switch'
-     */
-    FOC_LivGguard_Y.Vd_PID = rtb_Switch;
+    if (rtb_deltafalllimit_a < FOC_LivGguard_U.MTPA_PID.Low_Limit_flux_PID) {
+      /* Switch: '<S132>/Switch2' */
+      FOC_LivGguard_Y.Vd_PID = FOC_LivGguard_U.MTPA_PID.Low_Limit_flux_PID;
+    } else {
+      /* Switch: '<S132>/Switch2' */
+      FOC_LivGguard_Y.Vd_PID = rtb_deltafalllimit_a;
+    }
+
+    /* End of Switch: '<S132>/Switch' */
   }
 
   /* End of Switch: '<S132>/Switch2' */
@@ -527,26 +530,6 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  Inport: '<Root>/Bus_Voltage'
    */
   rtb_Gain_j = 0.577350259F * FOC_LivGguard_U.BusVoltage_V;
-
-  /* Gain: '<S10>/Gain' incorporates:
-   *  Abs: '<S10>/Abs'
-   *  Inport: '<Root>/Actual Speed_mech_rad//sec'
-   */
-  FOC_LivGguard_Y.Ld = fabs(FOC_LivGguard_U.ActualSpeed_mech_radsec) * RAD_S_TO_RPM;
-
-  /* Gain: '<S10>/Gain1' incorporates:
-   *  Gain: '<S10>/Gain'
-   *  Lookup_n-D: '<S10>/Lq_Table'
-   *  Sum: '<S8>/Difference Inputs2'
-   *
-   * Block description for '<S8>/Difference Inputs2':
-   *
-   *  Add in CPU
-   */
-  FOC_LivGguard_Y.Lq = 0.001 * look2_binlx(FOC_LivGguard_Y.Ld,
-    FOC_LivGguard_Y.T_gen, FOC_LivGguard_ConstP.pooled4,
-    FOC_LivGguard_ConstP.pooled5, FOC_LivGguard_ConstP.Lq_Table_tableData,
-    FOC_LivGguard_ConstP.pooled11, 27U);
 
   /* Delay: '<S155>/Delay' */
   if (FOC_LivGguard_DW.icLoad_n) {
@@ -633,18 +616,21 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
 
   /* End of Switch: '<S157>/Switch2' */
 
-  /* Sum: '<S28>/Sum2' incorporates:
+  /* Switch: '<S78>/Switch2' incorporates:
    *  Gain: '<S31>/wm_pu2si_mech2elec'
    *  Inport: '<Root>/Actual Speed_mech_rad//sec'
    */
-  FOC_LivGguard_Y.Iq_error = 3.0 * FOC_LivGguard_U.ActualSpeed_mech_radsec;
+  FOC_LivGguard_Y.Vq_PID = 3.0 * FOC_LivGguard_U.MtrSpd;
 
   /* Gain: '<S31>/NegSign' incorporates:
+   *  Gain: '<S10>/Gain1'
+   *  Lookup_n-D: '<S10>/Lq_Table'
    *  Product: '<S31>/prod1'
-   *  Switch: '<S32>/Switch1'
    */
-  FOC_LivGguard_Y.Vd_FF = -(FOC_LivGguard_Y.Lq * FOC_LivGguard_Y.Iq_ref_sat *
-    FOC_LivGguard_Y.Iq_error);
+  FOC_LivGguard_Y.Vd_FF = -(0.001 * look2_binlx(rtb_NProdOut_l, rtb_Sum_f,
+    FOC_LivGguard_ConstP.pooled5, FOC_LivGguard_ConstP.pooled6,
+    FOC_LivGguard_ConstP.Lq_Table_tableData, FOC_LivGguard_ConstP.pooled12, 27U)
+    * FOC_LivGguard_Y.Iq_ref_sat * FOC_LivGguard_Y.Vq_PID);
 
   /* Switch: '<S33>/Switch2' incorporates:
    *  RelationalOperator: '<S33>/LowerRelop1'
@@ -676,7 +662,9 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  Switch: '<S26>/Switch'
    */
   if (FOC_LivGguard_Y.Vd > FOC_LivGguard_U.MTPA_PID.Up_Limit_flux_PID) {
-    /* Sum: '<S5>/Add' */
+    /* Sum: '<S5>/Add' incorporates:
+     *  DataTypeConversion: '<S29>/Data Type Conversion4'
+     */
     FOC_LivGguard_Y.Vd = FOC_LivGguard_U.MTPA_PID.Up_Limit_flux_PID;
   } else if (FOC_LivGguard_Y.Vd < FOC_LivGguard_U.MTPA_PID.Low_Limit_flux_PID) {
     /* Sum: '<S5>/Add' incorporates:
@@ -687,41 +675,21 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
 
   /* End of Switch: '<S26>/Switch2' */
 
-  /* Gain: '<S10>/Gain2' incorporates:
-   *  Gain: '<S10>/Gain'
-   *  Lookup_n-D: '<S10>/Flux_Table'
-   *  Sum: '<S8>/Difference Inputs2'
-   *
-   * Block description for '<S8>/Difference Inputs2':
-   *
-   *  Add in CPU
-   */
-  FOC_LivGguard_Y.Lambda = 0.001 * look2_binlx(FOC_LivGguard_Y.Ld,
-    FOC_LivGguard_Y.T_gen, FOC_LivGguard_ConstP.pooled4,
-    FOC_LivGguard_ConstP.pooled5, FOC_LivGguard_ConstP.Flux_Table_tableData,
-    FOC_LivGguard_ConstP.pooled11, 27U);
-
-  /* Gain: '<S10>/Gain' incorporates:
-   *  Lookup_n-D: '<S10>/Ld_Table'
-   *  Sum: '<S8>/Difference Inputs2'
-   *
-   * Block description for '<S8>/Difference Inputs2':
-   *
-   *  Add in CPU
-   */
-  FOC_LivGguard_Y.Ld = 0.001 * look2_binlx(FOC_LivGguard_Y.Ld,
-    FOC_LivGguard_Y.T_gen, FOC_LivGguard_ConstP.pooled4,
-    FOC_LivGguard_ConstP.pooled5, FOC_LivGguard_ConstP.Ld_Table_tableData,
-    FOC_LivGguard_ConstP.pooled11, 27U);
-
   /* Product: '<S31>/prod2' incorporates:
+   *  Gain: '<S10>/Gain'
+   *  Gain: '<S10>/Gain2'
+   *  Lookup_n-D: '<S10>/Flux_Table'
+   *  Lookup_n-D: '<S10>/Ld_Table'
    *  Product: '<S31>/prod3'
    *  Sum: '<S31>/add1'
-   *  Switch: '<S32>/Switch'
-   *  Switch: '<S32>/Switch2'
    */
-  FOC_LivGguard_Y.Vq_FF = (FOC_LivGguard_Y.Ld * FOC_LivGguard_Y.Id_ref_sat +
-    FOC_LivGguard_Y.Lambda) * FOC_LivGguard_Y.Iq_error;
+  FOC_LivGguard_Y.Vq_FF = (0.001 * look2_binlx(rtb_NProdOut_l, rtb_Sum_f,
+    FOC_LivGguard_ConstP.pooled5, FOC_LivGguard_ConstP.pooled6,
+    FOC_LivGguard_ConstP.Ld_Table_tableData, FOC_LivGguard_ConstP.pooled12, 27U)
+    * FOC_LivGguard_Y.Id_ref_sat + 0.001 * look2_binlx(rtb_NProdOut_l, rtb_Sum_f,
+    FOC_LivGguard_ConstP.pooled5, FOC_LivGguard_ConstP.pooled6,
+    FOC_LivGguard_ConstP.Flux_Table_tableData, FOC_LivGguard_ConstP.pooled12,
+    27U)) * FOC_LivGguard_Y.Vq_PID;
 
   /* Switch: '<S34>/Switch2' incorporates:
    *  RelationalOperator: '<S34>/LowerRelop1'
@@ -742,6 +710,12 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   }
 
   /* End of Switch: '<S34>/Switch2' */
+
+  /* Switch: '<S78>/Switch2' incorporates:
+   *  DataTypeConversion: '<S28>/Data Type Conversion10'
+   *  Inport: '<Root>/MTPA_PID'
+   */
+  FOC_LivGguard_Y.Vq_PID = FOC_LivGguard_U.MTPA_PID.Up_Limit_torque_PID;
 
   /* Sum: '<S22>/Add1' incorporates:
    *  Constant: '<S13>/One'
@@ -772,44 +746,47 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   FOC_LivGguard_Y.Iq_error = FOC_LivGguard_Y.Iq_ref_sat - rtb_algDD_o2_o;
 
   /* Product: '<S73>/NProd Out' incorporates:
+   *  DataTypeConversion: '<S28>/Data Type Conversion8'
+   *  DataTypeConversion: '<S28>/Data Type Conversion9'
    *  DiscreteIntegrator: '<S65>/Filter'
    *  Inport: '<Root>/MTPA_PID'
    *  Product: '<S63>/DProd Out'
    *  Sum: '<S65>/SumD'
    */
-  rtb_UkYk1_f = (FOC_LivGguard_Y.Iq_error *
-                 FOC_LivGguard_U.MTPA_PID.Torque_PID_MTPA.Kd_torque_PID_MTPA -
-                 FOC_LivGguard_DW.Filter_DSTATE_d) *
+  rtb_NProdOut_l = (FOC_LivGguard_Y.Iq_error *
+                    FOC_LivGguard_U.MTPA_PID.Torque_PID_MTPA.Kd_torque_PID_MTPA
+                    - FOC_LivGguard_DW.Filter_DSTATE_d) *
     FOC_LivGguard_U.MTPA_PID.Torque_PID_MTPA.Filter_torque_PID_MTPA;
 
   /* Sum: '<S80>/Sum' incorporates:
+   *  DataTypeConversion: '<S28>/Data Type Conversion6'
    *  DiscreteIntegrator: '<S70>/Integrator'
    *  Inport: '<Root>/MTPA_PID'
    *  Product: '<S75>/PProd Out'
    */
   rtb_Sum_f = (FOC_LivGguard_Y.Iq_error *
                FOC_LivGguard_U.MTPA_PID.Torque_PID_MTPA.Kp_torque_PID_MTPA +
-               FOC_LivGguard_DW.Integrator_DSTATE_h) + rtb_UkYk1_f;
+               FOC_LivGguard_DW.Integrator_DSTATE_h) + rtb_NProdOut_l;
 
   /* Switch: '<S78>/Switch2' incorporates:
+   *  DataTypeConversion: '<S28>/Data Type Conversion10'
    *  Inport: '<Root>/MTPA_PID'
    *  RelationalOperator: '<S78>/LowerRelop1'
-   *  RelationalOperator: '<S78>/UpperRelop'
-   *  Switch: '<S78>/Switch'
    */
-  if (rtb_Sum_f > FOC_LivGguard_U.MTPA_PID.Up_Limit_torque_PID) {
-    /* Switch: '<S78>/Switch2' */
-    FOC_LivGguard_Y.Vq_PID = FOC_LivGguard_U.MTPA_PID.Up_Limit_torque_PID;
-  } else if (rtb_Sum_f < FOC_LivGguard_U.MTPA_PID.Low_Limit_torque_PID) {
-    /* Switch: '<S78>/Switch2' incorporates:
-     *  Switch: '<S78>/Switch'
+  if (!(rtb_Sum_f > FOC_LivGguard_U.MTPA_PID.Up_Limit_torque_PID)) {
+    /* Switch: '<S78>/Switch' incorporates:
+     *  DataTypeConversion: '<S28>/Data Type Conversion11'
+     *  RelationalOperator: '<S78>/UpperRelop'
      */
-    FOC_LivGguard_Y.Vq_PID = FOC_LivGguard_U.MTPA_PID.Low_Limit_torque_PID;
-  } else {
-    /* Switch: '<S78>/Switch2' incorporates:
-     *  Switch: '<S78>/Switch'
-     */
-    FOC_LivGguard_Y.Vq_PID = rtb_Sum_f;
+    if (rtb_Sum_f < FOC_LivGguard_U.MTPA_PID.Low_Limit_torque_PID) {
+      /* Switch: '<S78>/Switch2' */
+      FOC_LivGguard_Y.Vq_PID = FOC_LivGguard_U.MTPA_PID.Low_Limit_torque_PID;
+    } else {
+      /* Switch: '<S78>/Switch2' */
+      FOC_LivGguard_Y.Vq_PID = rtb_Sum_f;
+    }
+
+    /* End of Switch: '<S78>/Switch' */
   }
 
   /* End of Switch: '<S78>/Switch2' */
@@ -824,7 +801,9 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  Switch: '<S27>/Switch'
    */
   if (FOC_LivGguard_Y.Vq > FOC_LivGguard_U.MTPA_PID.Up_Limit_torque_PID) {
-    /* Sum: '<S5>/Add1' */
+    /* Sum: '<S5>/Add1' incorporates:
+     *  DataTypeConversion: '<S28>/Data Type Conversion10'
+     */
     FOC_LivGguard_Y.Vq = FOC_LivGguard_U.MTPA_PID.Up_Limit_torque_PID;
   } else if (FOC_LivGguard_Y.Vq < FOC_LivGguard_U.MTPA_PID.Low_Limit_torque_PID)
   {
@@ -848,7 +827,7 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   /* Gain: '<S146>/one_by_two' incorporates:
    *  AlgorithmDescriptorDelegate generated from: '<S147>/a16'
    */
-  rtb_add_c = 0.5 * rtb_Switch_f_idx_0;
+  rtb_UkYk1_f = 0.5 * rtb_Switch_f_idx_0;
 
   /* Gain: '<S146>/sqrt3_by_two' incorporates:
    *  Product: '<S147>/dsin'
@@ -861,10 +840,10 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   /* End of Outputs for SubSystem: '<S144>/Two inputs CRL' */
 
   /* Sum: '<S146>/add_b' */
-  rtb_Add1_l = rtb_Add3 - rtb_add_c;
+  rtb_Add1_l = rtb_Add3 - rtb_UkYk1_f;
 
   /* Sum: '<S146>/add_c' */
-  rtb_add_c = (0.0 - rtb_add_c) - rtb_Add3;
+  rtb_UkYk1_f = (0.0 - rtb_UkYk1_f) - rtb_Add3;
 
   /* Outputs for Atomic SubSystem: '<S144>/Two inputs CRL' */
   /* Gain: '<S152>/one_by_two' incorporates:
@@ -873,8 +852,8 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  MinMax: '<S152>/Min'
    *  Sum: '<S152>/Add'
    */
-  rtb_Add3 = (fmax(fmax(rtb_Switch_f_idx_0, rtb_Add1_l), rtb_add_c) + fmin(fmin
-    (rtb_Switch_f_idx_0, rtb_Add1_l), rtb_add_c)) * -0.5;
+  rtb_Add3 = (fmax(fmax(rtb_Switch_f_idx_0, rtb_Add1_l), rtb_UkYk1_f) + fmin
+              (fmin(rtb_Switch_f_idx_0, rtb_Add1_l), rtb_UkYk1_f)) * -0.5;
 
   /* Outport: '<Root>/Va' incorporates:
    *  AlgorithmDescriptorDelegate generated from: '<S147>/a16'
@@ -895,7 +874,7 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  Gain: '<S151>/Gain'
    *  Sum: '<S151>/Add2'
    */
-  FOC_LivGguard_Y.Vc = (rtb_Add3 + rtb_add_c) * 1.1547005383792517;
+  FOC_LivGguard_Y.Vc = (rtb_Add3 + rtb_UkYk1_f) * 1.1547005383792517;
 
   /* Outport: '<Root>/Iq' incorporates:
    *  DataTypeConversion: '<S4>/Data Type Conversion1'
@@ -947,7 +926,7 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *
    *  Add in CPU
    */
-  rtb_add_c = rtb_Add3 - FOC_LivGguard_DW.Delay_DSTATE_k;
+  rtb_Add1_l = rtb_Add3 - FOC_LivGguard_DW.Delay_DSTATE_k;
 
   /* Product: '<S3>/delta rise limit' incorporates:
    *  Inport: '<Root>/Ref_Speed_rate_up'
@@ -961,7 +940,7 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   /* Switch: '<S219>/Switch2' incorporates:
    *  RelationalOperator: '<S219>/LowerRelop1'
    */
-  if (!(rtb_add_c > rtb_Add3)) {
+  if (!(rtb_Add1_l > rtb_Add3)) {
     /* Product: '<S3>/delta fall limit' incorporates:
      *  Inport: '<Root>/Ref_Speed_rate_down'
      *  SampleTimeMath: '<S3>/sample time'
@@ -974,8 +953,8 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
     /* Switch: '<S219>/Switch' incorporates:
      *  RelationalOperator: '<S219>/UpperRelop'
      */
-    if (!(rtb_add_c < rtb_Add3)) {
-      rtb_Add3 = rtb_add_c;
+    if (!(rtb_Add1_l < rtb_Add3)) {
+      rtb_Add3 = rtb_Add1_l;
     }
 
     /* End of Switch: '<S219>/Switch' */
@@ -994,18 +973,13 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
     FOC_LivGguard_DW.Delay_DSTATE_k;
 
   /* Outport: '<Root>/Speed_error' incorporates:
+   *  Abs: '<S9>/Abs'
    *  Gain: '<S1>/rpm to Rad//sec'
    *  Inport: '<Root>/Actual Speed_mech_rad//sec'
    *  Sum: '<S9>/Subtract'
    */
   FOC_LivGguard_Y.Speed_error = 0.10471975511965977 *
-    FOC_LivGguard_Y.Ref_Speed_mech_rpm_out -
-    FOC_LivGguard_U.ActualSpeed_mech_radsec;
-
-  /* Outport: '<Root>/Pole_pairsb' incorporates:
-   *  Inport: '<Root>/Pole_pairs'
-   */
-  FOC_LivGguard_Y.Pole_pairsb = FOC_LivGguard_U.p;
+    FOC_LivGguard_Y.Ref_Speed_mech_rpm_out - fabs(FOC_LivGguard_U.MtrSpd);
 
   /* Update for Delay: '<S8>/Delay' */
   FOC_LivGguard_DW.icLoad = false;
@@ -1016,6 +990,7 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   FOC_LivGguard_DW.Delay_DSTATE_b = FOC_LivGguard_Y.Id_ref;
 
   /* Update for DiscreteIntegrator: '<S124>/Integrator' incorporates:
+   *  DataTypeConversion: '<S29>/Data Type Conversion1'
    *  Inport: '<Root>/MTPA_PID'
    *  Product: '<S121>/IProd Out'
    *  Sum: '<S116>/SumI2'
@@ -1026,7 +1001,7 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   FOC_LivGguard_DW.Integrator_DSTATE += ((FOC_LivGguard_Y.Id_error *
     FOC_LivGguard_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA +
     (FOC_LivGguard_Y.Vd_PID - FOC_LivGguard_Y.Vd_PID)) + (FOC_LivGguard_Y.Vd_PID
-    - rtb_Switch)) * 0.0001;
+    - rtb_deltafalllimit_a)) * 0.0001;
   if (FOC_LivGguard_DW.Integrator_DSTATE > SVM_VOLTAGE_LIMIT) {
     FOC_LivGguard_DW.Integrator_DSTATE = SVM_VOLTAGE_LIMIT;
   } else if (FOC_LivGguard_DW.Integrator_DSTATE < -SVM_VOLTAGE_LIMIT) {
@@ -1036,13 +1011,14 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   /* End of Update for DiscreteIntegrator: '<S124>/Integrator' */
 
   /* Update for DiscreteIntegrator: '<S119>/Filter' */
-  FOC_LivGguard_DW.Filter_DSTATE += 0.0001 * rtb_deltafalllimit_a;
+  FOC_LivGguard_DW.Filter_DSTATE += 0.0001 * rtb_Switch;
 
   /* Update for Delay: '<S155>/Delay' */
   FOC_LivGguard_DW.icLoad_n = false;
   FOC_LivGguard_DW.Delay_DSTATE_bc = FOC_LivGguard_Y.Iq_ref;
 
   /* Update for DiscreteIntegrator: '<S70>/Integrator' incorporates:
+   *  DataTypeConversion: '<S28>/Data Type Conversion7'
    *  Gain: '<S82>/Kt'
    *  Inport: '<Root>/MTPA_PID'
    *  Product: '<S67>/IProd Out'
@@ -1064,7 +1040,7 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
   /* End of Update for DiscreteIntegrator: '<S70>/Integrator' */
 
   /* Update for DiscreteIntegrator: '<S65>/Filter' */
-  FOC_LivGguard_DW.Filter_DSTATE_d += 0.0001 * rtb_UkYk1_f;
+  FOC_LivGguard_DW.Filter_DSTATE_d += 0.0001 * rtb_NProdOut_l;
 
   /* Update for Delay: '<S3>/Delay' */
   FOC_LivGguard_DW.icLoad_j = false;
@@ -1074,7 +1050,7 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
 /* Model step function for TID1 */
 void FOC_LivGguard_step1(void)         /* Sample time: [0.001s, 0.0s] */
 {
-  float rtb_NProdOut_j;
+  float rtb_NProdOut_n;
   float rtb_Sum_o;
 
   /* Product: '<S203>/NProd Out' incorporates:
@@ -1084,7 +1060,7 @@ void FOC_LivGguard_step1(void)         /* Sample time: [0.001s, 0.0s] */
    *  Product: '<S193>/DProd Out'
    *  Sum: '<S195>/SumD'
    */
-  rtb_NProdOut_j = (FOC_LivGguard_Y.Speed_error *
+  rtb_NProdOut_n = (FOC_LivGguard_Y.Speed_error *
                     FOC_LivGguard_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA -
                     FOC_LivGguard_DW.Filter_DSTATE_i) *
     FOC_LivGguard_U.MTPA_PID.Speed_PID_MTPA.Filter_speed_PID_MTPA;
@@ -1097,7 +1073,7 @@ void FOC_LivGguard_step1(void)         /* Sample time: [0.001s, 0.0s] */
    */
   rtb_Sum_o = (FOC_LivGguard_Y.Speed_error *
                FOC_LivGguard_U.MTPA_PID.Speed_PID_MTPA.Kp_speed_PID_MTPA +
-               FOC_LivGguard_DW.Integrator_DSTATE_b) + rtb_NProdOut_j;
+               FOC_LivGguard_DW.Integrator_DSTATE_b) + rtb_NProdOut_n;
 
   /* Switch: '<S208>/Switch2' incorporates:
    *  Inport: '<Root>/MTPA_PID'
@@ -1147,7 +1123,7 @@ void FOC_LivGguard_step1(void)         /* Sample time: [0.001s, 0.0s] */
   /* End of Update for DiscreteIntegrator: '<S200>/Integrator' */
 
   /* Update for DiscreteIntegrator: '<S195>/Filter' */
-  FOC_LivGguard_DW.Filter_DSTATE_i += 0.001 * rtb_NProdOut_j;
+  FOC_LivGguard_DW.Filter_DSTATE_i += 0.001 * rtb_NProdOut_n;
 }
 
 /* Model initialize function */
@@ -1170,10 +1146,10 @@ void FOC_LivGguard_initialize(void)
   FOC_LivGguard_U.p = POLEPAIRS;
 
   /* Id Iq Limits */
-  FOC_LivGguard_U.Id_Iq_MTPA_limit.Iq_up_limit = 495.0f;
-  FOC_LivGguard_U.Id_Iq_MTPA_limit.Iq_low_limit = -495.0f;
-  FOC_LivGguard_U.Id_Iq_MTPA_limit.Id_up_limit = 495.0f;
-  FOC_LivGguard_U.Id_Iq_MTPA_limit.Id_low_limit = -495.0f;
+  FOC_LivGguard_U.Id_Iq_MTPA_limit.Iq_up_limit = 512.0f;
+  FOC_LivGguard_U.Id_Iq_MTPA_limit.Iq_low_limit = -512.0f;
+  FOC_LivGguard_U.Id_Iq_MTPA_limit.Id_up_limit = 512.0f;
+  FOC_LivGguard_U.Id_Iq_MTPA_limit.Id_low_limit = -512.0f;
   
   /* Speed Ref Rate Limiter Settings */
   FOC_LivGguard_U.Ref_Speed_rate_up = 100.0f * 10000.0f;
