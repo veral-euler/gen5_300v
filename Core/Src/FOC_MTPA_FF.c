@@ -90,6 +90,8 @@ void FOC_MTPA_FF_step0(void)           /* Sample time: [0.0001s, 0.0s] */
     rtb_Switch2_d = FOC_MTPA_FF_U.RefTrq;
   }
 
+  FOC_MTPA_FF_Y.T_gen = rtb_Switch2_d;
+
   /* DataTypeConversion: '<S7>/Data Type Conversion' incorporates:
    *  Abs: '<S7>/Abs1'
    *  Constant: '<S7>/Constant1'
@@ -727,13 +729,6 @@ void FOC_MTPA_FF_step1(void)           /* Sample time: [0.001s, 0.0s] */
     FOC_MTPA_FF_Y.Iq_gen = rtb_Sum;
   }
 
-  if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
-    FOC_MTPA_FF_Y.Iq_gen *= 1.0f;
-  else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
-    FOC_MTPA_FF_Y.Iq_gen *= -1.0f;
-  else
-    FOC_MTPA_FF_Y.Iq_gen = 0.0f;
-
   /* End of Switch: '<S199>/Switch2' */
 
   /* Delay: '<S8>/Delay' */
@@ -816,10 +811,10 @@ void FOC_MTPA_FF_step1(void)           /* Sample time: [0.001s, 0.0s] */
     FOC_MTPA_FF_U.MTPA_PID.Speed_PID_MTPA.Ki_speed_PID_MTPA +
     (FOC_MTPA_FF_Y.Iq_gen - FOC_MTPA_FF_Y.Iq_gen)) + (FOC_MTPA_FF_Y.Iq_gen -
     rtb_Sum)) * 0.001;
-  if (FOC_MTPA_FF_DW.Integrator_DSTATE_b > 500.0) {
-    FOC_MTPA_FF_DW.Integrator_DSTATE_b = 500.0;
-  } else if (FOC_MTPA_FF_DW.Integrator_DSTATE_b < -500.0) {
-    FOC_MTPA_FF_DW.Integrator_DSTATE_b = -500.0;
+  if (FOC_MTPA_FF_DW.Integrator_DSTATE_b > MOTOR_PEAK_AC) {
+    FOC_MTPA_FF_DW.Integrator_DSTATE_b = MOTOR_PEAK_AC;
+  } else if (FOC_MTPA_FF_DW.Integrator_DSTATE_b < -MOTOR_PEAK_AC) {
+    FOC_MTPA_FF_DW.Integrator_DSTATE_b = -MOTOR_PEAK_AC;
   }
 
   /* End of Update for DiscreteIntegrator: '<S191>/Integrator' */
@@ -850,14 +845,14 @@ void FOC_MTPA_FF_initialize(void)
   FOC_MTPA_FF_U.Iq_Torque_ratio = CURR_TORQUE_RATIO;
 
   /* Rate limiter settings */
-  FOC_MTPA_FF_U.Ref_Speed_rate_down = -1000.0f * 10000.0f;
-  FOC_MTPA_FF_U.Ref_Speed_rate_up = 10.0f * 10000.0f;
+  FOC_MTPA_FF_U.Ref_Speed_rate_down = -100.0f * 10000.0f;
+  FOC_MTPA_FF_U.Ref_Speed_rate_up = 100.0f * 10000.0f;
   FOC_MTPA_FF_U.Rate_limiter.Torque_gen_ramp_down = -50.0f * 10000.0f;
   FOC_MTPA_FF_U.Rate_limiter.Torque_gen_ramp_up = 50.0f * 10000.0f;
 
   /* Limits and PID settings */
   /* Speed PID */
-  FOC_MTPA_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA = 500.0f;
+  FOC_MTPA_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA = MOTOR_PEAK_AC;
   FOC_MTPA_FF_U.MTPA_PID.Low_Limit_speed_PID_MTPA = 0.0f;
   FOC_MTPA_FF_U.MTPA_PID.Speed_PID_MTPA.Kp_speed_PID_MTPA = 4.0f;
   FOC_MTPA_FF_U.MTPA_PID.Speed_PID_MTPA.Ki_speed_PID_MTPA = 9.0f;
@@ -879,10 +874,10 @@ void FOC_MTPA_FF_initialize(void)
   FOC_MTPA_FF_U.MTPA_PID.Flux_PID_MTPA.Filter_flux_PID_MTPA = 5.0f;
 
   /* Id Iq limits */
-  FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Iq_up_limit = 250.0f;
-  FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Iq_low_limit = -250.0f;
-  FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Id_up_limit = 150.0f;
-  FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Id_low_limit = -150.0f;
+  FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Iq_up_limit = 495.0f;
+  FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Iq_low_limit = -495.0f;
+  FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Id_up_limit = 495.0f;
+  FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Id_low_limit = -495.0f;
 
   /* Speed/Torque Mode setting */
   FOC_MTPA_FF_U.Speed_1_Torque_0 = 1.0f;

@@ -1,8 +1,8 @@
 #include "Limit_Errors.h"
 
 uint8_t Over_Current_Phase_Error(float a, float b, float c) {
-    volatile float max_curr = fmaxf(a, fmaxf(a, b));
-    volatile float min_curr = fminf(a, fminf(a, b));
+    volatile float max_curr = fmaxf(a, fmaxf(b, c));
+    volatile float min_curr = fminf(a, fminf(b, c));
 
     static uint16_t error_counter = 0;
 
@@ -27,7 +27,7 @@ uint8_t Over_Current_Phase_Error(float a, float b, float c) {
 uint8_t Over_Current_Id_Iq_Error(float Id, float Iq) {
     static uint16_t error_counter = 0;
 
-    if (Id > FOC_LivGguard_U.Id_Iq_MTPA_limit.Id_up_limit || Id < FOC_LivGguard_U.Id_Iq_MTPA_limit.Id_low_limit || Iq < FOC_LivGguard_U.Id_Iq_MTPA_limit.Iq_low_limit || Iq > FOC_LivGguard_U.Id_Iq_MTPA_limit.Iq_up_limit) {
+    if (Id > FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Id_up_limit || Id < FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Id_low_limit || Iq < FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Iq_low_limit || Iq > FOC_MTPA_FF_U.Id_Iq_MTPA_limit.Iq_up_limit) {
         error_counter++;
 
         if (error_counter >= ID_IQ_OC_COUNT) {
@@ -108,14 +108,14 @@ uint8_t Mtc_OT_Error(float controller_temp) {
 }
 
 void Error_Check(void) {
-    if (Over_Current_Phase_Error(FOC_LivGguard_U.PhaseCurrent[0], FOC_LivGguard_U.PhaseCurrent[1], FOC_LivGguard_U.PhaseCurrent[2]) == !HAL_OK) {
+    if (Over_Current_Phase_Error(FOC_MTPA_FF_U.PhaseCurrent[0], FOC_MTPA_FF_U.PhaseCurrent[1], FOC_MTPA_FF_U.PhaseCurrent[2]) == !HAL_OK) {
         er.error_triggered = 1;
         er.phase_curr_error = 1;
         err = PHASE_CURR_ERROR;
         cS = CONT_ERROR;
     }
 
-    if (Over_Current_Id_Iq_Error(FOC_LivGguard_Y.Id, FOC_LivGguard_Y.Iq) == !HAL_OK) {
+    if (Over_Current_Id_Iq_Error(FOC_MTPA_FF_Y.Id, FOC_MTPA_FF_Y.Iq) == !HAL_OK) {
         er.error_triggered = 1;
         er.id_iq_oc_error = 1;
         err = ID_IQ_OC_ERROR;

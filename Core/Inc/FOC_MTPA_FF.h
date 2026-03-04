@@ -85,6 +85,7 @@ typedef struct {
   float Iq_ref;                       /* '<Root>/Iq_ref' */
   float Id_ref;                       /* '<Root>/Id_ref' */
   float Iq_gen;                       /* '<Root>/Iq_gen' */
+  float T_gen;                         /* '<Root>/T_gen'  */
   float Vd_PID;                       /* '<Root>/Vd_PID' */
   float Vq_PID;                       /* '<Root>/Vq_PID' */
   float Vd;                           /* '<Root>/Vd' */

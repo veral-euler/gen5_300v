@@ -31,21 +31,33 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#define EST_CYC_CNT			1
+#define OPEN_FOC			0
+#define CLOSED_FOC			1
+#define PROTECTION_MODEL	0
+#define ENABLE_FAULTS		1
+#define DISABLE_FAULTS		0
+
 #include <math.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "Speed_Sensing.h"
 #include "NTC_Temp_Reading.h"
+#if PROTECTION_MODEL
 #include "MCU_Protections.h"
-#include "FOC_LivGguard.h"
+#endif
+// #include "FOC_LivGguard.h"
+#include "FOC_MTPA_FF.h"
 #include "fdcan.h"
 #include "Rate_Limiter.h"
 #include "alignment_routine.h"
 #include "Eeprom.h"
 #include "Sensor_Disconnection_Checks.h"
 #include "Limit_Errors.h"
+#if OPEN_FOC
 #include "Open_FOC0.h"
+#endif
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -245,13 +257,6 @@ void rt_OneStep(void);
 #define TIM17_ARR			2499
 #define HIGH_PULSE16_ERROR	0.024574f
 #define OFFSET_CALC_ELEC 	1.1913f
-
-#define EST_CYC_CNT			1
-#define OPEN_FOC			0
-#define CLOSED_FOC			1
-#define PROTECTION_MODEL	0
-#define ENABLE_FAULTS		1
-#define DISABLE_FAULTS		0
 
 #define MTR_NTC_R25			49000.0f
 #define MTC_NTC_R25			10000.0f

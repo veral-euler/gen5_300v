@@ -180,9 +180,14 @@ int main(void)
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 5);
 
   /* Initializing FOC and Protections model */
-  FOC_LivGguard_initialize();
+  FOC_MTPA_FF_initialize();
+  // FOC_LivGguard_initialize();
+  #if PROTECTION_MODEL
   MCU_Protections_initialize();
+  #endif
+  #if OPEN_FOC
   Open_FOC0_initialize();
+  #endif
   RateLimiter_Init(&limiter, 50.0f, 100.0f, 0.0f);
   HAL_Delay(100);
 
@@ -222,19 +227,21 @@ int main(void)
     {
       fnr_state = NEUTRAL;
       d.speed_ref = 0.0f;
+      #if OPEN_FOC
       Open_FOC0_U.Speed_ref = 0.0f;
-      FOC_LivGguard_U.Ref_Speed_mech_rpm = 0.0f;
-      FOC_LivGguard_U.Drive_State = NEUTRAL;
+      #endif
+      FOC_MTPA_FF_U.Ref_Speed_mech_rpm = 0.0f;
+      // FOC_MTPA_FF_U.Drive_State = NEUTRAL;
     }
     else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
     {
       fnr_state = FORWARD;
-      FOC_LivGguard_U.Drive_State = FORWARD;
+      // FOC_MTPA_FF_U.Drive_State = FORWARD;
     }
     else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
     {
       fnr_state = REVERSE;
-      FOC_LivGguard_U.Drive_State = REVERSE;
+      // FOC_MTPA_FF_U.Drive_State = REVERSE;
     }
 
     /* Gathering ADC1 values */
@@ -248,7 +255,12 @@ int main(void)
     Model_Output_Flag_Checks();
     #endif
 
-    Open_FOC0_U.Speed_ref = FOC_LivGguard_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
+    #if OPEN_FOC
+    Open_FOC0_U.Speed_ref = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
+    #endif
+    #if CLOSED_FOC
+    FOC_MTPA_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
+    #endif
   }
   /* USER CODE END 3 */
 }
@@ -996,6 +1008,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         {
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
           cS = CONT_ERROR;
+          disable_drive();
         }
         #endif
 
@@ -1073,9 +1086,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       uint32_t start = DWT->CYCCNT;
       #endif
       /* Updating pahse current data */
-      FOC_LivGguard_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
-      FOC_LivGguard_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
-      FOC_LivGguard_U.PhaseCurrent[0] = 0.0f - FOC_LivGguard_U.PhaseCurrent[1] - FOC_LivGguard_U.PhaseCurrent[2];
+      FOC_MTPA_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+      FOC_MTPA_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
+      FOC_MTPA_FF_U.PhaseCurrent[0] = 0.0f - FOC_MTPA_FF_U.PhaseCurrent[1] - FOC_MTPA_FF_U.PhaseCurrent[2];
 
       /* Updating angle data */
       d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
@@ -1083,15 +1096,15 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.mech_angle = fmodf(d.mech_angle, TWO_PI);
       d.elec_angle = (d.mech_angle * POLEPAIRS) - d.offset_angle_elec;
       d.elec_angle = fmodf(d.elec_angle, TWO_PI);
-      FOC_LivGguard_U.MtrElcPos = d.elec_angle;
+      FOC_MTPA_FF_U.MtrElcPos = d.elec_angle;
 
       /* Running the FOC model */
       rt_OneStep();
 
       /* SVM and PWM update */
-      d.Va_SVM = FOC_LivGguard_Y.Va;
-      d.Vb_SVM = FOC_LivGguard_Y.Vb;
-      d.Vc_SVM = FOC_LivGguard_Y.Vc;
+      d.Va_SVM = FOC_MTPA_FF_Y.Va;
+      d.Vb_SVM = FOC_MTPA_FF_Y.Vb;
+      d.Vc_SVM = FOC_MTPA_FF_Y.Vc;
 
       if (d.Va_SVM > d.Vmax_SVM)
       {
@@ -1264,7 +1277,7 @@ void rt_OneStep(void)
 
   /* Check base rate for overrun */
   if (OverrunFlags[0]) {
-    rtmSetErrorStatus(FOC_LivGguard_M, "Overrun");
+    rtmSetErrorStatus(FOC_MTPA_FF_M, "Overrun");
     return;
   }
 
@@ -1284,7 +1297,7 @@ void rt_OneStep(void)
       OverrunFlags[1] = true;
 
       /* Sampling too fast */
-      rtmSetErrorStatus(FOC_LivGguard_M, "Overrun");
+      rtmSetErrorStatus(FOC_MTPA_FF_M, "Overrun");
       return;
     }
 
@@ -1299,7 +1312,7 @@ void rt_OneStep(void)
   /* Set model inputs associated with base rate here */
 
   /* Step the model for base rate */
-  FOC_LivGguard_step0();
+  FOC_MTPA_FF_step0();
 
   /* Get model outputs here */
 
@@ -1318,14 +1331,14 @@ void rt_OneStep(void)
     /* Set model inputs associated with subrates here */
     /* Gathering speed feedback data and setting motor start flag */
     Speed_Sense(d.mech_angle);
-    FOC_LivGguard_U.MtrSpd= fabsf(d.rad_s);
+    FOC_MTPA_FF_U.MtrSpd= fabsf(d.rad_s);
     if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START)
     {
       d.motor_start = 1;
     }
 
     /* Step the model for subrate 1 */
-    FOC_LivGguard_step1();
+    FOC_MTPA_FF_step1();
 
     /* Get model outputs here */
 
@@ -1389,8 +1402,8 @@ void disable_drive(void)
     }
 
     /* Resetting FOC data structures after error trigger */
-    (void)memset(&FOC_LivGguard_U, 0, sizeof(ExtU_FOC_LivGguard_T));
-    (void)memset(&FOC_LivGguard_Y, 0, sizeof(ExtY_FOC_LivGguard_T));
+    (void)memset(&FOC_MTPA_FF_U, 0, sizeof(ExtU_FOC_MTPA_FF_T));
+    (void)memset(&FOC_MTPA_FF_Y, 0, sizeof(ExtY_FOC_MTPA_FF_T));
   }
   #endif
 }
