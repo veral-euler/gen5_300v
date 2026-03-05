@@ -92,6 +92,7 @@ typedef struct {
   float Vq;                           /* '<Root>/Vq' */
   float Id_error;                     /* '<Root>/Id_error' */
   float Iq_error;                     /* '<Root>/Iq_error' */
+  float Iq_sat;                       /* '<Root>/Iq_sat>'  */
   float Speed_error;                  /* '<Root>/Speed_error' */
 } ExtY_FOC_MTPA_FF_T;
 

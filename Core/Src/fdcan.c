@@ -211,7 +211,7 @@ void Send_Data_On_CAN_402(void)
 
 	uint16_t Vd = (uint16_t)(FOC_MTPA_FF_Y.Vd + SVM_VOLTAGE_LIMIT);
 	uint16_t Vq = (uint16_t)(FOC_MTPA_FF_Y.Vq + SVM_VOLTAGE_LIMIT);
-	uint16_t Iq_ref = (uint16_t)(FOC_MTPA_FF_Y.Iq_ref + 512.0f);
+	uint16_t Iq_ref = (uint16_t)(FOC_MTPA_FF_Y.Iq_sat + 512.0f);
 	uint16_t Id_ref = (uint16_t)(FOC_MTPA_FF_Y.Id_ref + 512.0f);
 	uint16_t enc_cnt = (uint16_t)(d.encoder_count);
 

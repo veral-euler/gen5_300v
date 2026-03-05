@@ -228,15 +228,15 @@ void rt_OneStep(void);
 #define ADC_TO_CURR				0.0407496f
 #define ALIGN_DUTY				1000
 #define RS		  				0.0102f
-#define LQ						0.000148f
-#define LD						0.000064f
+#define LQ						0.0001258f
+#define LD						0.0000544f
 #define LAMBDA					0.032f
 #define CURR_TORQUE_RATIO		0.1673f //(Max_Torque/Max_Arms)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
 #define DEG_TWO_PI_3			2.094395f
 #define DEG_4_PI_3				4.188790f
-#define OP_VOLTAGE				58.0f
+#define OP_VOLTAGE				96.0f
 #define AUX_OP_VOLTAGE			12.0f
 #define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
 #define MOTOR_PEAK_ARMS			338.0f
@@ -265,8 +265,8 @@ void rt_OneStep(void);
 #define AUX_VDC_SCALE		0.000188658f
 
 #define MAX_PHASE_CURRENT		512.0f
-#define BUS_DC_OV_LIMIT			72
-#define BUS_DC_UV_LIMIT			50
+#define BUS_DC_OV_LIMIT			115
+#define BUS_DC_UV_LIMIT			90
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
 #define CONTRL_TEMP_OT_LIMIT	80

@@ -288,6 +288,8 @@ void FOC_MTPA_FF_step0(void)           /* Sample time: [0.0001s, 0.0s] */
   FOC_MTPA_FF_Y.Iq_error = sqrt(fabs(rtb_MathFunction2 - FOC_MTPA_FF_Y.Id_ref *
     FOC_MTPA_FF_Y.Id_ref));
 
+  FOC_MTPA_FF_Y.Iq_sat = FOC_MTPA_FF_Y.Iq_error;
+
   /* Switch: '<S77>/Switch2' incorporates:
    *  Gain: '<S30>/wm_pu2si_mech2elec'
    *  Inport: '<Root>/Actual Speed_mech_rad//sec'
