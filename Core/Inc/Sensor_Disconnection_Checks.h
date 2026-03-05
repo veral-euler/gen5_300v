@@ -3,8 +3,6 @@
 
 #include "main.h"
 
-#define ENCODER_ERROR_THRESHOLD 60 // Adjust this threshold based on your system's characteristics
-
 uint8_t encoder_ab_error_check(void);
 uint8_t encoder_z_index_check(void);
 uint8_t encoder_pwm_error_check(void);

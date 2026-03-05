@@ -231,7 +231,7 @@ void rt_OneStep(void);
 #define LQ						0.0001258f
 #define LD						0.0000544f
 #define LAMBDA					0.032f
-#define CURR_TORQUE_RATIO		0.1673f //(Max_Torque/Max_Arms)
+#define CURR_TORQUE_RATIO		0.1673f //(Max_Torque/Max_A)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
 #define DEG_TWO_PI_3			2.094395f
@@ -258,7 +258,7 @@ void rt_OneStep(void);
 #define HIGH_PULSE16_ERROR	0.024574f
 #define OFFSET_CALC_ELEC 	1.1913f
 
-#define MTR_NTC_R25			49000.0f
+#define MTR_NTC_R25			45000.0f
 #define MTC_NTC_R25			10000.0f
 #define CAN_BUS_CYCLE		500
 #define BUS_VDC_SCALE		0.00206f
