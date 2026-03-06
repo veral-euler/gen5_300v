@@ -127,6 +127,12 @@ typedef struct data {
 	float throttle_v;
 } data;
 
+typedef struct can_data_t {
+	float can_Ld;
+	float can_Lq;
+	float can_Lambda;
+} can_data_t;
+
 typedef struct errors {
 	char curr_sens_error;
 	char bus_voltage_ov_error;
@@ -190,6 +196,7 @@ typedef enum fnr_state_t {
 extern fnr_state_t fnr_state;
 extern currSession cS;
 extern data d;
+extern can_data_t can_d;
 extern errors er;
 extern errors_nums err;
 /* USER CODE END ET */

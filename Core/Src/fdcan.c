@@ -147,7 +147,7 @@ void _fdcan_filter_IDList(uint32_t can_receive_id, uint8_t format, uint32_t filt
     HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_REJECT, FDCAN_REJECT, FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE);
 
     /* Configure Rx FIFO 0 watermark to 5 */
-    HAL_FDCAN_ConfigFifoWatermark(&hfdcan2, FDCAN_CFG_RX_FIFO0, 0);
+    HAL_FDCAN_ConfigFifoWatermark(&hfdcan2, FDCAN_CFG_RX_FIFO0, 2);
 
     /* Activate Rx FIFO 0 watermark notification */
     HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
@@ -156,6 +156,7 @@ void _fdcan_filter_IDList(uint32_t can_receive_id, uint8_t format, uint32_t filt
 void FDCAN_SETUP()
 {
 	_fdcan_filter_IDList(0x102, 0, 0, 0);
+	_fdcan_filter_IDList(0x103, 0, 1, 0);
 	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_TX_COMPLETE, 0);
 
 	if(HAL_FDCAN_Start(&hfdcan2) != HAL_OK)
