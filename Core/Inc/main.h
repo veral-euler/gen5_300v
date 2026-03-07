@@ -273,7 +273,7 @@ void rt_OneStep(void);
 
 #define MAX_PHASE_CURRENT		512.0f
 #define BUS_DC_OV_LIMIT			115
-#define BUS_DC_UV_LIMIT			90
+#define BUS_DC_UV_LIMIT			85
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
 #define CONTRL_TEMP_OT_LIMIT	80

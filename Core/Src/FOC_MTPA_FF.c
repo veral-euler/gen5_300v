@@ -841,7 +841,7 @@ void FOC_MTPA_FF_initialize(void)
   FOC_MTPA_FF_U.BusVoltage_V = OP_VOLTAGE;
   FOC_MTPA_FF_U.p = POLEPAIRS;
   FOC_MTPA_FF_U.Lq = can_d.can_Lq;
-  FOC_MTPA_FF_U.Ld = can_d.can_Lq;
+  FOC_MTPA_FF_U.Ld = can_d.can_Ld;
   FOC_MTPA_FF_U.Lambda = can_d.can_Lambda;
   FOC_MTPA_FF_U.Rs = RS;
   FOC_MTPA_FF_U.Iq_Torque_ratio = CURR_TORQUE_RATIO;

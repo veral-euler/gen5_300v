@@ -262,6 +262,11 @@ int main(void)
     #if CLOSED_FOC
     FOC_MTPA_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
     #endif
+
+    /* Setting motor params from CAN */
+    FOC_MTPA_FF_U.Lambda = can_d.can_Lambda;
+    FOC_MTPA_FF_U.Ld = can_d.can_Ld;
+    FOC_MTPA_FF_U.Lq = can_d.can_Lq;
   }
   /* USER CODE END 3 */
 }
