@@ -130,6 +130,11 @@ void ADC1_Analog_Val_Update(void) {
   d.Vdc = (uint16_t)((float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE);
   d.Aux_dc = (uint16_t)((float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE);
   d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
+
+  /* Calculating Irms, Vrms and Throttle_percentage */
+  d.irms = sqrtf(FOC_MTPA_FF_Y.Id * FOC_MTPA_FF_Y.Id + FOC_MTPA_FF_Y.Iq * FOC_MTPA_FF_Y.Iq) / ROOT2;
+  d.vrms = sqrtf(FOC_MTPA_FF_Y.Vq * FOC_MTPA_FF_Y.Vq + FOC_MTPA_FF_Y.Vd * FOC_MTPA_FF_Y.Vd) / ROOT2;
+  d.throttle_percent = (uint8_t)((d.irms / MOTOR_PEAK_AC) * 100.0f);
 }
 
 uint8_t Initial_Fault_Check(void) {
@@ -143,12 +148,14 @@ uint8_t Initial_Fault_Check(void) {
 		er.bus_voltage_ov_error = 1;
     err = BUS_VOLTAGE_OV_ERROR;
 		er.error_triggered = 1;
+    d.error_c1 |= (1 << 4);
 	}
 
 	if (d.Vdc <= BUS_DC_UV_LIMIT) {
 		er.bus_voltage_uv_error = 1;
     err = BUS_VOLTAGE_UV_ERROR;
 		er.error_triggered = 1;
+    d.error_c1 |= (1 << 5);
 	}
 
 	if (er.error_triggered) {
@@ -194,6 +201,7 @@ void Sensor_Disconnection_Check(void) {
 
     if (count >= ENCODER_FAULT_MAX_COUNT) {
       count = 0;
+      d.error_c1 |= (1 << 0);
       er.error_triggered = 1;
       er.z_error = 1;
       err = ENCODER_Z_ERROR;
@@ -219,6 +227,7 @@ void Sensor_Disconnection_Check(void) {
 
     if (count >= ENCODER_FAULT_MAX_COUNT) {
       count = 0;
+      d.error_c1 |= (1 << 0);
       er.error_triggered = 1;
       er.a_b_error = 1;
       err = ENCODER_A_B_ERROR;
@@ -243,6 +252,7 @@ void Sensor_Disconnection_Check(void) {
 
     if (count >= ENCODER_FAULT_MAX_COUNT) {
       count = 0;
+      d.error_c1 |= (1 << 0);
       er.error_triggered = 1;
       er.enc_5v_error = 1;
       err = ENCODER_5V_ERROR;
@@ -259,6 +269,7 @@ void Sensor_Disconnection_Check(void) {
 
   if (temp_sensor_disconnection_check(d.mtr_analog_val, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
     er.error_triggered = 1;
+    d.error_c2 |= (1 << 1);
     er.mtr_temp_disconnection_error = 1;
     err = MTR_TEMP_DISCONNECTION_ERROR;
     cS = CONT_ERROR;

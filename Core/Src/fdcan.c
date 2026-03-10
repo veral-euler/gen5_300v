@@ -183,6 +183,7 @@ void _fdcan_transmit_on_can(uint32_t arbitration_id, uint8_t format, uint8_t * c
 		__HAL_FDCAN_CLEAR_FLAG(&hfdcan2, FDCAN_TXBC_TFQM);
 }
 
+#if DEBUG_CAN_ID
 void Send_Data_On_CAN_401(void)
 {
 	uint8_t can_data[8] = {0};
@@ -285,3 +286,224 @@ void Send_Data_On_CAN_405(void) {
 
 	CAN_Queue_Push_And_Kickstart(0x405, 0, can_data, 0x08);
 }
+#endif
+
+#if VH_CAN_ID
+/* Vehicle CAN Matrix */
+/*****************************************************************************/
+void Send_on_CAN_705(float Mtr_Temp, float Cntrl_Temp)
+{
+	uint8_t data[8] = {0};
+
+	float mt_t = Mtr_Temp + 50.0f;
+	float ct_t = Cntrl_Temp + 50.0f;
+	float can_iq = FOC_MTPA_FF_Y.Iq + 512.0f;
+	float can_id = FOC_MTPA_FF_Y.Id + 512.0f;
+	float offset_angle = d.offset_angle_elec * 100.0f;
+
+	data[0] = (uint8_t)((uint16_t)mt_t);
+	data[1] = (uint8_t)((uint16_t)ct_t);
+
+	data[2] = (uint8_t)((uint16_t)can_iq & 0x00FF);
+	data[3] = (uint8_t)(((uint16_t)can_iq & 0xFF00) >> 8);
+
+	data[4] = (uint8_t)((uint16_t)can_id & 0x00FF);
+	data[5] = (uint8_t)(((uint16_t)can_id & 0xFF00) >> 8);
+
+	data[6] = (uint8_t)((uint16_t)offset_angle & 0x00FF);
+	data[7] = (uint8_t)(((uint16_t)offset_angle & 0xFF00) >> 8);
+
+	CAN_Queue_Push_And_Kickstart(0x705, 0, data, 0x08);
+}
+
+void Send_on_CAN_706(float bus_voltage, float Speed_KMPH, uint8_t error_c)
+{
+	uint8_t data[8] = {0};
+
+	if (fnr_state == REVERSE)
+		data[0] = 0x04;
+	else if (fnr_state == NEUTRAL)
+		data[0] = 0x01;
+
+	if (pw_state == SPORTS && fnr_state == FORWARD) {
+		data[0] = 0x08;
+	} else if (pw_state == ECO && fnr_state == FORWARD) {
+		data[0] = 0x02;
+	}
+
+	if (d.regen_flag) {
+		data[1] |= (1 << 2);
+	} else {
+		data[1] &= ~(1 << 2);
+	}
+
+	if (bus_voltage <= 40)
+		data[1] |= (1 << 3);
+	else
+		data[1] &= ~(1 << 3);
+	
+	data[1] |= (1 << 5);
+
+	if (er.mtc_temp_ot_error) {
+		data[1] |= (1 << 4);
+	}
+
+	data[3] = error_c;
+
+	Speed_KMPH *= 10.0f;
+	data[4] = (uint8_t)((uint16_t)(Speed_KMPH) & 0x00FF);
+	data[5] = (uint8_t)(((uint16_t)(Speed_KMPH) & 0xFF00) >> 8);
+
+	// data[6] = (uint8_t)((uint16_t)(CAN_Counter) & 0x00FF);
+	// data[7] = (uint8_t)(((uint16_t)(CAN_Counter) & 0xFF00) >> 8);
+
+	CAN_Queue_Push_And_Kickstart(0x706, 0, data, 0x08);
+}
+
+void Send_on_CAN_708(uint8_t error_c_1, uint8_t error_c_2)
+{
+	uint8_t data[8] = {0};
+
+	float theta_elec = d.elec_angle * 100.0f;
+	uint16_t encoder_count = (uint16_t)(TIM2->CNT);
+
+	data[0] = error_c_1;
+	data[1] = error_c_2;
+
+	if (d.ctlr_derate_flag) {
+		data[1] |= (1 << 3);
+	} else {
+		data[1] &= ~(1 << 3);
+	}
+
+	if (d.motor_derate_flag) {
+		data[1] |= (1 << 4);
+	} else {
+		data[1] &= ~(1 << 4);
+	}
+
+	data[2] = (uint8_t)((uint16_t)theta_elec & 0x00FF);
+	data[3] = (uint8_t)(((uint16_t)theta_elec & 0xFF00) >> 8);
+
+	data[4] = (uint8_t)(encoder_count & 0x00FF);
+	data[5] = (uint8_t)((encoder_count & 0xFF00) >> 8);
+
+	// data[6] = (uint8_t)(CAN_Error_Occured);
+
+	CAN_Queue_Push_And_Kickstart(0x708, 0, data, 0x08);
+}
+
+void Send_on_CAN_709(uint8_t historic_errors)
+{
+	uint8_t data[8] = {0};
+	UNUSED(historic_errors);
+
+
+	CAN_Queue_Push_And_Kickstart(0x709, 0, data, 0x08);
+}
+
+void Send_on_CAN_710(float throttle_percent, float throttle_voltage) {
+	uint8_t data[8] = {0};
+
+	data[0] = (uint8_t)((uint16_t)throttle_percent);
+	data[3] = (uint8_t)((uint16_t)(throttle_voltage * 10.0f));
+	data[4] = 0x00;
+	// data[6] = OTA_State;
+	// data[7] = OTA_Source_ECU; 
+
+	CAN_Queue_Push_And_Kickstart(0x710, 0, data, 0x08);
+}
+
+void Send_on_CAN_715(float RPM, float bus_voltage, float lv_12v_voltage)
+{
+	uint8_t data[8] = {0};
+
+	data[3] = (uint8_t)((uint16_t)d.Vdc);
+	data[4] = (uint8_t)((uint16_t)bus_voltage);
+	data[5] = (uint8_t)((uint16_t)lv_12v_voltage);
+	data[6] = (uint8_t)((uint16_t)RPM & 0x00FF);
+	data[7] = (uint8_t)(((uint16_t)RPM & 0xFF00) >> 8);
+
+	CAN_Queue_Push_And_Kickstart(0x715, 0, data, 0x08);
+}
+
+void Send_on_CAN_716(float vrms, float irms)
+{
+	uint8_t data[8] = {0};
+
+	float pack_dc = d.pack_current + 500.0f;
+
+	data[2] = (uint8_t)((uint16_t)pack_dc & 0x00FF);
+	data[3] = (uint8_t)(((uint16_t)pack_dc & 0xFF00) >> 8);
+	data[4] = (uint8_t)((uint16_t)((vrms/d.Vdc) * 100.0f));
+	data[5] = (uint8_t)((uint16_t)vrms);
+	data[6] = (uint8_t)((uint16_t)irms & 0x00FF);
+	data[7] = (uint8_t)(((uint16_t)irms & 0xFF00) >> 8);
+
+	CAN_Queue_Push_And_Kickstart(0x716, 0, data, 0x08);
+}
+
+void Send_on_CAN_717(float rpm)
+{
+	uint8_t data[8] = {0};
+
+	volatile float Hz = (rpm * POLEPAIRS * 2.0f) / 120.0f;
+
+	data[0] = (uint8_t)((uint16_t)Hz & 0x00FF);
+	data[1] = (uint8_t)(((uint16_t)Hz & 0xFF00) >> 8);
+
+	// data[2] = (uint8_t)((uint16_t)L_g.Is_ref_woDCLO & 0x00FF);
+	// data[3] = (uint8_t)(((uint16_t)L_g.Is_ref_woDCLO & 0xFF00) >> 8);
+
+	// data[4] = (uint8_t)((uint16_t)L_g.Is_ref_wDCLO & 0x00FF);
+	// data[5] = (uint8_t)(((uint16_t)L_g.Is_ref_wDCLO & 0xFF00) >> 8);
+
+	CAN_Queue_Push_And_Kickstart(0x717, 0, data, 0x08);
+}
+
+void Send_on_CAN_724(float torque_ref)
+{
+	uint8_t data[8] = {0};
+
+	float can_vq = FOC_MTPA_FF_Y.Vq + 62.0f;
+	float can_vd = FOC_MTPA_FF_Y.Vd + 62.0f;
+	torque_ref *= 10.0f;
+
+	data[0] = (uint8_t)((uint16_t)torque_ref & 0x00FF);
+	data[1] = (uint8_t)(((uint16_t)torque_ref & 0xFF00) >> 8);
+
+	data[2] = (uint8_t)((uint16_t)can_vq & 0x00FF);
+	data[3] = (uint8_t)(((uint16_t)can_vq & 0xFF00) >> 8);
+
+	data[4] = (uint8_t)((uint16_t)can_vd & 0x00FF);
+	data[5] = (uint8_t)(((uint16_t)can_vd & 0xFF00) >> 8);
+
+	#if CURR_APP1
+		data[6] = 0x01;
+	#endif
+
+	#if CURR_APP2
+		data[6] = 0x02;
+	#endif
+
+	data[7] = 0x00;
+
+	CAN_Queue_Push_And_Kickstart(0x724, 0, data, 0x08);
+}
+
+void Send_on_CAN_726()
+{
+	uint8_t data[8] = {0};
+
+	data[0] = (uint8_t)(CONFIG_VERSION_MAJOR);
+	data[1] = (uint8_t)(CONFIG_VERSION_MINOR);
+	data[2] = (uint8_t)(CONFIG_VERSION_SUBMINOR);
+	data[3] = 0xE2;
+	data[4] = 0x58;
+	data[5] = (uint8_t)(FIRMWARE_VERSION_MAJOR);
+	data[6] = (uint8_t)(FIRMWARE_VERSION_MINOR);
+	data[7] = (uint8_t)(FIRMWARE_VERSION_SUBMINOR);
+
+	CAN_Queue_Push_And_Kickstart(0x726, 0, data, 0x08);
+}
+#endif

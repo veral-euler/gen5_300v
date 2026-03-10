@@ -37,6 +37,18 @@ extern "C" {
 #define PROTECTION_MODEL	0
 #define ENABLE_FAULTS		1
 #define DISABLE_FAULTS		0
+#define VH_CAN_ID			1
+#define DEBUG_CAN_ID		0
+
+#define CONFIG_VERSION_MAJOR 		0x05
+#define CONFIG_VERSION_MINOR 		0x00
+#define CONFIG_VERSION_SUBMINOR 	0x00
+#define FIRMWARE_VERSION_MAJOR  	0x00
+#define FIRMWARE_VERSION_MINOR 		0x0A
+#define FIRMWARE_VERSION_SUBMINOR 	0x11
+
+#define CURR_APP1					1
+#define CURR_APP2					0
 
 #include <math.h>
 #include <string.h>
@@ -63,6 +75,13 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 typedef struct data {
+	uint8_t ctlr_derate_flag;
+	uint8_t motor_derate_flag;
+	uint8_t error_c1;
+	uint8_t error_c2;
+	uint8_t error_c3;
+	uint8_t throttle_percent;
+	uint8_t regen_flag;
 	uint8_t z_pulse;
 	uint8_t A_Pulse;
 	uint8_t B_Pulse;
@@ -70,6 +89,7 @@ typedef struct data {
 	uint8_t motor_start;
 	uint8_t start_alignment;
 	uint8_t end_alignment;
+	uint8_t power_pin;
 	uint8_t forward_pin;
 	uint8_t reverse_pin;
 	uint8_t init_check;
@@ -93,6 +113,7 @@ typedef struct data {
 	uint32_t curr_z_count;
 	uint32_t z_count_diff;
 	uint32_t cycles;
+	float pack_current;
 	float offset_angle_elec;
 	float speed_ref;
 	float count_delta;
@@ -109,6 +130,8 @@ typedef struct data {
 	float Vc;
 	float Vpp;
 	float Vmax_SVM;
+	float vrms;
+	float irms;
 	float mech_angle;
 	float elec_angle;
 	float elec_angle_120;
@@ -193,7 +216,13 @@ typedef enum fnr_state_t {
 	NEUTRAL
 } fnr_state_t;
 
+typedef enum power_mode_t {
+	ECO,
+	SPORTS
+} power_mode_t;
+
 extern fnr_state_t fnr_state;
+extern power_mode_t pw_state;
 extern currSession cS;
 extern data d;
 extern can_data_t can_d;
@@ -217,6 +246,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+void power_mode_fnr_switch(void);
 void set_Initial_angle(void);
 void disable_drive(void);
 void rt_OneStep(void);
@@ -226,7 +256,7 @@ void rt_OneStep(void);
 
 /* USER CODE BEGIN Private defines */
 #define POLEPAIRS 				3.0f
-#define COUNTS_TO_RADS			0.003067962f //(2.0f * (PI / (TIM2_ARR+1)))
+#define COUNTS_TO_RADS			0.001533981f//(2.0f * (PI / (TIM2_ARR+1)))
 #define TWO_PI					6.283185f
 #define TWO_ROOT2				2.828427f
 #define ROOT2					1.414213f
@@ -243,7 +273,7 @@ void rt_OneStep(void);
 #define ADC_TO_V				0.00005030822f
 #define DEG_TWO_PI_3			2.094395f
 #define DEG_4_PI_3				4.188790f
-#define OP_VOLTAGE				96.0f
+#define OP_VOLTAGE				58.0f
 #define AUX_OP_VOLTAGE			12.0f
 #define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
 #define MOTOR_PEAK_ARMS			338.0f
@@ -253,11 +283,14 @@ void rt_OneStep(void);
 #define MIN_RPM_FOR_MOTOR_START 80.0f
 #define RAD_S_TO_RPM   			9.549296f
 
+#define ECO_MAX_SPEED			1000.0f
+#define SPORTS_MAX_SPEED		2000.0f
+
 #define TIM1_PSC			19
 #define TIM1_ARR			2499
 #define TIM1_DEAD_TIME		100
 #define TIM1_ARR_HALF		1250.0f
-#define TIM2_ARR			2047//(MAX_COUNT of your position sensor - 1)
+#define TIM2_ARR			4095//(MAX_COUNT of your position sensor - 1)
 #define TIM5_PSC			99
 #define TIM5_ARR			0xFFFFFFFF
 #define TIM17_PSC			39
@@ -265,15 +298,15 @@ void rt_OneStep(void);
 #define HIGH_PULSE16_ERROR	0.024574f
 #define OFFSET_CALC_ELEC 	1.1913f
 
-#define MTR_NTC_R25			45000.0f
+#define MTR_NTC_R25			10000.0f
 #define MTC_NTC_R25			10000.0f
 #define CAN_BUS_CYCLE		500
 #define BUS_VDC_SCALE		0.00206f
 #define AUX_VDC_SCALE		0.000188658f
 
 #define MAX_PHASE_CURRENT		512.0f
-#define BUS_DC_OV_LIMIT			115
-#define BUS_DC_UV_LIMIT			85
+#define BUS_DC_OV_LIMIT			68
+#define BUS_DC_UV_LIMIT			48
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
 #define CONTRL_TEMP_OT_LIMIT	80

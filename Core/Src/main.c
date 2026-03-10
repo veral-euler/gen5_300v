@@ -86,6 +86,7 @@ uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 
 fnr_state_t fnr_state = NEUTRAL;
+power_mode_t pw_state = ECO;
 currSession cS = ANGLE_CALIB_DONE;
 errors_nums err = NO_ERROR;
 errors er = {0};
@@ -154,15 +155,15 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   Read_EEPROM_at_init();
 
-  // if (cS == INIT)
-  // {
-  //   cS = ANGLE_CALIB;
-  //   Motor_Alignment_Routine();
-  // }
-  // else if (cS == ANGLE_CALIB_DONE)
-  // {
-  set_Initial_angle();
-  // }
+  if (cS == INIT)
+  {
+    cS = ANGLE_CALIB;
+    Motor_Alignment_Routine();
+  }
+  else if (cS == ANGLE_CALIB_DONE)
+  {
+    set_Initial_angle();
+  }
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -221,29 +222,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     uint32_t time_stamp_now = HAL_GetTick();
 
-    d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
-    d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
-
-    if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_SET)
-    {
-      fnr_state = NEUTRAL;
-      d.speed_ref = 0.0f;
-      #if OPEN_FOC
-      Open_FOC0_U.Speed_ref = 0.0f;
-      #endif
-      FOC_MTPA_FF_U.Ref_Speed_mech_rpm = 0.0f;
-      // FOC_MTPA_FF_U.Drive_State = NEUTRAL;
-    }
-    else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
-    {
-      fnr_state = FORWARD;
-      // FOC_MTPA_FF_U.Drive_State = FORWARD;
-    }
-    else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
-    {
-      fnr_state = REVERSE;
-      // FOC_MTPA_FF_U.Drive_State = REVERSE;
-    }
+    power_mode_fnr_switch();
 
     /* Gathering ADC1 values */
     ADC1_Analog_Val_Update();
@@ -262,11 +241,6 @@ int main(void)
     #if CLOSED_FOC
     FOC_MTPA_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
     #endif
-
-    /* Setting motor params from CAN */
-    FOC_MTPA_FF_U.Lambda = can_d.can_Lambda;
-    FOC_MTPA_FF_U.Ld = can_d.can_Ld;
-    FOC_MTPA_FF_U.Lq = can_d.can_Lq;
   }
   /* USER CODE END 3 */
 }
@@ -580,8 +554,8 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.RxBuffersNbr = 6;
   hfdcan2.Init.RxBufferSize = FDCAN_DATA_BYTES_8;
   hfdcan2.Init.TxEventsNbr = 0;
-  hfdcan2.Init.TxBuffersNbr = 8;
-  hfdcan2.Init.TxFifoQueueElmtsNbr = 8;
+  hfdcan2.Init.TxBuffersNbr = 15;
+  hfdcan2.Init.TxFifoQueueElmtsNbr = 15;
   hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   hfdcan2.Init.TxElmtSize = FDCAN_DATA_BYTES_8;
   if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
@@ -947,6 +921,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PD2 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PD3 PD4 */
   GPIO_InitStruct.Pin = GPIO_PIN_3 | GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -1194,11 +1174,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       can_counter = 0;
 
       // Only queue - don't process here
+      #if DEBUG_CAN_ID
       Send_Data_On_CAN_401();
       Send_Data_On_CAN_402();
       Send_Data_On_CAN_403();
       Send_Data_On_CAN_404();
       Send_Data_On_CAN_405();
+      #endif
+
+      #if VH_CAN_ID
+      Send_on_CAN_705(d.Mtr_temp, d.Mtc_temp);
+      Send_on_CAN_706(d.Vdc, fabsf(d.RPM * 0.008909f), d.error_c1);
+      Send_on_CAN_708(d.error_c2, d.error_c3);
+      Send_on_CAN_709(0);
+      Send_on_CAN_710(d.throttle_percent, d.throttle_v);
+      Send_on_CAN_715(fabsf(d.RPM), d.Vdc, d.Aux_dc);
+      Send_on_CAN_716(d.vrms, d.irms);
+      Send_on_CAN_724(fabsf(FOC_MTPA_FF_Y.T_gen));
+      Send_on_CAN_726();
+      #endif
     }
   }
 }
@@ -1216,6 +1210,11 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     can_d.can_Lambda = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-5f;
     can_d.can_Ld = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-8f;
     can_d.can_Lq = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-7f;
+
+    /* Setting motor params from CAN */
+    FOC_MTPA_FF_U.Lambda = can_d.can_Lambda;
+    FOC_MTPA_FF_U.Ld = can_d.can_Ld;
+    FOC_MTPA_FF_U.Lq = can_d.can_Lq;
   }
 }
 
@@ -1393,6 +1392,50 @@ void set_Initial_angle(void)
   HAL_TIM_IC_DeInit(&htim5);
   HAL_TIM_Base_MspDeInit(&htim5);
   cS = CURR_SENS_CALIB;
+}
+
+void power_mode_fnr_switch(void)
+{
+  d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
+  d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
+  d.power_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_2);
+
+  if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_SET)
+  {
+    fnr_state = NEUTRAL;
+    d.speed_ref = 0.0f;
+    #if OPEN_FOC
+    Open_FOC0_U.Speed_ref = 0.0f;
+    #endif
+    FOC_MTPA_FF_U.Ref_Speed_mech_rpm = 0.0f;
+    // FOC_MTPA_FF_U.Drive_State = NEUTRAL;
+  }
+  else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
+  {
+    fnr_state = FORWARD;
+    // FOC_MTPA_FF_U.Drive_State = FORWARD;
+  }
+  else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
+  {
+    fnr_state = REVERSE;
+    // FOC_MTPA_FF_U.Drive_State = REVERSE;
+  }
+
+  if (d.power_pin == GPIO_PIN_RESET) {
+    pw_state = SPORTS;
+  } else {
+    pw_state = ECO;
+  }
+
+  if (pw_state == ECO) {
+    if (d.speed_ref >= ECO_MAX_SPEED) {
+      d.speed_ref = ECO_MAX_SPEED;
+    }
+  } else if (pw_state == SPORTS) {
+    if (d.speed_ref >= SPORTS_MAX_SPEED) {
+      d.speed_ref = SPORTS_MAX_SPEED;
+    }
+  }
 }
 
 void disable_drive(void) 
