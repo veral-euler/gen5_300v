@@ -197,7 +197,7 @@ void FOC_Basic_FF_step0(void)          /* Sample time: [0.0001s, 0.0s] */
    *  Gain: '<S29>/wm_pu2si_mech2elec'
    *  Inport: '<Root>/Actual Speed_mech_rad//sec'
    */
-  FOC_Basic_FF_Y.Vq_PID = 3.0 * FOC_Basic_FF_U.MtrSpd;
+  FOC_Basic_FF_Y.Vq_PID = POLEPAIRS * FOC_Basic_FF_U.MtrSpd;
 
   /* Gain: '<S29>/NegSign' incorporates:
    *  Inport: '<Root>/Lq'
@@ -731,10 +731,10 @@ void FOC_Basic_FF_step1(void)          /* Sample time: [0.001s, 0.0s] */
     FOC_Basic_FF_U.MTPA_PID.Speed_PID_MTPA.Ki_speed_PID_MTPA +
     (FOC_Basic_FF_Y.Iq_gen - FOC_Basic_FF_Y.Iq_gen)) + (FOC_Basic_FF_Y.Iq_gen -
     rtb_Sum)) * 0.001;
-  if (FOC_Basic_FF_DW.Integrator_DSTATE_b > 500.0) {
-    FOC_Basic_FF_DW.Integrator_DSTATE_b = 500.0;
-  } else if (FOC_Basic_FF_DW.Integrator_DSTATE_b < -500.0) {
-    FOC_Basic_FF_DW.Integrator_DSTATE_b = -500.0;
+  if (FOC_Basic_FF_DW.Integrator_DSTATE_b > MOTOR_PEAK_AC) {
+    FOC_Basic_FF_DW.Integrator_DSTATE_b = MOTOR_PEAK_AC;
+  } else if (FOC_Basic_FF_DW.Integrator_DSTATE_b < -MOTOR_PEAK_AC) {
+    FOC_Basic_FF_DW.Integrator_DSTATE_b = -MOTOR_PEAK_AC;
   }
 
   /* End of Update for DiscreteIntegrator: '<S188>/Integrator' */
@@ -770,7 +770,7 @@ void FOC_Basic_FF_initialize(void)
   FOC_Basic_FF_U.Rate_limiter.Iq_ramp_up = 50.0f * 10000.0f;
   FOC_Basic_FF_U.Rate_limiter.Iq_ramp_down = -50.0f * 10000.0f;
   FOC_Basic_FF_U.Rate_limiter.Id_ramp_up = 10.0f * 10000.0f;
-  FOC_Basic_FF_U.Rate_limiter.Id_ramp_down = -120.0f * 10000.0f;
+  FOC_Basic_FF_U.Rate_limiter.Id_ramp_down = -10.0f * 10000.0f;
   //not used
 
   /* IIR Filter Settings */
@@ -785,7 +785,7 @@ void FOC_Basic_FF_initialize(void)
   FOC_Basic_FF_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA = 0.00001;
   FOC_Basic_FF_U.MTPA_PID.Speed_PID_MTPA.Filter_speed_PID_MTPA = 10.0f;
 
-  FOC_Basic_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA = 500.0f;
+  FOC_Basic_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA = MOTOR_PEAK_AC;
   FOC_Basic_FF_U.MTPA_PID.Low_Limit_speed_PID_MTPA = 0.0f;
 
   FOC_Basic_FF_U.MTPA_PID.Torque_PID_MTPA.Kp_torque_PID_MTPA = 0.2f;

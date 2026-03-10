@@ -60,7 +60,8 @@ extern "C" {
 #include "MCU_Protections.h"
 #endif
 // #include "FOC_LivGguard.h"
-#include "FOC_MTPA_FF.h"
+// #include "FOC_MTPA_FWC_FF.h"
+#include "FOC_Basic_FF.h"
 #include "fdcan.h"
 #include "Rate_Limiter.h"
 #include "alignment_routine.h"
@@ -283,8 +284,9 @@ void rt_OneStep(void);
 #define MIN_RPM_FOR_MOTOR_START 80.0f
 #define RAD_S_TO_RPM   			9.549296f
 
-#define ECO_MAX_SPEED			1000.0f
-#define SPORTS_MAX_SPEED		2000.0f
+#define ECO_MAX_SPEED			4500.0f
+#define SPORTS_MAX_SPEED		6000.0f
+#define REV_MAX_SPEED			1800.0f
 
 #define TIM1_PSC			19
 #define TIM1_ARR			2499

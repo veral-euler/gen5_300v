@@ -182,8 +182,10 @@ int main(void)
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 5);
 
   /* Initializing FOC and Protections model */
-  FOC_MTPA_FF_initialize();
+  // FOC_MTPA_FF_initialize();
   // FOC_LivGguard_initialize();
+  // FOC_MTPA_FWC_FF_initialize();
+  FOC_Basic_FF_initialize();
   #if PROTECTION_MODEL
   MCU_Protections_initialize();
   #endif
@@ -239,7 +241,7 @@ int main(void)
     Open_FOC0_U.Speed_ref = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
     #endif
     #if CLOSED_FOC
-    FOC_MTPA_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
+    FOC_Basic_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
     #endif
   }
   /* USER CODE END 3 */
@@ -1072,9 +1074,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       uint32_t start = DWT->CYCCNT;
       #endif
       /* Updating pahse current data */
-      FOC_MTPA_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
-      FOC_MTPA_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
-      FOC_MTPA_FF_U.PhaseCurrent[0] = 0.0f - FOC_MTPA_FF_U.PhaseCurrent[1] - FOC_MTPA_FF_U.PhaseCurrent[2];
+      FOC_Basic_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+      FOC_Basic_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
+      FOC_Basic_FF_U.PhaseCurrent[0] = 0.0f - FOC_Basic_FF_U.PhaseCurrent[1] - FOC_Basic_FF_U.PhaseCurrent[2];
 
       /* Updating angle data */
       d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
@@ -1082,15 +1084,15 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.mech_angle = fmodf(d.mech_angle, TWO_PI);
       d.elec_angle = (d.mech_angle * POLEPAIRS) - d.offset_angle_elec;
       d.elec_angle = fmodf(d.elec_angle, TWO_PI);
-      FOC_MTPA_FF_U.MtrElcPos = d.elec_angle;
+      FOC_Basic_FF_U.MtrElcPos = d.elec_angle;
 
       /* Running the FOC model */
       rt_OneStep();
 
       /* SVM and PWM update */
-      d.Va_SVM = FOC_MTPA_FF_Y.Va;
-      d.Vb_SVM = FOC_MTPA_FF_Y.Vb;
-      d.Vc_SVM = FOC_MTPA_FF_Y.Vc;
+      d.Va_SVM = FOC_Basic_FF_Y.Va;
+      d.Vb_SVM = FOC_Basic_FF_Y.Vb;
+      d.Vc_SVM = FOC_Basic_FF_Y.Vc;
 
       if (d.Va_SVM > d.Vmax_SVM)
       {
@@ -1190,7 +1192,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       Send_on_CAN_710(d.throttle_percent, d.throttle_v);
       Send_on_CAN_715(fabsf(d.RPM), d.Vdc, d.Aux_dc);
       Send_on_CAN_716(d.vrms, d.irms);
-      Send_on_CAN_724(fabsf(FOC_MTPA_FF_Y.T_gen));
+      Send_on_CAN_724(fabsf(FOC_Basic_FF_Y.Iq_gen) * CURR_TORQUE_RATIO);
       Send_on_CAN_726();
       #endif
     }
@@ -1212,9 +1214,9 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     can_d.can_Lq = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-7f;
 
     /* Setting motor params from CAN */
-    FOC_MTPA_FF_U.Lambda = can_d.can_Lambda;
-    FOC_MTPA_FF_U.Ld = can_d.can_Ld;
-    FOC_MTPA_FF_U.Lq = can_d.can_Lq;
+    FOC_Basic_FF_U.Lambda = can_d.can_Lambda;
+    FOC_Basic_FF_U.Ld = can_d.can_Ld;
+    FOC_Basic_FF_U.Lq = can_d.can_Lq;
   }
 }
 
@@ -1288,7 +1290,7 @@ void rt_OneStep(void)
 
   /* Check base rate for overrun */
   if (OverrunFlags[0]) {
-    rtmSetErrorStatus(FOC_MTPA_FF_M, "Overrun");
+    rtmSetErrorStatus(FOC_Basic_FF_M, "Overrun");
     return;
   }
 
@@ -1308,7 +1310,7 @@ void rt_OneStep(void)
       OverrunFlags[1] = true;
 
       /* Sampling too fast */
-      rtmSetErrorStatus(FOC_MTPA_FF_M, "Overrun");
+      rtmSetErrorStatus(FOC_Basic_FF_M, "Overrun");
       return;
     }
 
@@ -1323,7 +1325,7 @@ void rt_OneStep(void)
   /* Set model inputs associated with base rate here */
 
   /* Step the model for base rate */
-  FOC_MTPA_FF_step0();
+  FOC_Basic_FF_step0();
 
   /* Get model outputs here */
 
@@ -1342,14 +1344,14 @@ void rt_OneStep(void)
     /* Set model inputs associated with subrates here */
     /* Gathering speed feedback data and setting motor start flag */
     Speed_Sense(d.mech_angle);
-    FOC_MTPA_FF_U.MtrSpd= fabsf(d.rad_s);
+    FOC_Basic_FF_U.MtrSpd= fabsf(d.rad_s);
     if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START)
     {
       d.motor_start = 1;
     }
 
     /* Step the model for subrate 1 */
-    FOC_MTPA_FF_step1();
+    FOC_Basic_FF_step1();
 
     /* Get model outputs here */
 
@@ -1407,18 +1409,18 @@ void power_mode_fnr_switch(void)
     #if OPEN_FOC
     Open_FOC0_U.Speed_ref = 0.0f;
     #endif
-    FOC_MTPA_FF_U.Ref_Speed_mech_rpm = 0.0f;
-    // FOC_MTPA_FF_U.Drive_State = NEUTRAL;
+    FOC_Basic_FF_U.Ref_Speed_mech_rpm = 0.0f;
+    // FOC_Basic_FF_U.Drive_State = NEUTRAL;
   }
   else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
   {
     fnr_state = FORWARD;
-    // FOC_MTPA_FF_U.Drive_State = FORWARD;
+    // FOC_Basic_FF_U.Drive_State = FORWARD;
   }
   else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
   {
     fnr_state = REVERSE;
-    // FOC_MTPA_FF_U.Drive_State = REVERSE;
+    // FOC_Basic_FF_U.Drive_State = REVERSE;
   }
 
   if (d.power_pin == GPIO_PIN_RESET) {
@@ -1427,13 +1429,19 @@ void power_mode_fnr_switch(void)
     pw_state = ECO;
   }
 
-  if (pw_state == ECO) {
+  if (pw_state == ECO && fnr_state == FORWARD) {
     if (d.speed_ref >= ECO_MAX_SPEED) {
       d.speed_ref = ECO_MAX_SPEED;
     }
-  } else if (pw_state == SPORTS) {
+  } else if (pw_state == SPORTS && fnr_state == FORWARD) {
     if (d.speed_ref >= SPORTS_MAX_SPEED) {
       d.speed_ref = SPORTS_MAX_SPEED;
+    }
+  }
+
+  if (fnr_state == REVERSE) {
+    if (d.speed_ref >= REV_MAX_SPEED) {
+      d.speed_ref = REV_MAX_SPEED;
     }
   }
 }
@@ -1457,8 +1465,8 @@ void disable_drive(void)
     }
 
     /* Resetting FOC data structures after error trigger */
-    (void)memset(&FOC_MTPA_FF_U, 0, sizeof(ExtU_FOC_MTPA_FF_T));
-    (void)memset(&FOC_MTPA_FF_Y, 0, sizeof(ExtY_FOC_MTPA_FF_T));
+    (void)memset(&FOC_Basic_FF_U, 0, sizeof(ExtU_FOC_Basic_FF_T));
+    (void)memset(&FOC_Basic_FF_Y, 0, sizeof(ExtY_FOC_Basic_FF_T));
   }
   #endif
 }
