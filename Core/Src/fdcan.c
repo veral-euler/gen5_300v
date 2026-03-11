@@ -188,10 +188,10 @@ void Send_Data_On_CAN_401(void)
 {
 	uint8_t can_data[8] = {0};
 
-	uint16_t rpm_ref = (uint16_t)(FOC_Basic_FF_U.Ref_Speed_mech_rpm * 10.0f);
+	uint16_t rpm_ref = (uint16_t)(FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm * 10.0f);
 	uint16_t rpm_fdbk = (uint16_t)(fabsf(d.RPM) * 10.0f);
-	uint16_t Id = (uint16_t)(FOC_Basic_FF_Y.Id + 512.0f);
-	uint16_t Iq = (uint16_t)(FOC_Basic_FF_Y.Iq + 512.0f);
+	uint16_t Id = (uint16_t)(FOC_MTPA_FWC_FF_Y.Id + 512.0f);
+	uint16_t Iq = (uint16_t)(FOC_MTPA_FWC_FF_Y.Iq + 512.0f);
 
 	can_data[0] = (uint8_t)(rpm_ref & 0xFF);
 	can_data[1] = (uint8_t)((rpm_ref >> 8) & 0xFF);
@@ -211,10 +211,10 @@ void Send_Data_On_CAN_402(void)
 	// Implement similar to Send_Data_On_CAN_401 with different data
 	uint8_t can_data[8] = {0};
 
-	uint16_t Vd = (uint16_t)(FOC_Basic_FF_Y.Vd + SVM_VOLTAGE_LIMIT);
-	uint16_t Vq = (uint16_t)(FOC_Basic_FF_Y.Vq + SVM_VOLTAGE_LIMIT);
-	uint16_t Iq_ref = (uint16_t)(FOC_Basic_FF_Y.Iq_ref + 512.0f);
-	uint16_t Id_ref = (uint16_t)(FOC_Basic_FF_Y.Id_ref + 512.0f);
+	uint16_t Vd = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vd + SVM_VOLTAGE_LIMIT);
+	uint16_t Vq = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vq + SVM_VOLTAGE_LIMIT);
+	uint16_t Iq_ref = (uint16_t)(FOC_MTPA_FWC_FF_Y.Iq_ref_final + 512.0f);
+	uint16_t Id_ref = (uint16_t)(FOC_MTPA_FWC_FF_Y.Id_ref_final + 512.0f);
 	uint16_t enc_cnt = (uint16_t)(d.encoder_count);
 
 	// Fill can_data with appropriate values for message 402
@@ -247,7 +247,7 @@ void Send_Data_On_CAN_403(void)
 	can_data[4] = (uint8_t)(motor_temp);
 	can_data[5] = (uint8_t)(mc_temp);
 	can_data[6] = (uint8_t)err;
-	can_data[7] = (uint8_t)((uint16_t)(fabsf(FOC_Basic_FF_Y.Iq_gen) * CURR_TORQUE_RATIO));
+	can_data[7] = (uint8_t)((uint16_t)(fabsf(FOC_MTPA_FWC_FF_Y.Iq_gen) * CURR_TORQUE_RATIO));
 
 	// _fdcan_transmit_on_can(0x403, 0, can_data, 0x08);
 	CAN_Queue_Push_And_Kickstart(0x403, 0, can_data, 0x08);
@@ -256,9 +256,9 @@ void Send_Data_On_CAN_403(void)
 void Send_Data_On_CAN_404(void) {
 	uint8_t can_data[8] = {0};
 
-	uint16_t Ld_LUT = (uint16_t)(FOC_Basic_FF_U.Ld * 1.0E8f);
-	uint16_t Lq_LUT = (uint16_t)(FOC_Basic_FF_U.Lq * 1.0E7f);
-	uint16_t lambda_LUT = (uint16_t)(FOC_Basic_FF_U.Lambda * 1.0E5f);
+	uint16_t Ld_LUT = (uint16_t)(FOC_MTPA_FWC_FF_U.Ld * 1.0E8f);
+	uint16_t Lq_LUT = (uint16_t)(FOC_MTPA_FWC_FF_U.Lq * 1.0E7f);
+	uint16_t lambda_LUT = (uint16_t)(FOC_MTPA_FWC_FF_U.Lambda * 1.0E5f);
 
 	can_data[0] = (uint8_t)(Ld_LUT & 0xFF);
 	can_data[1] = (uint8_t)((Ld_LUT >> 8) & 0xFF);
@@ -278,7 +278,7 @@ void Send_Data_On_CAN_405(void) {
 
 	can_data[0] = (uint8_t)(fnr_state);
 	can_data[1] = (uint8_t)(cS);
-	if (rtmGetErrorStatus(FOC_Basic_FF_M) == "Overrun") {
+	if (rtmGetErrorStatus(FOC_MTPA_FWC_FF_M) == "Overrun") {
 		can_data[2] = 0x01;
 	} else {
 		can_data[2] = 0x00;
@@ -297,8 +297,8 @@ void Send_on_CAN_705(float Mtr_Temp, float Cntrl_Temp)
 
 	float mt_t = Mtr_Temp + 50.0f;
 	float ct_t = Cntrl_Temp + 50.0f;
-	float can_iq = FOC_Basic_FF_Y.Iq + 512.0f;
-	float can_id = FOC_Basic_FF_Y.Id + 512.0f;
+	float can_iq = FOC_MTPA_FWC_FF_Y.Iq + 512.0f;
+	float can_id = FOC_MTPA_FWC_FF_Y.Id + 512.0f;
 	float offset_angle = d.offset_angle_elec * 100.0f;
 
 	data[0] = (uint8_t)((uint16_t)mt_t);
@@ -465,8 +465,8 @@ void Send_on_CAN_724(float torque_ref)
 {
 	uint8_t data[8] = {0};
 
-	float can_vq = FOC_Basic_FF_Y.Vq + 62.0f;
-	float can_vd = FOC_Basic_FF_Y.Vd + 62.0f;
+	float can_vq = FOC_MTPA_FWC_FF_Y.Vq + 62.0f;
+	float can_vd = FOC_MTPA_FWC_FF_Y.Vd + 62.0f;
 	torque_ref *= 10.0f;
 
 	data[0] = (uint8_t)((uint16_t)torque_ref & 0x00FF);

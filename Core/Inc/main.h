@@ -37,10 +37,10 @@ extern "C" {
 #define PROTECTION_MODEL	0
 #define ENABLE_FAULTS		1
 #define DISABLE_FAULTS		0
-#define VH_CAN_ID			1
-#define DEBUG_CAN_ID		0
-#define CAN_BASED_REF		0
-#define THROTTLE_BASED_REF  1
+#define VH_CAN_ID			0
+#define DEBUG_CAN_ID		1
+#define CAN_BASED_REF		1
+#define THROTTLE_BASED_REF  0
 
 #define CONFIG_VERSION_MAJOR 		0x05
 #define CONFIG_VERSION_MINOR 		0x00
@@ -62,8 +62,8 @@ extern "C" {
 #include "MCU_Protections.h"
 #endif
 // #include "FOC_LivGguard.h"
-// #include "FOC_MTPA_FWC_FF.h"
-#include "FOC_Basic_FF.h"
+#include "FOC_MTPA_FWC_FF.h"
+// #include "FOC_Basic_FF.h"
 #include "fdcan.h"
 #include "Rate_Limiter.h"
 #include "alignment_routine.h"
@@ -293,6 +293,7 @@ void rt_OneStep(void);
 #define ECO_MAX_SPEED			4500.0f
 #define SPORTS_MAX_SPEED		6000.0f
 #define REV_MAX_SPEED			1800.0f
+#define FWC_LIMIT				10.0f
 
 #define TIM1_PSC			19
 #define TIM1_ARR			2499
@@ -313,8 +314,8 @@ void rt_OneStep(void);
 #define AUX_VDC_SCALE		0.000188658f
 
 #define MAX_PHASE_CURRENT		512.0f
-#define BUS_DC_OV_LIMIT			68
-#define BUS_DC_UV_LIMIT			48
+#define BUS_DC_OV_LIMIT			80
+#define BUS_DC_UV_LIMIT			30
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
 #define CONTRL_TEMP_OT_LIMIT	80

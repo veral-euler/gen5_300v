@@ -25,27 +25,27 @@ uint8_t Over_Current_Phase_Error(float a, float b, float c) {
     return HAL_OK;
 }
 
-// uint8_t Over_Current_Id_Iq_Error(float Id, float Iq) {
-//     static uint16_t error_counter = 0;
+uint8_t Over_Current_Id_Iq_Error(float Id, float Iq) {
+    static uint16_t error_counter = 0;
 
-//     if (Id > FOC_Basic_FF_U.Id_Iq_MTPA_limit.Id_up_limit || Id < FOC_Basic_FF_U.Id_Iq_MTPA_limit.Id_low_limit || Iq < FOC_Basic_FF_U.Id_Iq_MTPA_limit.Iq_low_limit || Iq > FOC_Basic_FF_U.Id_Iq_MTPA_limit.Iq_up_limit) {
-//         error_counter++;
+    if (Id > FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_up_limit || Id < FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_low_limit || Iq < FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_low_limit || Iq > FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_up_limit) {
+        error_counter++;
 
-//         if (error_counter >= ID_IQ_OC_COUNT) {
-//             error_counter = 0;
-//             d.error_c2 |= (1 << 4);
-//             return !HAL_OK;
-//         }
-//     } else {
-//         if (error_counter <= 0) {
-//             error_counter = 0;
-//         } else {
-//             error_counter--;
-//         }
-//     }
+        if (error_counter >= ID_IQ_OC_COUNT) {
+            error_counter = 0;
+            d.error_c2 |= (1 << 4);
+            return !HAL_OK;
+        }
+    } else {
+        if (error_counter <= 0) {
+            error_counter = 0;
+        } else {
+            error_counter--;
+        }
+    }
 
-//     return HAL_OK;
-// }
+    return HAL_OK;
+}
 
 uint8_t Bus_Voltage_Error(float Bus_DC) {
     static uint16_t error_counter_ov = 0;
@@ -114,19 +114,19 @@ uint8_t Mtc_OT_Error(float controller_temp) {
 }
 
 void Error_Check(void) {
-    if (Over_Current_Phase_Error(FOC_Basic_FF_U.PhaseCurrent[0], FOC_Basic_FF_U.PhaseCurrent[1], FOC_Basic_FF_U.PhaseCurrent[2]) == !HAL_OK) {
+    if (Over_Current_Phase_Error(FOC_MTPA_FWC_FF_U.PhaseCurrent[0], FOC_MTPA_FWC_FF_U.PhaseCurrent[1], FOC_MTPA_FWC_FF_U.PhaseCurrent[2]) == !HAL_OK) {
         er.error_triggered = 1;
         er.phase_curr_error = 1;
         err = PHASE_CURR_ERROR;
         cS = CONT_ERROR;
     }
 
-    // if (Over_Current_Id_Iq_Error(FOC_MTPA_FWC_FF_Y.Id, FOC_MTPA_FWC_FF_Y.Iq) == !HAL_OK) {
-    //     er.error_triggered = 1;
-    //     er.id_iq_oc_error = 1;
-    //     err = ID_IQ_OC_ERROR;
-    //     cS = CONT_ERROR;
-    // }
+    if (Over_Current_Id_Iq_Error(FOC_MTPA_FWC_FF_Y.Id, FOC_MTPA_FWC_FF_Y.Iq) == !HAL_OK) {
+        er.error_triggered = 1;
+        er.id_iq_oc_error = 1;
+        err = ID_IQ_OC_ERROR;
+        cS = CONT_ERROR;
+    }
 
     if (Bus_Voltage_Error(d.Vdc) == 1) {
         er.error_triggered = 1;

@@ -6,11 +6,11 @@ extern uint16_t injectedVal[2];
 
 uint8_t encoder_ab_error_check(void) {
   /* Checking A and B error based on A and B states and Id and Iq ref vals */
-  if (d.A_Pulse == GPIO_PIN_SET && d.B_Pulse == GPIO_PIN_SET && d.A_B_XOR == GPIO_PIN_RESET && fabsf(FOC_Basic_FF_Y.Iq) >= 250.0f && fabsf(FOC_Basic_FF_Y.Id) >= 250.0f && d.count_diff_at_z >= 60) {
+  if (d.A_Pulse == GPIO_PIN_SET && d.B_Pulse == GPIO_PIN_SET && d.A_B_XOR == GPIO_PIN_RESET && fabsf(FOC_MTPA_FWC_FF_Y.Iq) >= 250.0f && fabsf(FOC_MTPA_FWC_FF_Y.Id) >= 250.0f && d.count_diff_at_z >= 60) {
     return !HAL_OK; // A and B pulses are the same, which is an error
-  } else if (d.A_Pulse == GPIO_PIN_SET && fabsf(FOC_Basic_FF_Y.Iq) >= 250.0f && fabsf(FOC_Basic_FF_Y.Id) >= 250.0f && d.count_diff_at_z >= 60) {
+  } else if (d.A_Pulse == GPIO_PIN_SET && fabsf(FOC_MTPA_FWC_FF_Y.Iq) >= 250.0f && fabsf(FOC_MTPA_FWC_FF_Y.Id) >= 250.0f && d.count_diff_at_z >= 60) {
     return !HAL_OK; // A pulse is set but B pulse is not, which is an error
-  } else if (d.B_Pulse == GPIO_PIN_SET && fabsf(FOC_Basic_FF_Y.Iq) >= 250.0f && fabsf(FOC_Basic_FF_Y.Id) >= 250.0f && d.count_diff_at_z >= 60) {
+  } else if (d.B_Pulse == GPIO_PIN_SET && fabsf(FOC_MTPA_FWC_FF_Y.Iq) >= 250.0f && fabsf(FOC_MTPA_FWC_FF_Y.Id) >= 250.0f && d.count_diff_at_z >= 60) {
     return !HAL_OK; // B pulse is set but A pulse is not, which is an error
   }
 
@@ -41,7 +41,7 @@ uint8_t encoder_pwm_error_check(void) {
 }
 
 uint8_t encoder_5v_error_check(void) {
-  if (d.A_Pulse == GPIO_PIN_RESET && d.B_Pulse == GPIO_PIN_RESET && d.A_B_XOR == GPIO_PIN_RESET && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_RESET && fabsf(FOC_Basic_FF_Y.Id) >= 250.0f && fabsf(FOC_Basic_FF_Y.Iq) >= 250.0f && d.count_diff_at_z >= 60) {
+  if (d.A_Pulse == GPIO_PIN_RESET && d.B_Pulse == GPIO_PIN_RESET && d.A_B_XOR == GPIO_PIN_RESET && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_RESET && fabsf(FOC_MTPA_FWC_FF_Y.Id) >= 250.0f && fabsf(FOC_MTPA_FWC_FF_Y.Iq) >= 250.0f && d.count_diff_at_z >= 60) {
     return !HAL_OK;
   }
 
@@ -65,9 +65,9 @@ void Model_Params_Input(void) {
   // This function can be used to update any parameters in the MCU Protections model based on sensor readings or other conditions
 
   /* Populating MCU Protections input data structures */
-  MCU_Protections_U.I_a = FOC_Basic_FF_U.PhaseCurrent[2];
-  MCU_Protections_U.I_b = FOC_Basic_FF_U.PhaseCurrent[1];
-  MCU_Protections_U.I_c = FOC_Basic_FF_U.PhaseCurrent[0];
+  MCU_Protections_U.I_a = FOC_MTPA_FWC_FF_U.PhaseCurrent[2];
+  MCU_Protections_U.I_b = FOC_MTPA_FWC_FF_U.PhaseCurrent[1];
+  MCU_Protections_U.I_c = FOC_MTPA_FWC_FF_U.PhaseCurrent[0];
   MCU_Protections_U.MC_Temperature_C = d.Mtc_temp;
   MCU_Protections_U.Motor_Temperature_C = d.Mtr_temp;
   MCU_Protections_U.Bus_Voltage_V = d.Vdc;
@@ -133,8 +133,8 @@ void ADC1_Analog_Val_Update(void) {
   d.thr_v_mv = (adc1_buffer[THROTTLE] * 3297U * 2U) / 65536U;
 
   /* Calculating Irms, Vrms and Throttle_percentage */
-  d.irms = sqrtf(FOC_Basic_FF_Y.Id * FOC_Basic_FF_Y.Id + FOC_Basic_FF_Y.Iq * FOC_Basic_FF_Y.Iq) / ROOT2;
-  d.vrms = sqrtf(FOC_Basic_FF_Y.Vq * FOC_Basic_FF_Y.Vq + FOC_Basic_FF_Y.Vd * FOC_Basic_FF_Y.Vd) / ROOT2;
+  d.irms = sqrtf(FOC_MTPA_FWC_FF_Y.Id * FOC_MTPA_FWC_FF_Y.Id + FOC_MTPA_FWC_FF_Y.Iq * FOC_MTPA_FWC_FF_Y.Iq) / ROOT2;
+  d.vrms = sqrtf(FOC_MTPA_FWC_FF_Y.Vq * FOC_MTPA_FWC_FF_Y.Vq + FOC_MTPA_FWC_FF_Y.Vd * FOC_MTPA_FWC_FF_Y.Vd) / ROOT2;
   d.throttle_percent = (uint8_t)((d.irms / MOTOR_PEAK_AC) * 100.0f);
 }
 
