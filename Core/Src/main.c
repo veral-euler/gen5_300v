@@ -1435,17 +1435,19 @@ void power_mode_fnr_switch(void)
     // FOC_Basic_FF_U.Drive_State = REVERSE;
   }
 
+  #if THROTTLE_BASED_REF
+  ThrottleMap_SetDirection(&g_throttle_cfg, fnr_state);
+  #endif
+
   if (d.power_pin == GPIO_PIN_RESET) {
     pw_state = SPORTS;
-    #if THROTTLE_BASED_REF
-    ThrottleMap_SetMode(&g_throttle_cfg, SPORTS);
-    #endif
   } else {
     pw_state = ECO;
-    #if THROTTLE_BASED_REF
-    ThrottleMap_SetMode(&g_throttle_cfg, ECO);
-    #endif
   }
+
+  #if THROTTLE_BASED_REF
+  ThrottleMap_SetDriveMode(&g_throttle_cfg, pw_state);
+  #endif
 
   #if CAN_BASED_REF
   if (pw_state == ECO && fnr_state == FORWARD) {

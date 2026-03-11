@@ -1,14 +1,15 @@
 /**
  * @file throttle_map.c
- * @brief Throttle voltage to RPM mapping with ECO/THUNDER mode support
- * @target STM32H743ZIT6
  *
- * Mapping formula (linear):
- *
- *   rpm = (v_mv - v_min) / (v_max - v_min)  *  rpm_cap_active
- *
- * All intermediate math is done in uint64_t to avoid overflow on
- * the H743's 32-bit core without needing floating point.
+ * RPM resolution matrix:
+ * ┌───────────────┬──────────────────────────────────┐
+ * │  Direction    │  Effective RPM Cap               │
+ * ├───────────────┼──────────────────────────────────┤
+ * │  NEUTRAL      │  0 (always)                      │
+ * │  FORWARD ECO  │  rpm_cap_eco                     │
+ * │  FORWARD THU  │  rpm_cap_thunder                 │
+ * │  REVERSE      │  rpm_cap_reverse (ECO/THU ignore)│
+ * └───────────────┴──────────────────────────────────┘
  */
 
 #include "throttle_map.h"
@@ -29,12 +30,24 @@ static inline uint32_t clamp_u32(uint32_t val, uint32_t lo, uint32_t hi)
 }
 
 /**
- * @brief  Return the active RPM cap for the current mode.
+ * @brief  Resolve the active RPM cap from both flags.
+ *         This is the single decision point — direction takes priority.
  */
-static inline uint32_t get_active_rpm_cap(const ThrottleMapConfig_t *cfg)
+static inline uint32_t resolve_rpm_cap(const ThrottleMapConfig_t *cfg)
 {
-    return (cfg->mode == DRIVE_MODE_ECO) ? cfg->rpm_cap_eco
-                                         : cfg->rpm_cap_thunder;
+    switch (cfg->direction)
+    {
+        case DIRECTION_NEUTRAL:
+            return RPM_MIN;
+
+        case DIRECTION_REVERSE:
+            return cfg->rpm_cap_reverse;   /* ECO/THUNDER irrelevant in REVERSE */
+
+        case DIRECTION_FORWARD:
+        default:
+            return (cfg->drive_mode == DRIVE_MODE_ECO) ? cfg->rpm_cap_eco
+                                                        : cfg->rpm_cap_thunder;
+    }
 }
 
 /* ─── Public API ────────────────────────────────────────────────────────────  */
@@ -51,34 +64,38 @@ void ThrottleMap_Init(ThrottleMapConfig_t *cfg)
     cfg->v_max_mv        = THROTTLE_V_MAX_MV;
     cfg->rpm_cap_eco     = RPM_CAP_ECO_DEFAULT;
     cfg->rpm_cap_thunder = RPM_CAP_THUNDER_DEFAULT;
-    cfg->mode            = DRIVE_MODE_ECO;          /* Safe default            */
+    cfg->rpm_cap_reverse = RPM_CAP_REVERSE_DEFAULT;
+    cfg->drive_mode      = DRIVE_MODE_ECO;
+    cfg->direction       = DIRECTION_NEUTRAL;       /* Safe power-on default   */
 }
 
 /**
- * @brief  Dynamically switch between ECO and THUNDER.
- *         RPM cap takes effect on the very next ThrottleMap_GetRPM() call.
- *
- * @param  cfg   Pointer to config struct.
- * @param  mode  DRIVE_MODE_ECO or DRIVE_MODE_THUNDER.
+ * @brief  Switch ECO ↔ THUNDER. Only affects FORWARD direction output.
+ *         Calling this while in REVERSE has no immediate effect on RPM output
+ *         but the new mode is latched and applies instantly if FORWARD is selected.
  */
-void ThrottleMap_SetMode(ThrottleMapConfig_t *cfg, DriveMode_t mode)
+void ThrottleMap_SetDriveMode(ThrottleMapConfig_t *cfg, DriveMode_t mode)
 {
     assert(cfg != NULL);
-    cfg->mode = mode;
+    cfg->drive_mode = mode;
 }
 
 /**
- * @brief  Update the RPM cap for a specific mode at runtime.
- *         Useful for OTA config updates or calibration routines.
- *
- * @param  cfg      Pointer to config struct.
- * @param  mode     Which mode's cap to update.
- * @param  rpm_cap  New RPM cap. Clamped to [0, RPM_ABS_MAX] internally.
+ * @brief  Switch FORWARD / REVERSE / NEUTRAL.
+ *         RPM cap resolves on the very next ThrottleMap_GetRPM() call.
+ */
+void ThrottleMap_SetDirection(ThrottleMapConfig_t *cfg, Direction_t direction)
+{
+    assert(cfg != NULL);
+    cfg->direction = direction;
+}
+
+/**
+ * @brief  Update ECO or THUNDER RPM cap at runtime (e.g. CAN command / OTA).
  */
 void ThrottleMap_SetRpmCap(ThrottleMapConfig_t *cfg, DriveMode_t mode, uint32_t rpm_cap)
 {
     assert(cfg != NULL);
-
     rpm_cap = clamp_u32(rpm_cap, RPM_MIN, RPM_ABS_MAX);
 
     if (mode == DRIVE_MODE_ECO) {
@@ -89,44 +106,47 @@ void ThrottleMap_SetRpmCap(ThrottleMapConfig_t *cfg, DriveMode_t mode, uint32_t 
 }
 
 /**
- * @brief  Map a raw throttle voltage (mV) to a target RPM.
+ * @brief  Update the REVERSE RPM cap at runtime.
+ */
+void ThrottleMap_SetReverseRpmCap(ThrottleMapConfig_t *cfg, uint32_t rpm_cap)
+{
+    assert(cfg != NULL);
+    cfg->rpm_cap_reverse = clamp_u32(rpm_cap, RPM_MIN, RPM_ABS_MAX);
+}
+
+/**
+ * @brief  Map throttle voltage (mV) → target RPM, honouring both flags.
  *
- *         - Voltages below v_min  → 0 RPM   (dead-band / released throttle)
- *         - Voltages above v_max  → rpm_cap  (full throttle, clamped)
- *         - Linear interpolation in between
- *
- * @param  cfg   Pointer to config struct (read-only).
- * @param  v_mv  Raw ADC-derived throttle voltage in millivolts.
- * @return       Target RPM in range [0, active_rpm_cap].
+ * @param  cfg   Config struct (read-only).
+ * @param  v_mv  ADC-derived throttle voltage in millivolts.
+ * @return       Target RPM. Caller should treat this as an unsigned magnitude;
+ *               direction of rotation is conveyed by cfg->direction separately.
  */
 uint32_t ThrottleMap_GetRPM(const ThrottleMapConfig_t *cfg, uint32_t v_mv)
 {
     assert(cfg != NULL);
-    assert(cfg->v_max_mv > cfg->v_min_mv);  /* Guard against bad config        */
+    assert(cfg->v_max_mv > cfg->v_min_mv);
 
-    /* ── 1. Hard clamp voltage to [v_min, v_max] ─────────────────────────── */
+    /* ── 1. Resolve active cap from both flags in one place ──────────────── */
+    uint32_t rpm_cap = resolve_rpm_cap(cfg);
+
+    /* ── 2. NEUTRAL: ignore throttle entirely ────────────────────────────── */
+    if (rpm_cap == RPM_MIN) {
+        return RPM_MIN;
+    }
+
+    /* ── 3. Clamp voltage to hardware range ──────────────────────────────── */
     v_mv = clamp_u32(v_mv, cfg->v_min_mv, cfg->v_max_mv);
 
-    /* ── 2. Dead-band: below minimum → zero RPM ──────────────────────────── */
     if (v_mv <= cfg->v_min_mv) {
         return RPM_MIN;
     }
 
-    /* ── 3. Resolve active RPM cap based on current mode ─────────────────── */
-    uint32_t rpm_cap = get_active_rpm_cap(cfg);
-
-    /* ── 4. Linear map using 64-bit to prevent overflow ──────────────────── *
-     *                                                                         *
-     *   rpm = (v_mv - v_min) * rpm_cap / (v_max - v_min)                    *
-     *                                                                         *
-     *   Max intermediate: (4000 - 900) * 6000 = 18,600,000 → fits uint32,   *
-     *   but use uint64_t for safety if caps are ever raised above 6000.      *
-     * ──────────────────────────────────────────────────────────────────────  */
+    /* ── 4. Linear interpolation (64-bit numerator, safe on H743) ────────── */
     uint64_t numerator   = (uint64_t)(v_mv - cfg->v_min_mv) * rpm_cap;
     uint32_t denominator = cfg->v_max_mv - cfg->v_min_mv;
     uint32_t rpm         = (uint32_t)(numerator / denominator);
 
-    /* ── 5. Final clamp (defensive) ──────────────────────────────────────── */
     return clamp_u32(rpm, RPM_MIN, rpm_cap);
 }
 
@@ -137,7 +157,9 @@ void App_Init(void)
     /* Optional: override caps at startup (e.g., from flash/EEPROM config) */
     ThrottleMap_SetRpmCap(&g_throttle_cfg, DRIVE_MODE_ECO,     ECO_MAX_SPEED);
     ThrottleMap_SetRpmCap(&g_throttle_cfg, DRIVE_MODE_THUNDER, SPORTS_MAX_SPEED);
+    ThrottleMap_SetReverseRpmCap(&g_throttle_cfg, REV_MAX_SPEED);
+    ThrottleMap_SetDirection(&g_throttle_cfg, NEUTRAL);
 
     /* Start in ECO */
-    ThrottleMap_SetMode(&g_throttle_cfg, ECO);
+    ThrottleMap_SetDriveMode(&g_throttle_cfg, ECO);
 }
