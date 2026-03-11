@@ -195,9 +195,12 @@ int main(void)
   RateLimiter_Init(&limiter, 50.0f, 100.0f, 0.0f);
   HAL_Delay(100);
 
-  /*Starting FDCAN2 and Queue Init*/
+  /*Starting FDCAN2, Queue Init and Throttle Init*/
   FDCAN_SETUP();
   CAN_Queue_Init();
+  #if THROTTLE_BASED_REF
+  App_Init();
+  #endif
 
   /*Sending Heartbeat message once at init*/
   _fdcan_transmit_on_can(0x400, 0, heart_beat_init, 0x08);
@@ -240,8 +243,17 @@ int main(void)
     #if OPEN_FOC
     Open_FOC0_U.Speed_ref = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
     #endif
+
     #if CLOSED_FOC
+    #if CAN_BASED_REF
     FOC_Basic_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
+    #endif
+
+    #if THROTTLE_BASED_REF
+    uint32_t target_rpm = ThrottleMap_GetRPM(&g_throttle_cfg, d.thr_v_mv);
+    /* Pass target_rpm into your FOC speed reference */
+    FOC_Basic_FF_U.Ref_Speed_mech_rpm = target_rpm;
+    #endif
     #endif
   }
   /* USER CODE END 3 */
@@ -1425,10 +1437,17 @@ void power_mode_fnr_switch(void)
 
   if (d.power_pin == GPIO_PIN_RESET) {
     pw_state = SPORTS;
+    #if THROTTLE_BASED_REF
+    ThrottleMap_SetMode(&g_throttle_cfg, SPORTS);
+    #endif
   } else {
     pw_state = ECO;
+    #if THROTTLE_BASED_REF
+    ThrottleMap_SetMode(&g_throttle_cfg, ECO);
+    #endif
   }
 
+  #if CAN_BASED_REF
   if (pw_state == ECO && fnr_state == FORWARD) {
     if (d.speed_ref >= ECO_MAX_SPEED) {
       d.speed_ref = ECO_MAX_SPEED;
@@ -1444,6 +1463,7 @@ void power_mode_fnr_switch(void)
       d.speed_ref = REV_MAX_SPEED;
     }
   }
+  #endif
 }
 
 void disable_drive(void) 

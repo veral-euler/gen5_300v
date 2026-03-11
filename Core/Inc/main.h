@@ -39,6 +39,8 @@ extern "C" {
 #define DISABLE_FAULTS		0
 #define VH_CAN_ID			1
 #define DEBUG_CAN_ID		0
+#define CAN_BASED_REF		0
+#define THROTTLE_BASED_REF  1
 
 #define CONFIG_VERSION_MAJOR 		0x05
 #define CONFIG_VERSION_MINOR 		0x00
@@ -68,6 +70,9 @@ extern "C" {
 #include "Eeprom.h"
 #include "Sensor_Disconnection_Checks.h"
 #include "Limit_Errors.h"
+#if THROTTLE_BASED_REF
+#include "throttle_map.h"
+#endif
 #if OPEN_FOC
 #include "Open_FOC0.h"
 #endif
@@ -114,6 +119,7 @@ typedef struct data {
 	uint32_t curr_z_count;
 	uint32_t z_count_diff;
 	uint32_t cycles;
+	uint32_t thr_v_mv;
 	float pack_current;
 	float offset_angle_elec;
 	float speed_ref;

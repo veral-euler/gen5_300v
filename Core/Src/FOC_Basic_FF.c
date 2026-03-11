@@ -642,9 +642,9 @@ void FOC_Basic_FF_step1(void)          /* Sample time: [0.001s, 0.0s] */
     FOC_Basic_FF_Y.Iq_gen = rtb_Sum;
   }
 
-  if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
+  if (fnr_state == FORWARD)
     FOC_Basic_FF_Y.Iq_gen *= 1.0f;
-  else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
+  else if (fnr_state == REVERSE)
     FOC_Basic_FF_Y.Iq_gen *= -1.0f;
   else
     FOC_Basic_FF_Y.Iq_gen = 0.0f;
@@ -762,7 +762,7 @@ void FOC_Basic_FF_initialize(void)
 
     /* Rate limiter settings */
   FOC_Basic_FF_U.Ref_Speed_rate_up = 0.1f * 10000.0f;
-  FOC_Basic_FF_U.Ref_Speed_rate_down = -10.0f * 10000.0f;
+  FOC_Basic_FF_U.Ref_Speed_rate_down = -0.1f * 10000.0f;
   FOC_Basic_FF_U.Rate_limiter.Torque_gen_ramp_up = 100.0f * 10000.0f;
   FOC_Basic_FF_U.Rate_limiter.Torque_gen_ramp_down = -100.0f * 10000.0f;
 
