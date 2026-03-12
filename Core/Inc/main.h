@@ -70,6 +70,8 @@ extern "C" {
 #include "Eeprom.h"
 #include "Sensor_Disconnection_Checks.h"
 #include "Limit_Errors.h"
+#include "Helper_Functions.h"
+#include "Peripheral_Init.h"
 #if THROTTLE_BASED_REF
 #include "throttle_map.h"
 #endif
@@ -266,10 +268,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-void power_mode_fnr_switch(void);
-void set_Initial_angle(void);
-void disable_drive(void);
-void rt_OneStep(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
