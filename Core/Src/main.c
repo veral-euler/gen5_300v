@@ -1230,6 +1230,50 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     FOC_MTPA_FWC_FF_U.Ld = can_d.can_Ld;
     FOC_MTPA_FWC_FF_U.Lq = can_d.can_Lq;
   }
+
+  if (RxMessageBuf.Identifier == 0x104) {
+    can_d.canFW_PID.Kp = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-2f;
+    can_d.canFW_PID.Ki = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-2f;
+    can_d.canFW_PID.Kd = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-5f;
+
+    /* Setting FWC PID params on CAN */
+    FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Kp_FWC_PID_MTPA = can_d.canFW_PID.Kp;
+    FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Ki_FWC_PID_MTPA = can_d.canFW_PID.Ki;
+    FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Kd_FWC_PID_MTPA = can_d.canFW_PID.Kd;
+  }
+
+  if (RxMessageBuf.Identifier == 0x105) {
+    can_d.canSpeed_PID.Kp = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-2f;
+    can_d.canSpeed_PID.Ki = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-2f;
+    can_d.canSpeed_PID.Kd = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-5f;
+
+    /* Setting Speed PID params on CAN */
+    FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kp_speed_PID_MTPA = can_d.canSpeed_PID.Kp;
+    FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Ki_speed_PID_MTPA = can_d.canSpeed_PID.Ki;
+    FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA = can_d.canSpeed_PID.Kd;
+  }
+
+  if (RxMessageBuf.Identifier == 0x106) {
+    can_d.canId_PID.Kp = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-2f;
+    can_d.canId_PID.Ki = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-2f;
+    can_d.canId_PID.Kd = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-5f;
+
+    /* Setting ID PID params on CAN */
+    FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Kp_flux_PID_MTPA = can_d.canId_PID.Kp;
+    FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA = can_d.canId_PID.Ki;
+    FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Kd_flux_PID_MTPA = can_d.canId_PID.Kd;
+  }
+
+  if (RxMessageBuf.Identifier == 0x107) {
+    can_d.canIq_PID.Kp = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-2f;
+    can_d.canIq_PID.Ki = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-2f;
+    can_d.canIq_PID.Kd = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-5f;
+
+    /* Setting IQ PID params on CAN */
+    FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kp_torque_PID_MTPA = can_d.canIq_PID.Kp;
+    FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Ki_torque_PID_MTPA = can_d.canIq_PID.Ki;
+    FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kd_torque_PID_MTPA = can_d.canIq_PID.Kd;
+  }
 }
 
 /* FDCAN TX Complete Callback - automatically sends next message */
