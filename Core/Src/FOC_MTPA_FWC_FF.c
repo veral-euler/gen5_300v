@@ -246,6 +246,18 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
   FOC_MTPA_FWC_FF_Y.Id_ref_final *= FOC_MTPA_FWC_FF_U.Ld *
     FOC_MTPA_FWC_FF_Y.Id_ref_MTPA + FOC_MTPA_FWC_FF_U.Lambda;
 
+  if (FOC_MTPA_FWC_FF_Y.Id >= SVM_VOLTAGE_LIMIT) {
+    FOC_MTPA_FWC_FF_Y.Id = SVM_VOLTAGE_LIMIT;
+  } else if (FOC_MTPA_FWC_FF_Y.Id <= -SVM_VOLTAGE_LIMIT) {
+    FOC_MTPA_FWC_FF_Y.Id = -SVM_VOLTAGE_LIMIT;
+  }
+
+  if (FOC_MTPA_FWC_FF_Y.Id_ref_final >= SVM_VOLTAGE_LIMIT) {
+    FOC_MTPA_FWC_FF_Y.Id_ref_final = SVM_VOLTAGE_LIMIT;
+  } else if (FOC_MTPA_FWC_FF_Y.Id_ref_final <= -SVM_VOLTAGE_LIMIT) {
+    FOC_MTPA_FWC_FF_Y.Id_ref_final = -SVM_VOLTAGE_LIMIT;
+  }
+
   /* Sqrt: '<S160>/Sqrt' incorporates:
    *  Math: '<S160>/Square'
    *  Math: '<S160>/Square1'
@@ -253,6 +265,8 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    */
   FOC_MTPA_FWC_FF_Y.V_s = sqrt(FOC_MTPA_FWC_FF_Y.Id * FOC_MTPA_FWC_FF_Y.Id +
     FOC_MTPA_FWC_FF_Y.Id_ref_final * FOC_MTPA_FWC_FF_Y.Id_ref_final);
+
+  FOC_MTPA_FWC_FF_Y.V_s = fmin(FOC_MTPA_FWC_FF_Y.V_s, (2.0f * FOC_MTPA_FWC_FF_Y.V_max));
 
   /* Chart: '<S160>/Chart' */
   guard1 = false;
@@ -326,7 +340,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      *  Switch: '<S204>/Switch'
      *  Switch: '<S204>/Switch2'
      * */
-    rtb_IProdOut = FOC_MTPA_FWC_FF_Y.V_s - FOC_MTPA_FWC_FF_Y.V_max;
+    rtb_IProdOut = FOC_MTPA_FWC_FF_Y.V_max - FOC_MTPA_FWC_FF_Y.V_s;
     rtb_NProdOut_l = (rtb_IProdOut *
                       FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Kd_FWC_PID_MTPA -
                       FOC_MTPA_FWC_FF_DW.Filter_DSTATE_e) *
@@ -680,7 +694,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Gain: '<S30>/wm_pu2si_mech2elec'
    *  Inport: '<Root>/Actual Speed_mech_rpm'
    */
-  FOC_MTPA_FWC_FF_Y.Iq = 3.0 * FOC_MTPA_FWC_FF_U.MtrSpd;
+  FOC_MTPA_FWC_FF_Y.Iq = POLEPAIRS * FOC_MTPA_FWC_FF_U.MtrSpd;
 
   /* Gain: '<S30>/NegSign' incorporates:
    *  Inport: '<Root>/Lq'
@@ -1011,10 +1025,10 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA +
     (FOC_MTPA_FWC_FF_Y.Vd_PID - FOC_MTPA_FWC_FF_Y.Vd_PID)) +
     (FOC_MTPA_FWC_FF_Y.Vd_PID - rtb_IProdOut)) * 0.0001;
-  if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE > 58.0) {
-    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE = 58.0;
-  } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE < -58.0) {
-    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE = -58.0;
+  if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE > SVM_VOLTAGE_LIMIT) {
+    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE = SVM_VOLTAGE_LIMIT;
+  } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE < -SVM_VOLTAGE_LIMIT) {
+    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE = -SVM_VOLTAGE_LIMIT;
   }
 
   /* End of Update for DiscreteIntegrator: '<S123>/Integrator' */
@@ -1038,10 +1052,10 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_Y.Vq_PID) * -10.0 + FOC_MTPA_FWC_FF_Y.Iq_error *
     FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Ki_torque_PID_MTPA) +
     (FOC_MTPA_FWC_FF_Y.Vq_PID - rtb_Add_e)) * 0.0001;
-  if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h > 58.0) {
-    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h = 58.0;
-  } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h < -58.0) {
-    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h = -58.0;
+  if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h > SVM_VOLTAGE_LIMIT) {
+    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h = SVM_VOLTAGE_LIMIT;
+  } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h < -SVM_VOLTAGE_LIMIT) {
+    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h = -SVM_VOLTAGE_LIMIT;
   }
 
   /* End of Update for DiscreteIntegrator: '<S69>/Integrator' */
@@ -1129,10 +1143,10 @@ void FOC_MTPA_FWC_FF_step1(void)       /* Sample time: [0.001s, 0.0s] */
     FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Ki_speed_PID_MTPA +
     (FOC_MTPA_FWC_FF_B.Switch2 - FOC_MTPA_FWC_FF_B.Switch2)) +
     (FOC_MTPA_FWC_FF_B.Switch2 - rtb_Sum_o)) * 0.001;
-  if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b > 500.0) {
-    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b = 500.0;
-  } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b < -500.0) {
-    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b = -500.0;
+  if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b > MOTOR_PEAK_AC) {
+    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b = MOTOR_PEAK_AC;
+  } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b < -MOTOR_PEAK_AC) {
+    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b = -MOTOR_PEAK_AC;
   }
 
   /* End of Update for DiscreteIntegrator: '<S256>/Integrator' */
@@ -1183,36 +1197,36 @@ void FOC_MTPA_FWC_FF_initialize(void)
   FOC_MTPA_FWC_FF_U.Rate_limiter.Id_ramp_down = -50.0f * 10000.0f;
 
   /* FWC PID Values */
-  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Kp_FWC_PID_MTPA = 0.01f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Ki_FWC_PID_MTPA = 0.02f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Kd_FWC_PID_MTPA = 0.00001f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Filter_FWC_PID_MTPA = 5.0f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_Up_limit = FWC_LIMIT;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_Low_limit = -FWC_LIMIT;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Kp_FWC_PID_MTPA = can_d.canFW_PID.Kp;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Ki_FWC_PID_MTPA = can_d.canFW_PID.Ki;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Kd_FWC_PID_MTPA = can_d.canFW_PID.Kd;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Filter_FWC_PID_MTPA = can_d.canFW_PID.Kd_Filter;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_Up_limit = can_d.canFW_PID.Output_Up_Limit;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_Low_limit = can_d.canFW_PID.Output_Low_Limit;
 
   /* Speed PID Values */
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA = MOTOR_PEAK_AC;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_speed_PID_MTPA = 0.0f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kp_speed_PID_MTPA = 4.0f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Ki_speed_PID_MTPA = 8.0f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA = 0.00001f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Filter_speed_PID_MTPA = 5.0f;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA = can_d.canSpeed_PID.Output_Up_Limit;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_speed_PID_MTPA = can_d.canSpeed_PID.Output_Low_Limit;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kp_speed_PID_MTPA = can_d.canSpeed_PID.Kp;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Ki_speed_PID_MTPA = can_d.canSpeed_PID.Ki;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA = can_d.canSpeed_PID.Kd;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Filter_speed_PID_MTPA = can_d.canSpeed_PID.Kd_Filter;
 
   /* Iq PID Values */
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_torque_PID = SVM_VOLTAGE_LIMIT;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_torque_PID = -SVM_VOLTAGE_LIMIT;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kp_torque_PID_MTPA = 0.1f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Ki_torque_PID_MTPA = 7.0f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kd_torque_PID_MTPA = 0.00001f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Filter_torque_PID_MTPA = 5.0f;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_torque_PID = can_d.canIq_PID.Output_Up_Limit;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_torque_PID = can_d.canIq_PID.Output_Low_Limit;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kp_torque_PID_MTPA = can_d.canIq_PID.Kp;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Ki_torque_PID_MTPA = can_d.canIq_PID.Ki;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kd_torque_PID_MTPA = can_d.canId_PID.Kd;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Filter_torque_PID_MTPA = can_d.canIq_PID.Kd_Filter;
 
   /* Id PID Values */
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_flux_PID = SVM_VOLTAGE_LIMIT;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_flux_PID = -SVM_VOLTAGE_LIMIT;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Kp_flux_PID_MTPA = 0.2f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA = 6.0f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Kd_flux_PID_MTPA = 0.00001f;
-  FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Filter_flux_PID_MTPA = 5.0f;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_flux_PID = can_d.canId_PID.Output_Up_Limit;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_flux_PID = can_d.canId_PID.Output_Low_Limit;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Kp_flux_PID_MTPA = can_d.canId_PID.Kp;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA = can_d.canId_PID.Ki;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Kd_flux_PID_MTPA = can_d.canId_PID.Kd;
+  FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Filter_flux_PID_MTPA = can_d.canId_PID.Kd_Filter;
 
   /* IIR Filter Coefficients */
   FOC_MTPA_FWC_FF_U.IIR_Filter_Coefficient.Id_Filter_switch = 1.0f;

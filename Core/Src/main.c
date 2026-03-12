@@ -90,8 +90,8 @@ power_mode_t pw_state = ECO;
 currSession cS = ANGLE_CALIB_DONE;
 errors_nums err = NO_ERROR;
 errors er = {0};
-can_data_t can_d = {.can_Lambda = LAMBDA, .can_Ld = LD, .can_Lq = LQ};
-data d = {.Kvf = V_F_RATIO, .speed_ref = 0.0f, .freq = 0.0f, .t_req = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vpp = 0.0f, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
+can_data_t can_d = {.can_Lambda = LAMBDA, .can_Ld = LD, .can_Lq = LQ, .canFW_PID.Kp = FW_KP, .canFW_PID.Ki = FW_KI, .canFW_PID.Kd = FW_KD, .canFW_PID.Kd_Filter = FW_KD_FILTER, .canFW_PID.Output_Up_Limit = FW_PID_OUT_UPL, .canFW_PID.Output_Low_Limit = FW_PID_OUT_LOWL, .canSpeed_PID.Kp = SPEED_KP, .canSpeed_PID.Ki = SPEED_KI, .canSpeed_PID.Kd = SPEED_KD, .canSpeed_PID.Kd_Filter = SPEED_KD_FILTER, .canSpeed_PID.Output_Up_Limit = SPEED_PID_OUT_UPL, .canSpeed_PID.Output_Low_Limit = SPEED_PID_OUT_LOWL, .canId_PID.Kp = ID_KP, .canId_PID.Ki = ID_KI, .canId_PID.Kd = ID_KD, .canId_PID.Kd_Filter = ID_KD_FILTER, .canId_PID.Output_Up_Limit = ID_PID_OUT_UPL, .canId_PID.Output_Low_Limit = ID_PID_OUT_LOWL, .canIq_PID.Kp = IQ_KP, .canIq_PID.Ki = IQ_KI, .canIq_PID.Kd = IQ_KD, .canIq_PID.Kd_Filter = IQ_KD_FILTER, .canIq_PID.Output_Up_Limit = IQ_PID_OUT_UPL, .canIq_PID.Output_Low_Limit = IQ_PID_OUT_LOWL};
+data d = {.Kvf = V_F_RATIO, .speed_ref = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
 /* USER CODE END 0 */
 
 /**

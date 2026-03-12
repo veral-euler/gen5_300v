@@ -157,10 +157,23 @@ typedef struct data {
 	float throttle_v;
 } data;
 
+typedef struct foc_pid_t {
+	float Kp;
+	float Ki;
+	float Kd;
+	float Kd_Filter;
+	float Output_Up_Limit;
+	float Output_Low_Limit;
+} foc_pid_t;
+
 typedef struct can_data_t {
 	float can_Ld;
 	float can_Lq;
 	float can_Lambda;
+	foc_pid_t canFW_PID;
+	foc_pid_t canSpeed_PID;
+	foc_pid_t canId_PID;
+	foc_pid_t canIq_PID;
 } can_data_t;
 
 typedef struct errors {
@@ -328,6 +341,36 @@ void rt_OneStep(void);
 #define TEMP_SENS_FAULT_COUNT 	65000
 #define ENCODER_CHECK_MS		20
 #define ENCODER_FAULT_MAX_COUNT 5
+
+/* FOC PID Default Settings */
+/* FW PID */
+#define FW_KP					0.00001f
+#define FW_KI					0.00002f
+#define FW_KD					0.00001f
+#define FW_KD_FILTER			5.0f
+#define FW_PID_OUT_UPL			FWC_LIMIT
+#define FW_PID_OUT_LOWL			-FWC_LIMIT
+/* Speed PID */
+#define SPEED_KP				4.0f
+#define SPEED_KI				8.0f
+#define SPEED_KD				0.00001f
+#define SPEED_KD_FILTER			5.0f
+#define SPEED_PID_OUT_UPL		MOTOR_PEAK_AC
+#define SPEED_PID_OUT_LOWL		0.0f
+/* ID PID */
+#define ID_KP					0.4f
+#define ID_KI					6.0f
+#define ID_KD					0.00001f
+#define ID_KD_FILTER			5.0f
+#define ID_PID_OUT_UPL			SVM_VOLTAGE_LIMIT
+#define ID_PID_OUT_LOWL			-SVM_VOLTAGE_LIMIT
+/* IQ PID */
+#define IQ_KP					0.3f
+#define IQ_KI					7.0f
+#define IQ_KD					0.00001f
+#define IQ_KD_FILTER			5.0f
+#define IQ_PID_OUT_UPL			SVM_VOLTAGE_LIMIT
+#define IQ_PID_OUT_LOWL			-SVM_VOLTAGE_LIMIT
 
 typedef enum ADC2_CHANNELS {
 	PHASE_U,

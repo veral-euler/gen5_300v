@@ -30,7 +30,7 @@ typedef enum {
 
 /* ─── Direction (FORWARD / REVERSE / NEUTRAL) ───────────────────────────────  */
 typedef enum {
-    DIRECTION_NEUTRAL = 0,
+    DIRECTION_NEUTRAL = 3,
     DIRECTION_FORWARD = 1,
     DIRECTION_REVERSE = 2
 } Direction_t;
