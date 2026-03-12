@@ -118,6 +118,10 @@ set(APP_SOURCES
     Core/Src/Sensor_Disconnection_Checks.c
     Core/Src/Speed_Sensing.c
     Core/Src/Limit_Errors.c
+    Core/Src/FOC_MTPA_FWC_FF.c
+    Core/Src/throttle_map.c
+    Core/Src/Helper_Functions.c
+    Core/Src/Peripheral_Init.c
     Core/Startup/startup_stm32h743zitx.s   # ← generated startup file
     # Core/Src/myfile.c
     # Core/Src/mydriver.cpp
