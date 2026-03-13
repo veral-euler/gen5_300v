@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_MTPA_FWC_FF'.
  *
- * Model version                  : 18.320
+ * Model version                  : 18.322
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Thu Mar 12 19:41:11 2026
+ * C/C++ source code generated on : Fri Mar 13 14:25:46 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -157,8 +157,8 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    */
   rtb_UkYk1 = FOC_MTPA_FWC_FF_B.Switch2 - FOC_MTPA_FWC_FF_DW.Delay_DSTATE;
 
-  /* Switch: '<S171>/Switch2' incorporates:
-   *  RelationalOperator: '<S171>/LowerRelop1'
+  /* Switch: '<S175>/Switch2' incorporates:
+   *  RelationalOperator: '<S175>/LowerRelop1'
    */
   if (!(rtb_UkYk1 > FOC_MTPA_FWC_FF_Y.Id_error)) {
     /* Product: '<S156>/delta fall limit' incorporates:
@@ -168,18 +168,18 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_Y.Id_error = FOC_MTPA_FWC_FF_B.sampletime *
       FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_down;
 
-    /* Switch: '<S171>/Switch' incorporates:
-     *  RelationalOperator: '<S171>/UpperRelop'
+    /* Switch: '<S175>/Switch' incorporates:
+     *  RelationalOperator: '<S175>/UpperRelop'
      */
     if (!(rtb_UkYk1 < FOC_MTPA_FWC_FF_Y.Id_error)) {
       /* Product: '<S156>/delta fall limit' */
       FOC_MTPA_FWC_FF_Y.Id_error = rtb_UkYk1;
     }
 
-    /* End of Switch: '<S171>/Switch' */
+    /* End of Switch: '<S175>/Switch' */
   }
 
-  /* End of Switch: '<S171>/Switch2' */
+  /* End of Switch: '<S175>/Switch2' */
 
   /* Sum: '<S8>/Difference Inputs2' incorporates:
    *  Delay: '<S8>/Delay'
@@ -216,20 +216,20 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
   rtb_UkYk1 = fabsf(2.0F * rtb_UkYk1_k) / (float)((float)
     (FOC_MTPA_FWC_FF_U.Lambda * FOC_MTPA_FWC_FF_U.p) * 3.0);
 
-  /* Switch: '<S167>/Switch2' incorporates:
+  /* Switch: '<S168>/Switch2' incorporates:
    *  Inport: '<Root>/Id_Iq_MTPA_limit'
-   *  RelationalOperator: '<S167>/LowerRelop1'
-   *  RelationalOperator: '<S167>/UpperRelop'
-   *  Switch: '<S167>/Switch'
+   *  RelationalOperator: '<S168>/LowerRelop1'
+   *  RelationalOperator: '<S168>/UpperRelop'
+   *  Switch: '<S168>/Switch'
    */
   if (rtb_UkYk1 > FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_up_limit) {
     rtb_UkYk1 = FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_up_limit;
   } else if (rtb_UkYk1 < FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_low_limit) {
-    /* Switch: '<S167>/Switch' */
+    /* Switch: '<S168>/Switch' */
     rtb_UkYk1 = FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_low_limit;
   }
 
-  /* End of Switch: '<S167>/Switch2' */
+  /* End of Switch: '<S168>/Switch2' */
 
   /* Math: '<S155>/Math Function2' */
   rtb_UkYk1 *= rtb_UkYk1;
@@ -245,11 +245,11 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     (FOC_MTPA_FWC_FF_Y.Id_ref_final * FOC_MTPA_FWC_FF_Y.Id_ref_final + 0.5F *
      rtb_UkYk1));
 
-  /* Switch: '<S166>/Switch2' incorporates:
+  /* Switch: '<S167>/Switch2' incorporates:
    *  Inport: '<Root>/Id_Iq_MTPA_limit'
-   *  RelationalOperator: '<S166>/LowerRelop1'
-   *  RelationalOperator: '<S166>/UpperRelop'
-   *  Switch: '<S166>/Switch'
+   *  RelationalOperator: '<S167>/LowerRelop1'
+   *  RelationalOperator: '<S167>/UpperRelop'
+   *  Switch: '<S167>/Switch'
    */
   if (FOC_MTPA_FWC_FF_Y.Id_ref_MTPA >
       FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_up_limit) {
@@ -259,13 +259,13 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
   } else if (FOC_MTPA_FWC_FF_Y.Id_ref_MTPA <
              FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_low_limit) {
     /* Sum: '<S155>/Subtract' incorporates:
-     *  Switch: '<S166>/Switch'
+     *  Switch: '<S167>/Switch'
      */
     FOC_MTPA_FWC_FF_Y.Id_ref_MTPA =
       FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_low_limit;
   }
 
-  /* End of Switch: '<S166>/Switch2' */
+  /* End of Switch: '<S167>/Switch2' */
 
   /* Sqrt: '<S155>/Sqrt1' incorporates:
    *  Abs: '<S155>/Abs'
@@ -308,7 +308,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Math: '<S160>/Square'
    *  Math: '<S160>/Square1'
    *  Sqrt: '<S160>/Sqrt'
-   *  Sqrt: '<S163>/Sqrt'
+   *  Sqrt: '<S164>/Sqrt'
    *  Sum: '<S160>/Add1'
    */
   FOC_MTPA_FWC_FF_Y.V_s = sqrtf(rtb_UkYk1 * rtb_UkYk1 + rtb_V_qo * rtb_V_qo);
@@ -364,39 +364,38 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      *  ActionPort: '<S154>/Action Port'
      */
     /* If: '<S7>/If' incorporates:
-     *  Constant: '<S161>/Constant'
-     *  Constant: '<S161>/Constant1'
-     *  Constant: '<S161>/Modulation index threshold'
-     *  Constant: '<S165>/Constant1'
-     *  DiscreteIntegrator: '<S161>/Discrete-Time Integrator'
-     *  Fcn: '<S162>/x->r'
-     *  Fcn: '<S162>/x->theta'
-     *  Fcn: '<S164>/r->x'
-     *  Fcn: '<S164>/theta->y'
-     *  Gain: '<S161>/Gain'
-     *  Gain: '<S161>/Gain1'
+     *  Constant: '<S162>/Constant'
+     *  Constant: '<S162>/Constant1'
+     *  Constant: '<S162>/Modulation index threshold'
+     *  Constant: '<S166>/Constant1'
+     *  DiscreteIntegrator: '<S162>/Discrete-Time Integrator'
+     *  Fcn: '<S163>/x->r'
+     *  Fcn: '<S163>/x->theta'
+     *  Fcn: '<S165>/r->x'
+     *  Fcn: '<S165>/theta->y'
+     *  Gain: '<S162>/Gain'
+     *  Gain: '<S162>/Gain1'
      *  Merge: '<S7>/Merge'
-     *  Product: '<S161>/Product'
-     *  Product: '<S163>/Product'
-     *  Saturate: '<S161>/Saturation'
+     *  Product: '<S162>/Product'
+     *  Product: '<S164>/Product'
+     *  Saturate: '<S162>/Saturation'
      *  SignalConversion generated from: '<S154>/Out1'
-     *  Sum: '<S161>/Sum'
-     *  Sum: '<S161>/Sum1'
-     *  Sum: '<S161>/Sum2'
-     *  Sum: '<S161>/Sum3'
-     *  Sum: '<S161>/Sum4'
-     *  Switch: '<S165>/Switch'
-     *  UnitDelay: '<S161>/Unit Delay'
+     *  Sum: '<S162>/Sum'
+     *  Sum: '<S162>/Sum1'
+     *  Sum: '<S162>/Sum2'
+     *  Sum: '<S162>/Sum3'
+     *  Sum: '<S162>/Sum4'
+     *  Switch: '<S166>/Switch'
+     *  UnitDelay: '<S162>/Unit Delay'
      */
     if (FOC_MTPA_FWC_FF_Y.V_max > 0.1F) {
       rtb_UkYk1_k = FOC_MTPA_FWC_FF_Y.V_max;
     } else {
       rtb_UkYk1_k = 0.1F;
     }
-    
-    /* Kfw and Kaw = make it user configurable */
+
     FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE += ((float)(1.0 -
-      FOC_MTPA_FWC_FF_Y.V_s / rtb_UkYk1_k) * d.Kfw + d.Kaw *
+      FOC_MTPA_FWC_FF_Y.V_s / rtb_UkYk1_k) * can_d.Kfw + can_d.Kaw *
       FOC_MTPA_FWC_FF_DW.UnitDelay_DSTATE_p) * 0.0001F;
     if (FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE > 1.0F) {
       rtb_UkYk1 = 1.0F;
@@ -421,6 +420,55 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
 
   /* End of Chart: '<S160>/Chart' */
 
+  /* If: '<S161>/If' incorporates:
+   *  Inport: '<Root>/Drive_State'
+   */
+  if (FOC_MTPA_FWC_FF_U.Drive_State == 1.0F) {
+    /* Outputs for IfAction SubSystem: '<S161>/If Action Subsystem' incorporates:
+     *  ActionPort: '<S172>/Action Port'
+     */
+    /* SignalConversion generated from: '<S172>/Id_LUT' incorporates:
+     *  Merge: '<S161>/Merge'
+     */
+    FOC_MTPA_FWC_FF_B.Merge_n[0] = FOC_MTPA_FWC_FF_B.Merge[0];
+
+    /* SignalConversion generated from: '<S172>/Iq_LUT' incorporates:
+     *  Merge: '<S161>/Merge'
+     */
+    FOC_MTPA_FWC_FF_B.Merge_n[1] = FOC_MTPA_FWC_FF_B.Merge[1];
+
+    /* End of Outputs for SubSystem: '<S161>/If Action Subsystem' */
+  } else if (FOC_MTPA_FWC_FF_U.Drive_State == 2.0F) {
+    /* Outputs for IfAction SubSystem: '<S161>/If Action Subsystem1' incorporates:
+     *  ActionPort: '<S173>/Action Port'
+     */
+    /* Gain: '<S173>/Gain' incorporates:
+     *  Merge: '<S161>/Merge'
+     */
+    FOC_MTPA_FWC_FF_B.Merge_n[1] = -FOC_MTPA_FWC_FF_B.Merge[1];
+
+    /* SignalConversion generated from: '<S173>/Id_LUT' incorporates:
+     *  Merge: '<S161>/Merge'
+     */
+    FOC_MTPA_FWC_FF_B.Merge_n[0] = FOC_MTPA_FWC_FF_B.Merge[0];
+
+    /* End of Outputs for SubSystem: '<S161>/If Action Subsystem1' */
+  } else {
+    /* Outputs for IfAction SubSystem: '<S161>/If Action Subsystem2' incorporates:
+     *  ActionPort: '<S174>/Action Port'
+     */
+    /* Merge: '<S161>/Merge' incorporates:
+     *  Constant: '<S174>/Constant'
+     *  SignalConversion generated from: '<S174>/Out1'
+     */
+    FOC_MTPA_FWC_FF_B.Merge_n[0] = 0.0F;
+    FOC_MTPA_FWC_FF_B.Merge_n[1] = 0.0F;
+
+    /* End of Outputs for SubSystem: '<S161>/If Action Subsystem2' */
+  }
+
+  /* End of If: '<S161>/If' */
+
   /* Delay: '<S156>/Delay' */
   if (FOC_MTPA_FWC_FF_DW.icLoad_p) {
     /* Sum: '<S156>/Difference Inputs2'
@@ -429,7 +477,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      *
      *  Add in CPU
      */
-    FOC_MTPA_FWC_FF_DW.Delay_DSTATE_h = FOC_MTPA_FWC_FF_B.Merge[0];
+    FOC_MTPA_FWC_FF_DW.Delay_DSTATE_h = FOC_MTPA_FWC_FF_B.Merge_n[0];
   }
 
   /* Product: '<S156>/delta fall limit' incorporates:
@@ -450,10 +498,10 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *
    *  Add in CPU
    */
-  rtb_UkYk1 = FOC_MTPA_FWC_FF_B.Merge[0] - FOC_MTPA_FWC_FF_DW.Delay_DSTATE_h;
+  rtb_UkYk1 = FOC_MTPA_FWC_FF_B.Merge_n[0] - FOC_MTPA_FWC_FF_DW.Delay_DSTATE_h;
 
-  /* Switch: '<S168>/Switch2' incorporates:
-   *  RelationalOperator: '<S168>/LowerRelop1'
+  /* Switch: '<S169>/Switch2' incorporates:
+   *  RelationalOperator: '<S169>/LowerRelop1'
    */
   if (!(rtb_UkYk1 > FOC_MTPA_FWC_FF_Y.Id_error)) {
     /* Product: '<S156>/delta fall limit' incorporates:
@@ -466,18 +514,18 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_Y.Id_error = 0.0001F *
       FOC_MTPA_FWC_FF_U.Rate_limiter.Id_ramp_down;
 
-    /* Switch: '<S168>/Switch' incorporates:
-     *  RelationalOperator: '<S168>/UpperRelop'
+    /* Switch: '<S169>/Switch' incorporates:
+     *  RelationalOperator: '<S169>/UpperRelop'
      */
     if (!(rtb_UkYk1 < FOC_MTPA_FWC_FF_Y.Id_error)) {
       /* Product: '<S156>/delta fall limit' */
       FOC_MTPA_FWC_FF_Y.Id_error = rtb_UkYk1;
     }
 
-    /* End of Switch: '<S168>/Switch' */
+    /* End of Switch: '<S169>/Switch' */
   }
 
-  /* End of Switch: '<S168>/Switch2' */
+  /* End of Switch: '<S169>/Switch2' */
 
   /* Sum: '<S156>/Difference Inputs2' incorporates:
    *  Delay: '<S156>/Delay'
@@ -657,7 +705,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      *
      *  Add in CPU
      */
-    FOC_MTPA_FWC_FF_DW.Delay_DSTATE_b = FOC_MTPA_FWC_FF_B.Merge[1];
+    FOC_MTPA_FWC_FF_DW.Delay_DSTATE_b = FOC_MTPA_FWC_FF_B.Merge_n[1];
   }
 
   /* Product: '<S157>/delta fall limit' incorporates:
@@ -678,10 +726,10 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *
    *  Add in CPU
    */
-  rtb_UkYk1_k = FOC_MTPA_FWC_FF_B.Merge[1] - FOC_MTPA_FWC_FF_DW.Delay_DSTATE_b;
+  rtb_UkYk1_k = FOC_MTPA_FWC_FF_B.Merge_n[1] - FOC_MTPA_FWC_FF_DW.Delay_DSTATE_b;
 
-  /* Switch: '<S169>/Switch2' incorporates:
-   *  RelationalOperator: '<S169>/LowerRelop1'
+  /* Switch: '<S170>/Switch2' incorporates:
+   *  RelationalOperator: '<S170>/LowerRelop1'
    */
   if (!(rtb_UkYk1_k > FOC_MTPA_FWC_FF_Y.Iq_ref_final)) {
     /* Product: '<S157>/delta fall limit' incorporates:
@@ -694,18 +742,18 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_Y.Iq_ref_final = 0.0001F *
       FOC_MTPA_FWC_FF_U.Rate_limiter.Iq_ramp_down;
 
-    /* Switch: '<S169>/Switch' incorporates:
-     *  RelationalOperator: '<S169>/UpperRelop'
+    /* Switch: '<S170>/Switch' incorporates:
+     *  RelationalOperator: '<S170>/UpperRelop'
      */
     if (!(rtb_UkYk1_k < FOC_MTPA_FWC_FF_Y.Iq_ref_final)) {
       /* Product: '<S157>/delta fall limit' */
       FOC_MTPA_FWC_FF_Y.Iq_ref_final = rtb_UkYk1_k;
     }
 
-    /* End of Switch: '<S169>/Switch' */
+    /* End of Switch: '<S170>/Switch' */
   }
 
-  /* End of Switch: '<S169>/Switch2' */
+  /* End of Switch: '<S170>/Switch2' */
 
   /* Sum: '<S157>/Difference Inputs2' incorporates:
    *  Delay: '<S157>/Delay'
@@ -1012,19 +1060,30 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *   */
   rtb_Gain = FOC_MTPA_FWC_FF_U.Ref_Speed_rate_up * 0.0001F;
 
+  /* Switch: '<S1>/Switch' incorporates:
+   *  Constant: '<S1>/Constant'
+   *  Inport: '<Root>/Drive_State'
+   *  Inport: '<Root>/Ref_Speed_mech_rpm'
+   */
+  if (FOC_MTPA_FWC_FF_U.Drive_State > 2.0F) {
+    rtb_TrigonometricFunction_tmp = 0.0;
+  } else {
+    rtb_TrigonometricFunction_tmp = FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm;
+  }
+
   /* Sum: '<S3>/Difference Inputs1' incorporates:
    *  Delay: '<S3>/Delay'
-   *  Inport: '<Root>/Ref_Speed_mech_rpm'
+   *  Switch: '<S1>/Switch'
    *
    * Block description for '<S3>/Difference Inputs1':
    *
    *  Add in CPU
    */
-  rtb_add_c = (float)(FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm -
+  rtb_add_c = (float)(rtb_TrigonometricFunction_tmp -
                       FOC_MTPA_FWC_FF_DW.Delay_DSTATE_c);
 
-  /* Switch: '<S226>/Switch2' incorporates:
-   *  RelationalOperator: '<S226>/LowerRelop1'
+  /* Switch: '<S230>/Switch2' incorporates:
+   *  RelationalOperator: '<S230>/LowerRelop1'
    */
   if (!(rtb_add_c > rtb_Gain)) {
     /* Product: '<S3>/delta fall limit' incorporates:
@@ -1036,17 +1095,17 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      *   */
     rtb_Gain = 0.0001F * FOC_MTPA_FWC_FF_U.Ref_Speed_rate_down;
 
-    /* Switch: '<S226>/Switch' incorporates:
-     *  RelationalOperator: '<S226>/UpperRelop'
+    /* Switch: '<S230>/Switch' incorporates:
+     *  RelationalOperator: '<S230>/UpperRelop'
      */
     if (!(rtb_add_c < rtb_Gain)) {
       rtb_Gain = rtb_add_c;
     }
 
-    /* End of Switch: '<S226>/Switch' */
+    /* End of Switch: '<S230>/Switch' */
   }
 
-  /* End of Switch: '<S226>/Switch2' */
+  /* End of Switch: '<S230>/Switch2' */
 
   /* Sum: '<S3>/Difference Inputs2' incorporates:
    *  Delay: '<S3>/Delay'
@@ -1133,52 +1192,52 @@ void FOC_MTPA_FWC_FF_step1(void)       /* Sample time: [0.001s, 0.0s] */
   float rtb_NProdOut_j;
   float rtb_Sum_o;
 
-  /* Product: '<S210>/NProd Out' incorporates:
-   *  DiscreteIntegrator: '<S202>/Filter'
+  /* Product: '<S214>/NProd Out' incorporates:
+   *  DiscreteIntegrator: '<S206>/Filter'
    *  Inport: '<Root>/MTPA_PID'
    *  Outport: '<Root>/Speed_error'
-   *  Product: '<S200>/DProd Out'
-   *  Sum: '<S202>/SumD'
+   *  Product: '<S204>/DProd Out'
+   *  Sum: '<S206>/SumD'
    */
   rtb_NProdOut_j = (FOC_MTPA_FWC_FF_Y.Speed_error *
                     FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA
                     - FOC_MTPA_FWC_FF_DW.Filter_DSTATE_i) *
     FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Filter_speed_PID_MTPA;
 
-  /* Sum: '<S217>/Sum' incorporates:
-   *  DiscreteIntegrator: '<S207>/Integrator'
+  /* Sum: '<S221>/Sum' incorporates:
+   *  DiscreteIntegrator: '<S211>/Integrator'
    *  Inport: '<Root>/MTPA_PID'
    *  Outport: '<Root>/Speed_error'
-   *  Product: '<S212>/PProd Out'
+   *  Product: '<S216>/PProd Out'
    */
   rtb_Sum_o = (FOC_MTPA_FWC_FF_Y.Speed_error *
                FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kp_speed_PID_MTPA +
                FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b) + rtb_NProdOut_j;
 
-  /* Switch: '<S215>/Switch2' incorporates:
+  /* Switch: '<S219>/Switch2' incorporates:
    *  Inport: '<Root>/MTPA_PID'
-   *  RelationalOperator: '<S215>/LowerRelop1'
-   *  RelationalOperator: '<S215>/UpperRelop'
-   *  Switch: '<S215>/Switch'
+   *  RelationalOperator: '<S219>/LowerRelop1'
+   *  RelationalOperator: '<S219>/UpperRelop'
+   *  Switch: '<S219>/Switch'
    */
   if (rtb_Sum_o > FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA) {
-    /* Switch: '<S215>/Switch2' */
+    /* Switch: '<S219>/Switch2' */
     FOC_MTPA_FWC_FF_B.Switch2 =
       FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA;
   } else if (rtb_Sum_o < FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_speed_PID_MTPA) {
-    /* Switch: '<S215>/Switch' incorporates:
-     *  Switch: '<S215>/Switch2'
+    /* Switch: '<S219>/Switch' incorporates:
+     *  Switch: '<S219>/Switch2'
      */
     FOC_MTPA_FWC_FF_B.Switch2 =
       FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_speed_PID_MTPA;
   } else {
-    /* Switch: '<S215>/Switch2' incorporates:
-     *  Switch: '<S215>/Switch'
+    /* Switch: '<S219>/Switch2' incorporates:
+     *  Switch: '<S219>/Switch'
      */
     FOC_MTPA_FWC_FF_B.Switch2 = rtb_Sum_o;
   }
 
-  /* End of Switch: '<S215>/Switch2' */
+  /* End of Switch: '<S219>/Switch2' */
 
   /* Outport: '<Root>/Iq_gen' */
   FOC_MTPA_FWC_FF_Y.Iq_gen = FOC_MTPA_FWC_FF_B.Switch2;
@@ -1190,14 +1249,14 @@ void FOC_MTPA_FWC_FF_step1(void)       /* Sample time: [0.001s, 0.0s] */
    *   */
   FOC_MTPA_FWC_FF_B.sampletime = 0.001F;
 
-  /* Update for DiscreteIntegrator: '<S207>/Integrator' incorporates:
+  /* Update for DiscreteIntegrator: '<S211>/Integrator' incorporates:
    *  Inport: '<Root>/MTPA_PID'
    *  Outport: '<Root>/Speed_error'
-   *  Product: '<S204>/IProd Out'
-   *  Sum: '<S199>/SumI2'
-   *  Sum: '<S199>/SumI4'
-   *  Sum: '<S219>/SumI3'
-   *  Sum: '<S220>/SumI1'
+   *  Product: '<S208>/IProd Out'
+   *  Sum: '<S203>/SumI2'
+   *  Sum: '<S203>/SumI4'
+   *  Sum: '<S223>/SumI3'
+   *  Sum: '<S224>/SumI1'
    */
   FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b += ((FOC_MTPA_FWC_FF_Y.Speed_error *
     FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Ki_speed_PID_MTPA +
@@ -1209,9 +1268,9 @@ void FOC_MTPA_FWC_FF_step1(void)       /* Sample time: [0.001s, 0.0s] */
     FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b = -MOTOR_PEAK_AC;
   }
 
-  /* End of Update for DiscreteIntegrator: '<S207>/Integrator' */
+  /* End of Update for DiscreteIntegrator: '<S211>/Integrator' */
 
-  /* Update for DiscreteIntegrator: '<S202>/Filter' */
+  /* Update for DiscreteIntegrator: '<S206>/Filter' */
   FOC_MTPA_FWC_FF_DW.Filter_DSTATE_i += 0.001F * rtb_NProdOut_j;
 }
 
@@ -1231,7 +1290,7 @@ void FOC_MTPA_FWC_FF_initialize(void)
   FOC_MTPA_FWC_FF_DW.icLoad_k = true;
 
   /* SystemInitialize for IfAction SubSystem: '<S7>/If Action Subsystem1' */
-  /* InitializeConditions for DiscreteIntegrator: '<S161>/Discrete-Time Integrator' */
+  /* InitializeConditions for DiscreteIntegrator: '<S162>/Discrete-Time Integrator' */
   FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE = 1.0F;
 
   FOC_MTPA_FWC_FF_U.BusVoltage_V = OP_VOLTAGE;
@@ -1249,8 +1308,8 @@ void FOC_MTPA_FWC_FF_initialize(void)
   FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_low_limit = -512.0f;
   
   /* Speed Ref Rate Limiter Settings */
-  FOC_MTPA_FWC_FF_U.Ref_Speed_rate_up = 0.1f * 10000.0f;
-  FOC_MTPA_FWC_FF_U.Ref_Speed_rate_down = -0.1f * 10000.0f;
+  FOC_MTPA_FWC_FF_U.Ref_Speed_rate_up = 10.0f * 10000.0f;
+  FOC_MTPA_FWC_FF_U.Ref_Speed_rate_down = -500.0f * 10000.0f;
 
   /* Rate Limiter Settings */
   FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_up = 50.0f * 10000.0f;

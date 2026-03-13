@@ -79,8 +79,8 @@ power_mode_t pw_state = ECO;
 currSession cS = ANGLE_CALIB_DONE;
 errors_nums err = NO_ERROR;
 errors er = {0};
-can_data_t can_d = {.can_Lambda = LAMBDA, .can_Ld = LD, .can_Lq = LQ, .canSpeed_PID.Kp = SPEED_KP, .canSpeed_PID.Ki = SPEED_KI, .canSpeed_PID.Kd = SPEED_KD, .canSpeed_PID.Kd_Filter = SPEED_KD_FILTER, .canSpeed_PID.Output_Up_Limit = SPEED_PID_OUT_UPL, .canSpeed_PID.Output_Low_Limit = SPEED_PID_OUT_LOWL, .canId_PID.Kp = ID_KP, .canId_PID.Ki = ID_KI, .canId_PID.Kd = ID_KD, .canId_PID.Kd_Filter = ID_KD_FILTER, .canId_PID.Output_Up_Limit = ID_PID_OUT_UPL, .canId_PID.Output_Low_Limit = ID_PID_OUT_LOWL, .canIq_PID.Kp = IQ_KP, .canIq_PID.Ki = IQ_KI, .canIq_PID.Kd = IQ_KD, .canIq_PID.Kd_Filter = IQ_KD_FILTER, .canIq_PID.Output_Up_Limit = IQ_PID_OUT_UPL, .canIq_PID.Output_Low_Limit = IQ_PID_OUT_LOWL};
-data d = {.Kvf = V_F_RATIO, .speed_ref = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE, .Kfw = 0.001f, .Kaw = 10.0f};
+can_data_t can_d = {.can_Lambda = LAMBDA, .can_Ld = LD, .can_Lq = LQ, .Kaw = FW_KAW, .Kfw = FW_KFW, .canSpeed_PID.Kp = SPEED_KP, .canSpeed_PID.Ki = SPEED_KI, .canSpeed_PID.Kd = SPEED_KD, .canSpeed_PID.Kd_Filter = SPEED_KD_FILTER, .canSpeed_PID.Output_Up_Limit = SPEED_PID_OUT_UPL, .canSpeed_PID.Output_Low_Limit = SPEED_PID_OUT_LOWL, .canId_PID.Kp = ID_KP, .canId_PID.Ki = ID_KI, .canId_PID.Kd = ID_KD, .canId_PID.Kd_Filter = ID_KD_FILTER, .canId_PID.Output_Up_Limit = ID_PID_OUT_UPL, .canId_PID.Output_Low_Limit = ID_PID_OUT_LOWL, .canIq_PID.Kp = IQ_KP, .canIq_PID.Ki = IQ_KI, .canIq_PID.Kd = IQ_KD, .canIq_PID.Kd_Filter = IQ_KD_FILTER, .canIq_PID.Output_Up_Limit = IQ_PID_OUT_UPL, .canIq_PID.Output_Low_Limit = IQ_PID_OUT_LOWL};
+data d = {.Kvf = V_F_RATIO, .speed_ref = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
 /* USER CODE END 0 */
 
 /**
@@ -181,7 +181,7 @@ int main(void)
   #if OPEN_FOC
   Open_FOC0_initialize();
   #endif
-  RateLimiter_Init(&limiter, 50.0f, 100.0f, 0.0f);
+  RateLimiter_Init(&limiter, 100.0f, 500.0f, 0.0f);
   HAL_Delay(100);
 
   /*Starting FDCAN2, Queue Init and Throttle Init*/
@@ -191,8 +191,10 @@ int main(void)
   App_Init();
   #endif
 
-  /*Sending Heartbeat message once at init*/
+  /*Sending Heartbeat message once at init and sending PID values*/
   _fdcan_transmit_on_can(0x400, 0, heart_beat_init, 0x08);
+  /* Enable LED */
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12, GPIO_PIN_SET);
 
   /*Starting ADC2 Injected conversions first*/
   HAL_ADCEx_InjectedStart_IT(&hadc2);
@@ -490,6 +492,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       Send_Data_On_CAN_403();
       Send_Data_On_CAN_404();
       Send_Data_On_CAN_405();
+      Send_Data_On_CAN_406();
+      Send_Data_On_CAN_407();
+      Send_Data_On_CAN_408();
+      Send_Data_On_CAN_409();
       #endif
 
       #if VH_CAN_ID
@@ -527,6 +533,11 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     FOC_MTPA_FWC_FF_U.Lq = can_d.can_Lq;
   }
 
+  if (RxMessageBuf.Identifier == 0x104) {
+    can_d.Kfw = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-3f;
+    can_d.Kaw = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-3f;
+  }
+
   if (RxMessageBuf.Identifier == 0x105) {
     can_d.canSpeed_PID.Kp = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-2f;
     can_d.canSpeed_PID.Ki = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-2f;
@@ -558,6 +569,10 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kp_torque_PID_MTPA = can_d.canIq_PID.Kp;
     FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Ki_torque_PID_MTPA = can_d.canIq_PID.Ki;
     FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kd_torque_PID_MTPA = can_d.canIq_PID.Kd;
+  }
+
+  if (RxMessageBuf.Identifier == 0x108) {
+    can_d.direction = rxMsg[0];
   }
 }
 

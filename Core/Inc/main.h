@@ -40,6 +40,8 @@ extern "C" {
 #define VH_CAN_ID			0
 #define DEBUG_CAN_ID		1
 #define CAN_BASED_REF		1
+#define CAN_BASED_DIR		1
+#define THROTTLE_BASED_DIR	0
 #define THROTTLE_BASED_REF  0
 
 #define CONFIG_VERSION_MAJOR 		0x05
@@ -122,8 +124,6 @@ typedef struct data {
 	uint32_t z_count_diff;
 	uint32_t cycles;
 	uint32_t thr_v_mv;
-	float Kfw;
-	float Kaw;
 	float pack_current;
 	float offset_angle_elec;
 	float speed_ref;
@@ -171,9 +171,12 @@ typedef struct foc_pid_t {
 } foc_pid_t;
 
 typedef struct can_data_t {
+	uint8_t direction;
 	float can_Ld;
 	float can_Lq;
 	float can_Lambda;
+	float Kfw;
+	float Kaw;
 	foc_pid_t canSpeed_PID;
 	foc_pid_t canId_PID;
 	foc_pid_t canIq_PID;
@@ -343,13 +346,9 @@ void Error_Handler(void);
 #define ENCODER_FAULT_MAX_COUNT 5
 
 /* FOC PID Default Settings */
-/* FW PID */
-#define FW_KP					0.00001f
-#define FW_KI					0.00002f
-#define FW_KD					0.00001f
-#define FW_KD_FILTER			5.0f
-#define FW_PID_OUT_UPL			FWC_LIMIT
-#define FW_PID_OUT_LOWL			-FWC_LIMIT
+/* FW Kfw and Kaw */
+#define FW_KFW					0.001f
+#define FW_KAW					10.0f
 /* Speed PID */
 #define SPEED_KP				4.0f
 #define SPEED_KI				8.0f

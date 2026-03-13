@@ -125,26 +125,44 @@ void set_Initial_angle(void)
 
 void power_mode_fnr_switch(void)
 {
+  #if THROTTLE_BASED_DIR
   d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
   d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
+  #endif
   d.power_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_2);
 
+  #if THROTTLE_BASED_DIR
   if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_SET)
   {
     fnr_state = NEUTRAL;
     d.speed_ref = 0.0f;
-    // FOC_MTPA_FWC_FF_U.Drive_State = NEUTRAL;
+    FOC_MTPA_FWC_FF_U.Drive_State = NEUTRAL;
   }
   else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
   {
     fnr_state = FORWARD;
-    // FOC_MTPA_FWC_FF_U.Drive_State = FORWARD;
+    FOC_MTPA_FWC_FF_U.Drive_State = FORWARD;
   }
   else if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_RESET)
   {
     fnr_state = REVERSE;
-    // FOC_MTPA_FWC_FF_U.Drive_State = REVERSE;
+    FOC_MTPA_FWC_FF_U.Drive_State = REVERSE;
   }
+  #endif
+
+  #if CAN_BASED_DIR
+  if (can_d.direction == FORWARD) {
+    fnr_state = FORWARD;
+    FOC_MTPA_FWC_FF_U.Drive_State = FORWARD;
+  } else if (can_d.direction == REVERSE) {
+    fnr_state = REVERSE;
+    FOC_MTPA_FWC_FF_U.Drive_State = REVERSE;
+  } else if (can_d.direction == NEUTRAL) {
+    d.speed_ref = 0.0f;
+    fnr_state = NEUTRAL;
+    FOC_MTPA_FWC_FF_U.Drive_State = NEUTRAL;
+  }
+  #endif
 
   #if THROTTLE_BASED_REF
   ThrottleMap_SetDirection(&g_throttle_cfg, fnr_state);

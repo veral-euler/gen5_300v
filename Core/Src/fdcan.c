@@ -147,7 +147,7 @@ void _fdcan_filter_IDList(uint32_t can_receive_id, uint8_t format, uint32_t filt
     HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_REJECT, FDCAN_REJECT, FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE);
 
     /* Configure Rx FIFO 0 watermark to 5 */
-    HAL_FDCAN_ConfigFifoWatermark(&hfdcan2, FDCAN_CFG_RX_FIFO0, 4);
+    HAL_FDCAN_ConfigFifoWatermark(&hfdcan2, FDCAN_CFG_RX_FIFO0, 6);
 
     /* Activate Rx FIFO 0 watermark notification */
     HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
@@ -157,9 +157,11 @@ void FDCAN_SETUP()
 {
 	_fdcan_filter_IDList(0x102, 0, 0, 0);
 	_fdcan_filter_IDList(0x103, 0, 1, 0);
+	_fdcan_filter_IDList(0x104, 0, 2, 0);
 	_fdcan_filter_IDList(0x105, 0, 3, 0);
 	_fdcan_filter_IDList(0x106, 0, 4, 0);
 	_fdcan_filter_IDList(0x107, 0, 5, 0);
+	_fdcan_filter_IDList(0x108, 0, 6, 0);
 	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_TX_COMPLETE, 0);
 
 	if(HAL_FDCAN_Start(&hfdcan2) != HAL_OK)
@@ -288,6 +290,71 @@ void Send_Data_On_CAN_405(void) {
 	}
 
 	CAN_Queue_Push_And_Kickstart(0x405, 0, can_data, 0x08);
+}
+
+void Send_Data_On_CAN_406(void) {
+	uint8_t can_data[8] = {0};
+
+	uint16_t can_tx_Kfw = (uint16_t)(can_d.Kfw * 1.0E3f);
+	uint16_t can_tx_Kaw = (uint16_t)(can_d.Kaw * 1.0E3f);
+
+	can_data[0] = (uint8_t)(can_tx_Kfw & 0xFF);
+	can_data[1] = (uint8_t)((can_tx_Kfw >> 8) & 0xFF);
+	can_data[2] = (uint8_t)(can_tx_Kaw & 0xFF);
+	can_data[3] = (uint8_t)((can_tx_Kaw >> 8) & 0xFF);
+
+	CAN_Queue_Push_And_Kickstart(0x406, 0, can_data, 0x08);
+}
+
+void Send_Data_On_CAN_407(void) {
+	uint8_t can_data[8] = {0};
+
+	uint16_t can_tx_speed_kp = (uint16_t)(FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kp_speed_PID_MTPA * 1.0E2f);
+	uint16_t can_tx_speed_ki = (uint16_t)(FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Ki_speed_PID_MTPA * 1.0E2f);
+	uint16_t can_tx_speed_kd = (uint16_t)(FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA * 1.0E5f);
+
+	can_data[0] = (uint8_t)(can_tx_speed_kp & 0xFF);
+	can_data[1] = (uint8_t)((can_tx_speed_kp >> 8) & 0xFF);
+	can_data[2] = (uint8_t)(can_tx_speed_ki & 0xFF);
+	can_data[3] = (uint8_t)((can_tx_speed_ki >> 8) & 0xFF);
+	can_data[4] = (uint8_t)(can_tx_speed_kd & 0xFF);
+	can_data[5] = (uint8_t)((can_tx_speed_kd >> 8) & 0xFF);
+
+	CAN_Queue_Push_And_Kickstart(0x407, 0, can_data, 0x08);
+}
+
+void Send_Data_On_CAN_408(void) {
+	uint8_t can_data[8] = {0};
+
+	uint16_t can_tx_speed_kp = (uint16_t)(FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Kp_flux_PID_MTPA * 1.0E2f);
+	uint16_t can_tx_speed_ki = (uint16_t)(FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA * 1.0E2f);
+	uint16_t can_tx_speed_kd = (uint16_t)(FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Kd_flux_PID_MTPA * 1.0E5f);
+
+	can_data[0] = (uint8_t)(can_tx_speed_kp & 0xFF);
+	can_data[1] = (uint8_t)((can_tx_speed_kp >> 8) & 0xFF);
+	can_data[2] = (uint8_t)(can_tx_speed_ki & 0xFF);
+	can_data[3] = (uint8_t)((can_tx_speed_ki >> 8) & 0xFF);
+	can_data[4] = (uint8_t)(can_tx_speed_kd & 0xFF);
+	can_data[5] = (uint8_t)((can_tx_speed_kd >> 8) & 0xFF);
+
+	CAN_Queue_Push_And_Kickstart(0x408, 0, can_data, 0x08);
+}
+
+void Send_Data_On_CAN_409(void) {
+	uint8_t can_data[8] = {0};
+
+	uint16_t can_tx_speed_kp = (uint16_t)(FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kp_torque_PID_MTPA * 1.0E2f);
+	uint16_t can_tx_speed_ki = (uint16_t)(FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Ki_torque_PID_MTPA * 1.0E2f);
+	uint16_t can_tx_speed_kd = (uint16_t)(FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kd_torque_PID_MTPA * 1.0E5f);
+
+	can_data[0] = (uint8_t)(can_tx_speed_kp & 0xFF);
+	can_data[1] = (uint8_t)((can_tx_speed_kp >> 8) & 0xFF);
+	can_data[2] = (uint8_t)(can_tx_speed_ki & 0xFF);
+	can_data[3] = (uint8_t)((can_tx_speed_ki >> 8) & 0xFF);
+	can_data[4] = (uint8_t)(can_tx_speed_kd & 0xFF);
+	can_data[5] = (uint8_t)((can_tx_speed_kd >> 8) & 0xFF);
+
+	CAN_Queue_Push_And_Kickstart(0x409, 0, can_data, 0x08);
 }
 #endif
 

@@ -29,6 +29,10 @@ void Send_Data_On_CAN_402(void);
 void Send_Data_On_CAN_403(void);
 void Send_Data_On_CAN_404(void);
 void Send_Data_On_CAN_405(void);
+void Send_Data_On_CAN_406(void);
+void Send_Data_On_CAN_407(void);
+void Send_Data_On_CAN_408(void);
+void Send_Data_On_CAN_409(void);
 #endif
 
 #if VH_CAN_ID
