@@ -186,7 +186,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Sqrt: '<S155>/Sqrt'
    *  Sum: '<S155>/Add'
    */
-  FOC_MTPA_FWC_FF_Y.Id_ref_MTPA = FOC_MTPA_FWC_FF_Y.Id - sqrt(fabs
+  FOC_MTPA_FWC_FF_Y.Id_ref_MTPA = FOC_MTPA_FWC_FF_Y.Id - sqrtf(fabs
     (FOC_MTPA_FWC_FF_Y.Id * FOC_MTPA_FWC_FF_Y.Id + 0.5 * rtb_UkYk1));
 
   /* Switch: '<S215>/Switch2' incorporates:
@@ -217,7 +217,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Math: '<S155>/Math Function3'
    *  Sum: '<S155>/Subtract1'
    */
-  FOC_MTPA_FWC_FF_Y.Iq_ref_MTPA = sqrt(fabs(rtb_UkYk1 -
+  FOC_MTPA_FWC_FF_Y.Iq_ref_MTPA = sqrtf(fabs(rtb_UkYk1 -
     FOC_MTPA_FWC_FF_Y.Id_ref_MTPA * FOC_MTPA_FWC_FF_Y.Id_ref_MTPA));
 
   /* Switch: '<S158>/Switch2' incorporates:
@@ -263,7 +263,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Math: '<S160>/Square1'
    *  Sum: '<S160>/Add1'
    */
-  FOC_MTPA_FWC_FF_Y.V_s = sqrt(FOC_MTPA_FWC_FF_Y.Id * FOC_MTPA_FWC_FF_Y.Id +
+  FOC_MTPA_FWC_FF_Y.V_s = sqrtf(FOC_MTPA_FWC_FF_Y.Id * FOC_MTPA_FWC_FF_Y.Id +
     FOC_MTPA_FWC_FF_Y.Id_ref_final * FOC_MTPA_FWC_FF_Y.Id_ref_final);
 
   FOC_MTPA_FWC_FF_Y.V_s = fmin(FOC_MTPA_FWC_FF_Y.V_s, (2.0f * FOC_MTPA_FWC_FF_Y.V_max));
@@ -360,7 +360,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     rtb_Sum_h = rtb_Add_e - rtb_Sum_h;
     rtb_Add_e += FOC_MTPA_FWC_FF_Y.Id_ref_MTPA;
     FOC_MTPA_FWC_FF_B.Merge[0] = rtb_Add_e;
-    FOC_MTPA_FWC_FF_B.Merge[1] = sqrt(rtb_UkYk1 - rtb_Add_e * rtb_Add_e);
+    FOC_MTPA_FWC_FF_B.Merge[1] = sqrtf(rtb_UkYk1 - rtb_Add_e * rtb_Add_e);
     FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_i += (rtb_IProdOut *
       FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Ki_FWC_PID_MTPA + rtb_Sum_h) *
       0.0001;
@@ -479,13 +479,13 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function1'
    */
-  rtb_Sum_h = sin(FOC_MTPA_FWC_FF_U.MtrElcPos);
+  rtb_Sum_h = sinf(FOC_MTPA_FWC_FF_U.MtrElcPos);
 
   /* Trigonometry: '<S4>/Trigonometric Function1' incorporates:
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function'
    */
-  rtb_Add1_l = cos(FOC_MTPA_FWC_FF_U.MtrElcPos);
+  rtb_Add1_l = cosf(FOC_MTPA_FWC_FF_U.MtrElcPos);
 
   /* Outputs for Atomic SubSystem: '<S13>/Two inputs CRL' */
   /* Outputs for Atomic SubSystem: '<S14>/Two phase CRL wrap' */

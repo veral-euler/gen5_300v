@@ -131,7 +131,7 @@ void FOC_MTPA_FF_step0(void)           /* Sample time: [0.0001s, 0.0s] */
    *  Sqrt: '<S7>/Sqrt'
    *  Sum: '<S7>/Add'
    */
-  FOC_MTPA_FF_Y.Id_ref = FOC_MTPA_FF_Y.Id_error - sqrt(fabs
+  FOC_MTPA_FF_Y.Id_ref = FOC_MTPA_FF_Y.Id_error - sqrtf(fabs
     (FOC_MTPA_FF_Y.Id_error * FOC_MTPA_FF_Y.Id_error + 0.5F * rtb_MathFunction2));
 
   /* Switch: '<S153>/Switch2' incorporates:
@@ -285,7 +285,7 @@ void FOC_MTPA_FF_step0(void)           /* Sample time: [0.0001s, 0.0s] */
    *  Sqrt: '<S7>/Sqrt1'
    *  Sum: '<S7>/Subtract1'
    */
-  FOC_MTPA_FF_Y.Iq_error = sqrt(fabs(rtb_MathFunction2 - FOC_MTPA_FF_Y.Id_ref *
+  FOC_MTPA_FF_Y.Iq_error = sqrtf(fabs(rtb_MathFunction2 - FOC_MTPA_FF_Y.Id_ref *
     FOC_MTPA_FF_Y.Id_ref));
 
   FOC_MTPA_FF_Y.Iq_sat = FOC_MTPA_FF_Y.Iq_error;

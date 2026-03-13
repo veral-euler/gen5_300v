@@ -419,13 +419,13 @@ void FOC_LivGguard_step0(void)         /* Sample time: [0.0001s, 0.0s] */
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function1'
    */
-  rtb_Add3 = sin(FOC_LivGguard_U.MtrElcPos);
+  rtb_Add3 = sinf(FOC_LivGguard_U.MtrElcPos);
 
   /* Trigonometry: '<S4>/Trigonometric Function1' incorporates:
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function'
    */
-  rtb_Add1_l = cos(FOC_LivGguard_U.MtrElcPos);
+  rtb_Add1_l = cosf(FOC_LivGguard_U.MtrElcPos);
 
   /* Outputs for Atomic SubSystem: '<S14>/Two inputs CRL' */
   /* Outputs for Atomic SubSystem: '<S15>/Two phase CRL wrap' */
