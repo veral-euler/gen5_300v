@@ -147,7 +147,7 @@ void _fdcan_filter_IDList(uint32_t can_receive_id, uint8_t format, uint32_t filt
     HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_REJECT, FDCAN_REJECT, FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE);
 
     /* Configure Rx FIFO 0 watermark to 5 */
-    HAL_FDCAN_ConfigFifoWatermark(&hfdcan2, FDCAN_CFG_RX_FIFO0, 6);
+    HAL_FDCAN_ConfigFifoWatermark(&hfdcan2, FDCAN_CFG_RX_FIFO0, 7);
 
     /* Activate Rx FIFO 0 watermark notification */
     HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
@@ -162,6 +162,7 @@ void FDCAN_SETUP()
 	_fdcan_filter_IDList(0x106, 0, 4, 0);
 	_fdcan_filter_IDList(0x107, 0, 5, 0);
 	_fdcan_filter_IDList(0x108, 0, 6, 0);
+	_fdcan_filter_IDList(0x109, 0, 7, 0);
 	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_TX_COMPLETE, 0);
 
 	if(HAL_FDCAN_Start(&hfdcan2) != HAL_OK)
@@ -288,6 +289,7 @@ void Send_Data_On_CAN_405(void) {
 	} else {
 		can_data[2] = 0x00;
 	}
+	can_data[3] = (uint8_t)(pw_state);
 
 	CAN_Queue_Push_And_Kickstart(0x405, 0, can_data, 0x08);
 }

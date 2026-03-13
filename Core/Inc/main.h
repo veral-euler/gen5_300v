@@ -172,6 +172,7 @@ typedef struct foc_pid_t {
 
 typedef struct can_data_t {
 	uint8_t direction;
+	uint8_t power_mode;
 	float can_Ld;
 	float can_Lq;
 	float can_Lambda;

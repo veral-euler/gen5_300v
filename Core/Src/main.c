@@ -574,6 +574,10 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
   if (RxMessageBuf.Identifier == 0x108) {
     can_d.direction = rxMsg[0];
   }
+
+  if (RxMessageBuf.Identifier == 0x109) {
+    can_d.power_mode = rxMsg[0];
+  }
 }
 
 /* FDCAN TX Complete Callback - automatically sends next message */

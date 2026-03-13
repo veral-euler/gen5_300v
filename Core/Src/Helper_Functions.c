@@ -128,8 +128,8 @@ void power_mode_fnr_switch(void)
   #if THROTTLE_BASED_DIR
   d.forward_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_3);
   d.reverse_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4);
-  #endif
   d.power_pin = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_2);
+  #endif
 
   #if THROTTLE_BASED_DIR
   if (d.forward_pin == GPIO_PIN_SET && d.reverse_pin == GPIO_PIN_SET)
@@ -162,17 +162,25 @@ void power_mode_fnr_switch(void)
     fnr_state = NEUTRAL;
     FOC_MTPA_FWC_FF_U.Drive_State = NEUTRAL;
   }
+
+  if (can_d.power_mode == SPORTS) {
+    pw_state = SPORTS;
+  } else if (can_d.power_mode == ECO) {
+    pw_state = ECO;
+  }
   #endif
 
   #if THROTTLE_BASED_REF
   ThrottleMap_SetDirection(&g_throttle_cfg, fnr_state);
   #endif
 
+  #if THROTTLE_BASED_DIR
   if (d.power_pin == GPIO_PIN_RESET) {
     pw_state = SPORTS;
   } else {
     pw_state = ECO;
   }
+  #endif
 
   #if THROTTLE_BASED_REF
   ThrottleMap_SetDriveMode(&g_throttle_cfg, pw_state);
