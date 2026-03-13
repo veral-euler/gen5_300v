@@ -122,6 +122,8 @@ typedef struct data {
 	uint32_t z_count_diff;
 	uint32_t cycles;
 	uint32_t thr_v_mv;
+	float Kfw;
+	float Kaw;
 	float pack_current;
 	float offset_angle_elec;
 	float speed_ref;
@@ -172,7 +174,6 @@ typedef struct can_data_t {
 	float can_Ld;
 	float can_Lq;
 	float can_Lambda;
-	foc_pid_t canFW_PID;
 	foc_pid_t canSpeed_PID;
 	foc_pid_t canId_PID;
 	foc_pid_t canIq_PID;

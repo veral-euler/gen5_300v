@@ -79,8 +79,8 @@ power_mode_t pw_state = ECO;
 currSession cS = ANGLE_CALIB_DONE;
 errors_nums err = NO_ERROR;
 errors er = {0};
-can_data_t can_d = {.can_Lambda = LAMBDA, .can_Ld = LD, .can_Lq = LQ, .canFW_PID.Kp = FW_KP, .canFW_PID.Ki = FW_KI, .canFW_PID.Kd = FW_KD, .canFW_PID.Kd_Filter = FW_KD_FILTER, .canFW_PID.Output_Up_Limit = FW_PID_OUT_UPL, .canFW_PID.Output_Low_Limit = FW_PID_OUT_LOWL, .canSpeed_PID.Kp = SPEED_KP, .canSpeed_PID.Ki = SPEED_KI, .canSpeed_PID.Kd = SPEED_KD, .canSpeed_PID.Kd_Filter = SPEED_KD_FILTER, .canSpeed_PID.Output_Up_Limit = SPEED_PID_OUT_UPL, .canSpeed_PID.Output_Low_Limit = SPEED_PID_OUT_LOWL, .canId_PID.Kp = ID_KP, .canId_PID.Ki = ID_KI, .canId_PID.Kd = ID_KD, .canId_PID.Kd_Filter = ID_KD_FILTER, .canId_PID.Output_Up_Limit = ID_PID_OUT_UPL, .canId_PID.Output_Low_Limit = ID_PID_OUT_LOWL, .canIq_PID.Kp = IQ_KP, .canIq_PID.Ki = IQ_KI, .canIq_PID.Kd = IQ_KD, .canIq_PID.Kd_Filter = IQ_KD_FILTER, .canIq_PID.Output_Up_Limit = IQ_PID_OUT_UPL, .canIq_PID.Output_Low_Limit = IQ_PID_OUT_LOWL};
-data d = {.Kvf = V_F_RATIO, .speed_ref = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
+can_data_t can_d = {.can_Lambda = LAMBDA, .can_Ld = LD, .can_Lq = LQ, .canSpeed_PID.Kp = SPEED_KP, .canSpeed_PID.Ki = SPEED_KI, .canSpeed_PID.Kd = SPEED_KD, .canSpeed_PID.Kd_Filter = SPEED_KD_FILTER, .canSpeed_PID.Output_Up_Limit = SPEED_PID_OUT_UPL, .canSpeed_PID.Output_Low_Limit = SPEED_PID_OUT_LOWL, .canId_PID.Kp = ID_KP, .canId_PID.Ki = ID_KI, .canId_PID.Kd = ID_KD, .canId_PID.Kd_Filter = ID_KD_FILTER, .canId_PID.Output_Up_Limit = ID_PID_OUT_UPL, .canId_PID.Output_Low_Limit = ID_PID_OUT_LOWL, .canIq_PID.Kp = IQ_KP, .canIq_PID.Ki = IQ_KI, .canIq_PID.Kd = IQ_KD, .canIq_PID.Kd_Filter = IQ_KD_FILTER, .canIq_PID.Output_Up_Limit = IQ_PID_OUT_UPL, .canIq_PID.Output_Low_Limit = IQ_PID_OUT_LOWL};
+data d = {.Kvf = V_F_RATIO, .speed_ref = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE, .Kfw = 0.001f, .Kaw = 10.0f};
 /* USER CODE END 0 */
 
 /**
@@ -525,17 +525,6 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     FOC_MTPA_FWC_FF_U.Lambda = can_d.can_Lambda;
     FOC_MTPA_FWC_FF_U.Ld = can_d.can_Ld;
     FOC_MTPA_FWC_FF_U.Lq = can_d.can_Lq;
-  }
-
-  if (RxMessageBuf.Identifier == 0x104) {
-    can_d.canFW_PID.Kp = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-5f;
-    can_d.canFW_PID.Ki = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-5f;
-    can_d.canFW_PID.Kd = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-5f;
-
-    /* Setting FWC PID params on CAN */
-    FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Kp_FWC_PID_MTPA = can_d.canFW_PID.Kp;
-    FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Ki_FWC_PID_MTPA = can_d.canFW_PID.Ki;
-    FOC_MTPA_FWC_FF_U.MTPA_PID.FWC_PID_MTPA.Kd_FWC_PID_MTPA = can_d.canFW_PID.Kd;
   }
 
   if (RxMessageBuf.Identifier == 0x105) {
