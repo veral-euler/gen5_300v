@@ -43,6 +43,8 @@ extern "C" {
 #define CAN_BASED_DIR		1
 #define THROTTLE_BASED_DIR	0
 #define THROTTLE_BASED_REF  0
+#define CAN_BASED_THRV		1
+#define THR_BASED_THRV		0
 
 #define CONFIG_VERSION_MAJOR 		0x05
 #define CONFIG_VERSION_MINOR 		0x00

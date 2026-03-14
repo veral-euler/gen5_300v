@@ -132,6 +132,10 @@ void ADC1_Analog_Val_Update(void) {
   d.throttle_v = adc1_buffer[THROTTLE] * ADC_TO_V * 2.0f;
   d.thr_v_mv = (adc1_buffer[THROTTLE] * 3297U * 2U) / 65536U;
 
+  #if THR_BASED_THRV
+  FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage = d.throttle_v;
+  #endif
+
   /* Calculating Irms, Vrms and Throttle_percentage */
   d.irms = sqrtf(FOC_MTPA_FWC_FF_Y.Id * FOC_MTPA_FWC_FF_Y.Id + FOC_MTPA_FWC_FF_Y.Iq * FOC_MTPA_FWC_FF_Y.Iq) / ROOT2;
   d.vrms = sqrtf(FOC_MTPA_FWC_FF_Y.Vq * FOC_MTPA_FWC_FF_Y.Vq + FOC_MTPA_FWC_FF_Y.Vd * FOC_MTPA_FWC_FF_Y.Vd) / ROOT2;

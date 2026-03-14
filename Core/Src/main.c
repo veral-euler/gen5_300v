@@ -579,12 +579,14 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     can_d.power_mode = rxMsg[0];
   }
 
+  #if CAN_BASED_THRV
   if (RxMessageBuf.Identifier == 0x110) {
     can_d.can_instV = (float)((rxMsg[1] << 8) | rxMsg[0]);
 
     /* Setting FOC Model thr voltage on CAN Rx */
     FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage = can_d.can_instV;
   }
+  #endif
 }
 
 /* FDCAN TX Complete Callback - automatically sends next message */
