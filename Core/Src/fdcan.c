@@ -282,6 +282,8 @@ void Send_Data_On_CAN_404(void) {
 void Send_Data_On_CAN_405(void) {
 	uint8_t can_data[8] = {0};
 
+	uint16_t can_offsetAngle = (uint16_t)(d.offset_angle_elec * 1000.0f);
+
 	can_data[0] = (uint8_t)(fnr_state);
 	can_data[1] = (uint8_t)(cS);
 	if (rtmGetErrorStatus(FOC_MTPA_FWC_FF_M) == "Overrun") {
@@ -290,6 +292,8 @@ void Send_Data_On_CAN_405(void) {
 		can_data[2] = 0x00;
 	}
 	can_data[3] = (uint8_t)(pw_state);
+	can_data[4] = (uint8_t)(can_offsetAngle & 0xFF);
+	can_data[5] = (uint8_t)((can_offsetAngle >> 8) & 0xFF);
 
 	CAN_Queue_Push_And_Kickstart(0x405, 0, can_data, 0x08);
 }
