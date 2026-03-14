@@ -144,15 +144,15 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   Read_EEPROM_at_init();
 
-  if (cS == INIT)
-  {
-    cS = ANGLE_CALIB;
-    Motor_Alignment_Routine();
-  }
-  else if (cS == ANGLE_CALIB_DONE)
-  {
-    set_Initial_angle();
-  }
+  // if (cS == INIT)
+  // {
+  //   cS = ANGLE_CALIB;
+  //   Motor_Alignment_Routine();
+  // }
+  // else if (cS == ANGLE_CALIB_DONE)
+  // {
+  set_Initial_angle();
+  // }
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
