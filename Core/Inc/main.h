@@ -178,6 +178,7 @@ typedef struct can_data_t {
 	float can_Lambda;
 	float Kfw;
 	float Kaw;
+	float can_instV;
 	foc_pid_t canSpeed_PID;
 	foc_pid_t canId_PID;
 	foc_pid_t canIq_PID;
@@ -371,6 +372,10 @@ void Error_Handler(void);
 #define IQ_KD_FILTER			5.0f
 #define IQ_PID_OUT_UPL			SVM_VOLTAGE_LIMIT
 #define IQ_PID_OUT_LOWL			-SVM_VOLTAGE_LIMIT
+
+#define THR_MIN_VAL 			0.9f
+#define THR_MAX_VAL				4.0f
+#define MIN_RPM_CHANGE_LIM		10.0f
 
 typedef enum ADC2_CHANNELS {
 	PHASE_U,

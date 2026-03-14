@@ -528,9 +528,9 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     can_d.can_Lq = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-7f;
 
     /* Setting motor params from CAN */
-    FOC_MTPA_FWC_FF_U.Lambda = can_d.can_Lambda;
-    FOC_MTPA_FWC_FF_U.Ld = can_d.can_Ld;
-    FOC_MTPA_FWC_FF_U.Lq = can_d.can_Lq;
+    FOC_MTPA_FWC_FF_U.Motor_Parameters.Lambda = can_d.can_Lambda;
+    FOC_MTPA_FWC_FF_U.Motor_Parameters.Ld = can_d.can_Ld;
+    FOC_MTPA_FWC_FF_U.Motor_Parameters.Lq = can_d.can_Lq;
   }
 
   if (RxMessageBuf.Identifier == 0x104) {
@@ -577,6 +577,13 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 
   if (RxMessageBuf.Identifier == 0x109) {
     can_d.power_mode = rxMsg[0];
+  }
+
+  if (RxMessageBuf.Identifier == 0x110) {
+    can_d.can_instV = (float)((rxMsg[1] << 8) | rxMsg[0]);
+
+    /* Setting FOC Model thr voltage on CAN Rx */
+    FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage = can_d.can_instV;
   }
 }
 

@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_MTPA_FWC_FF'.
  *
- * Model version                  : 18.322
+ * Model version                  : 18.341
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Fri Mar 13 14:25:46 2026
+ * C/C++ source code generated on : Sat Mar 14 18:56:29 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -93,6 +93,9 @@ typedef struct {
   float Iq_ramp_down;
   float Torque_gen_ramp_up;
   float Torque_gen_ramp_down;
+  float Ref_Speed_rate_up;
+  float Ref_Speed_rate_down;
+  float Ref_Speed_rate_down_neutral;
 } Rate_limiterBus;
 
 #endif
@@ -109,6 +112,31 @@ typedef struct {
 
 #endif
 
+#ifndef DEFINED_TYPEDEF_FOR_Motor_ParametersBus_
+#define DEFINED_TYPEDEF_FOR_Motor_ParametersBus_
+
+typedef struct {
+  float Pole_Pairs;
+  float Rs;
+  float Ld;
+  float Lq;
+  float Lambda;
+} Motor_ParametersBus;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_ThrottleBus_
+#define DEFINED_TYPEDEF_FOR_ThrottleBus_
+
+typedef struct {
+  float Throttle_Inst_Voltage;
+  float Max_Output_Value;
+  float Max_Throttle_Voltage;
+  float Min_Throttle_Voltage;
+} ThrottleBus;
+
+#endif
+
 #ifndef DEFINED_TYPEDEF_FOR_Id_Iq_MTPA_limitBus_
 #define DEFINED_TYPEDEF_FOR_Id_Iq_MTPA_limitBus_
 
@@ -118,6 +146,18 @@ typedef struct {
   float Iq_up_limit;
   float Iq_low_limit;
 } Id_Iq_MTPA_limitBus;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_ThrottleState_
+#define DEFINED_TYPEDEF_FOR_ThrottleState_
+
+typedef enum {
+  Forward = 1,                         /* Default value */
+  Reverse,
+  Neutral,
+  Throttle_Error
+} ThrottleState;
 
 #endif
 

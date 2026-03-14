@@ -147,7 +147,7 @@ void _fdcan_filter_IDList(uint32_t can_receive_id, uint8_t format, uint32_t filt
     HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_REJECT, FDCAN_REJECT, FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE);
 
     /* Configure Rx FIFO 0 watermark to 5 */
-    HAL_FDCAN_ConfigFifoWatermark(&hfdcan2, FDCAN_CFG_RX_FIFO0, 7);
+    HAL_FDCAN_ConfigFifoWatermark(&hfdcan2, FDCAN_CFG_RX_FIFO0, 8);
 
     /* Activate Rx FIFO 0 watermark notification */
     HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
@@ -163,6 +163,7 @@ void FDCAN_SETUP()
 	_fdcan_filter_IDList(0x107, 0, 5, 0);
 	_fdcan_filter_IDList(0x108, 0, 6, 0);
 	_fdcan_filter_IDList(0x109, 0, 7, 0);
+	_fdcan_filter_IDList(0x110, 0, 8, 0);
 	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_TX_COMPLETE, 0);
 
 	if(HAL_FDCAN_Start(&hfdcan2) != HAL_OK)
@@ -262,9 +263,9 @@ void Send_Data_On_CAN_403(void)
 void Send_Data_On_CAN_404(void) {
 	uint8_t can_data[8] = {0};
 
-	uint16_t Ld_LUT = (uint16_t)(FOC_MTPA_FWC_FF_U.Ld * 1.0E8f);
-	uint16_t Lq_LUT = (uint16_t)(FOC_MTPA_FWC_FF_U.Lq * 1.0E7f);
-	uint16_t lambda_LUT = (uint16_t)(FOC_MTPA_FWC_FF_U.Lambda * 1.0E5f);
+	uint16_t Ld_LUT = (uint16_t)(FOC_MTPA_FWC_FF_U.Motor_Parameters.Ld * 1.0E8f);
+	uint16_t Lq_LUT = (uint16_t)(FOC_MTPA_FWC_FF_U.Motor_Parameters.Lq * 1.0E7f);
+	uint16_t lambda_LUT = (uint16_t)(FOC_MTPA_FWC_FF_U.Motor_Parameters.Lambda * 1.0E5f);
 
 	can_data[0] = (uint8_t)(Ld_LUT & 0xFF);
 	can_data[1] = (uint8_t)((Ld_LUT >> 8) & 0xFF);
