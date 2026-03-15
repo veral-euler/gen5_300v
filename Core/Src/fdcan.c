@@ -284,7 +284,7 @@ void Send_Data_On_CAN_405(void) {
 	uint8_t can_data[8] = {0};
 
 	uint16_t can_offsetAngle = (uint16_t)(d.offset_angle_elec * 1000.0f);
-	uint16_t can_thrVoltage = (uint16_t)(d.throttle_v * 1000.0f);
+	uint16_t can_thrVoltage = (uint16_t)(FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage * 1000.0f);
 
 	can_data[0] = (uint8_t)(fnr_state);
 	can_data[1] = (uint8_t)(cS);
