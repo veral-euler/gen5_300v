@@ -366,6 +366,19 @@ void Send_Data_On_CAN_409(void) {
 
 	CAN_Queue_Push_And_Kickstart(0x409, 0, can_data, 0x08);
 }
+
+void Send_Data_On_CAN_410(void) {
+	uint8_t can_data[8] = {0};
+
+	can_data[0] = CONFIG_VERSION_MAJOR;
+	can_data[1] = CONFIG_VERSION_MINOR;
+	can_data[3] = CONFIG_VERSION_SUBMINOR;
+	can_data[4] = FIRMWARE_VERSION_MAJOR;
+	can_data[5] = FIRMWARE_VERSION_MINOR;
+	can_data[6] = FIRMWARE_VERSION_SUBMINOR;
+
+	_fdcan_transmit_on_can(0x410, 0, can_data, 0x08);
+}
 #endif
 
 #if VH_CAN_ID

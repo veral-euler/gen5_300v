@@ -33,6 +33,7 @@ void Send_Data_On_CAN_406(void);
 void Send_Data_On_CAN_407(void);
 void Send_Data_On_CAN_408(void);
 void Send_Data_On_CAN_409(void);
+void Send_Data_On_CAN_410(void);
 #endif
 
 #if VH_CAN_ID
