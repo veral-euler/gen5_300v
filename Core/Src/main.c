@@ -181,7 +181,7 @@ int main(void)
   #if OPEN_FOC
   Open_FOC0_initialize();
   #endif
-  RateLimiter_Init(&limiter, 100.0f, 500.0f, 0.0f);
+  RateLimiter_Init(&limiter, 100.0f, 600.0f, 0.0f);
   HAL_Delay(100);
 
   /*Starting FDCAN2, Queue Init and Throttle Init*/
@@ -582,6 +582,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
   #if CAN_BASED_THRV
   if (RxMessageBuf.Identifier == 0x110) {
     can_d.can_instV = (float)((rxMsg[1] << 8) | rxMsg[0]);
+    can_d.can_instV *= 0.001f;
 
     /* Setting FOC Model thr voltage on CAN Rx */
     FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage = can_d.can_instV;

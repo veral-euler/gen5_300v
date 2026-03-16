@@ -159,6 +159,7 @@ void power_mode_fnr_switch(void)
     FOC_MTPA_FWC_FF_U.Drive_State = REVERSE;
   } else if (can_d.direction == NEUTRAL) {
     d.speed_ref = 0.0f;
+    FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = 0.0f;
     fnr_state = NEUTRAL;
     FOC_MTPA_FWC_FF_U.Drive_State = NEUTRAL;
   }
