@@ -416,7 +416,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     }
 
     FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE += ((float)(1.0 -
-      FOC_MTPA_FWC_FF_Y.V_s / rtb_Gain) * 0.01F + 10.0F *
+      FOC_MTPA_FWC_FF_Y.V_s / rtb_Gain) * can_d.Kfw + can_d.Kaw *
       FOC_MTPA_FWC_FF_DW.UnitDelay_DSTATE_p) * 0.0001F;
     if (FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE > 1.0F) {
       rtb_UkYk1 = 1.0F;
@@ -724,13 +724,13 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function1'
    */
-  rtb_TrigonometricFunction_tmp = sinf(FOC_MTPA_FWC_FF_U.MtrElcPos);
+  rtb_TrigonometricFunction_tmp = sin(FOC_MTPA_FWC_FF_U.MtrElcPos);
 
   /* Trigonometry: '<S4>/Trigonometric Function1' incorporates:
    *  Inport: '<Root>/angle'
    *  Trigonometry: '<S6>/Trigonometric Function'
    */
-  rtb_TrigonometricFunction1_tmp = cosf(FOC_MTPA_FWC_FF_U.MtrElcPos);
+  rtb_TrigonometricFunction1_tmp = cos(FOC_MTPA_FWC_FF_U.MtrElcPos);
 
   /* Outputs for Atomic SubSystem: '<S13>/Two inputs CRL' */
   /* Outputs for Atomic SubSystem: '<S14>/Two phase CRL wrap' */
