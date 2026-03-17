@@ -153,14 +153,14 @@ uint8_t Initial_Fault_Check(void) {
 		er.bus_voltage_ov_error = 1;
     err = BUS_VOLTAGE_OV_ERROR;
 		er.error_triggered = 1;
-    d.error_c1 |= (1 << 4);
+    er.error_c1 |= (1 << 4);
 	}
 
 	if (d.Vdc <= BUS_DC_UV_LIMIT) {
 		er.bus_voltage_uv_error = 1;
     err = BUS_VOLTAGE_UV_ERROR;
 		er.error_triggered = 1;
-    d.error_c1 |= (1 << 5);
+    er.error_c1 |= (1 << 5);
 	}
 
 	if (er.error_triggered) {
@@ -206,7 +206,7 @@ void Sensor_Disconnection_Check(void) {
 
     if (count >= ENCODER_FAULT_MAX_COUNT) {
       count = 0;
-      d.error_c1 |= (1 << 0);
+      er.error_c1 |= (1 << 0);
       er.error_triggered = 1;
       er.z_error = 1;
       err = ENCODER_Z_ERROR;
@@ -232,7 +232,7 @@ void Sensor_Disconnection_Check(void) {
 
     if (count >= ENCODER_FAULT_MAX_COUNT) {
       count = 0;
-      d.error_c1 |= (1 << 0);
+      er.error_c1 |= (1 << 0);
       er.error_triggered = 1;
       er.a_b_error = 1;
       err = ENCODER_A_B_ERROR;
@@ -257,7 +257,7 @@ void Sensor_Disconnection_Check(void) {
 
     if (count >= ENCODER_FAULT_MAX_COUNT) {
       count = 0;
-      d.error_c1 |= (1 << 0);
+      er.error_c1 |= (1 << 0);
       er.error_triggered = 1;
       er.enc_5v_error = 1;
       err = ENCODER_5V_ERROR;
@@ -274,7 +274,7 @@ void Sensor_Disconnection_Check(void) {
 
   if (temp_sensor_disconnection_check(d.mtr_analog_val, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
     er.error_triggered = 1;
-    d.error_c2 |= (1 << 1);
+    er.error_c2 |= (1 << 1);
     er.mtr_temp_disconnection_error = 1;
     err = MTR_TEMP_DISCONNECTION_ERROR;
     cS = CONT_ERROR;

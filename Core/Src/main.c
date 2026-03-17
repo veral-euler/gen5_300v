@@ -530,8 +530,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
       #if VH_CAN_ID
       Send_on_CAN_705(d.Mtr_temp, d.Mtc_temp);
-      Send_on_CAN_706(d.Vdc, fabsf(d.RPM * 0.008909f), d.error_c1);
-      Send_on_CAN_708(d.error_c2, d.error_c3);
+      Send_on_CAN_706(d.Vdc, fabsf(d.RPM * 0.008909f), er.error_c1);
+      Send_on_CAN_708(er.error_c2, er.error_c3);
       Send_on_CAN_709(0);
       Send_on_CAN_710(d.throttle_percent, d.throttle_v);
       Send_on_CAN_715(fabsf(d.RPM), d.Vdc, d.Aux_dc);

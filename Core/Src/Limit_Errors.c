@@ -11,7 +11,7 @@ uint8_t Over_Current_Phase_Error(float a, float b, float c) {
 
         if (error_counter >= PHASE_OC_COUNT) {
             error_counter = 0;
-            d.error_c2 |= (1 << 3);
+            er.error_c2 |= (1 << 3);
             return !HAL_OK;
         }
     } else {
@@ -33,7 +33,7 @@ uint8_t Over_Current_Id_Iq_Error(float Id, float Iq) {
 
         if (error_counter >= ID_IQ_OC_COUNT) {
             error_counter = 0;
-            d.error_c2 |= (1 << 4);
+            er.error_c2 |= (1 << 4);
             return !HAL_OK;
         }
     } else {
@@ -56,7 +56,7 @@ uint8_t Bus_Voltage_Error(float Bus_DC) {
 
         if (error_counter_ov >= BUS_DC_OV_COUNT) {
             error_counter_ov = 0;
-            d.error_c1 |= (1 << 4);
+            er.error_c1 |= (1 << 4);
             return (uint8_t)1;
         }
     } else {
@@ -72,7 +72,7 @@ uint8_t Bus_Voltage_Error(float Bus_DC) {
 
         if (error_counter_uv >= BUS_DC_UV_COUNT) {
             error_counter_uv = 0;
-            d.error_c1 |= (1 << 5);
+            er.error_c1 |= (1 << 5);
             return (uint8_t)2;
         }
     } else {
@@ -89,7 +89,7 @@ uint8_t Bus_Voltage_Error(float Bus_DC) {
 uint8_t Aux_Voltage_Error(float Aux_DC) {
     /* Checking for Aux DC UV Error explicitly */
     if (Aux_DC <= AUX_UV_LIMIT && d.motor_start == 1) {
-        d.error_c3 |= (1 << 1);
+        er.error_c3 |= (1 << 1);
         return !HAL_OK;
     } else {
         return HAL_OK;
@@ -98,7 +98,7 @@ uint8_t Aux_Voltage_Error(float Aux_DC) {
 
 uint8_t Mtr_OT_Error(float motor_temp) {
     if (motor_temp >= MOTOR_TEMP_OT_LIMIT) {
-        d.error_c1 |= (1 << 3);
+        er.error_c1 |= (1 << 3);
         return !HAL_OK;
     } else {
         return HAL_OK;

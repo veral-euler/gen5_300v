@@ -90,9 +90,6 @@ extern "C" {
 typedef struct data {
 	uint8_t ctlr_derate_flag;
 	uint8_t motor_derate_flag;
-	uint8_t error_c1;
-	uint8_t error_c2;
-	uint8_t error_c3;
 	uint8_t throttle_percent;
 	uint8_t regen_flag;
 	uint8_t z_pulse;
@@ -189,6 +186,9 @@ typedef struct can_data_t {
 } can_data_t;
 
 typedef struct errors {
+	uint8_t error_c1;
+	uint8_t error_c2;
+	uint8_t error_c3;
 	char curr_sens_error;
 	char bus_voltage_ov_error;
 	char bus_voltage_uv_error;
