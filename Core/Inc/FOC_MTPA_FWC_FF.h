@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_MTPA_FWC_FF'.
  *
- * Model version                  : 18.341
+ * Model version                  : 18.345
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Sat Mar 14 18:56:29 2026
+ * C/C++ source code generated on : Tue Mar 17 15:55:35 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -39,16 +39,16 @@
 
 /* Block signals (default storage) */
 typedef struct {
+  float Iq_gen;                        /* '<S2>/Rate Transition' */
   float Merge[2];                      /* '<S7>/Merge' */
-  float Switch2;                       /* '<S217>/Switch2' */
-  float sampletime;                    /* '<S8>/sample time' */
   float Iq_ref;                        /* '<S161>/FNR_switching' */
   float Id_ref;                        /* '<S161>/FNR_switching' */
 } B_FOC_MTPA_FWC_FF_T;
 
 /* Block states (default storage) for system '<Root>' */
 typedef struct {
-  float Delay_DSTATE;                  /* '<S8>/Delay' */
+  float Delay_DSTATE;                  /* '<S9>/Delay' */
+  float DelayOneStep_DSTATE;           /* '<S1>/Delay One Step' */
   float Delay_DSTATE_h;                /* '<S156>/Delay' */
   float UnitDelay_DSTATE;              /* '<S18>/Unit Delay' */
   float Integrator_DSTATE;             /* '<S123>/Integrator' */
@@ -58,15 +58,18 @@ typedef struct {
   float Integrator_DSTATE_h;           /* '<S69>/Integrator' */
   float Filter_DSTATE_d;               /* '<S64>/Filter' */
   float Delay_DSTATE_c;                /* '<S3>/Delay' */
-  float Integrator_DSTATE_b;           /* '<S209>/Integrator' */
-  float Filter_DSTATE_i;               /* '<S204>/Filter' */
+  float Integrator_DSTATE_b;           /* '<S208>/Integrator' */
+  float Filter_DSTATE_i;               /* '<S203>/Filter' */
   float UnitDelay_DSTATE_p;            /* '<S162>/Unit Delay' */
   float DiscreteTimeIntegrator_DSTATE; /* '<S162>/Discrete-Time Integrator' */
+  float RateTransition_Buffer0;        /* '<S2>/Rate Transition' */
+  uint32_t durationCounter_1;          /* '<S161>/FNR_switching' */
+  uint32_t durationCounter_1_n;        /* '<S161>/FNR_switching' */
   uint8_t is_active_c1_FOC_MTPA_FWC_FF;/* '<S161>/FNR_switching' */
   uint8_t is_c1_FOC_MTPA_FWC_FF;       /* '<S161>/FNR_switching' */
   uint8_t is_active_c3_FOC_MTPA_FWC_FF;/* '<S160>/Chart' */
   uint8_t is_c3_FOC_MTPA_FWC_FF;       /* '<S160>/Chart' */
-  bool icLoad;                         /* '<S8>/Delay' */
+  bool icLoad;                         /* '<S9>/Delay' */
   bool icLoad_p;                       /* '<S156>/Delay' */
   bool icLoad_l;                       /* '<S157>/Delay' */
   bool icLoad_k;                       /* '<S3>/Delay' */
@@ -110,21 +113,32 @@ typedef struct {
   float Id_error;                      /* '<Root>/Id_error' */
   float Iq_error;                      /* '<Root>/Iq_error' */
   float Speed_error;                   /* '<Root>/Speed_error' */
-  float Iq_PID;                        /* '<Root>/Iq_PID' */
   float Id_ref_MTPA;                   /* '<Root>/Id_ref_MTPA' */
   float Iq_ref_MTPA;                   /* '<Root>/Iq_ref_MTPA' */
   float V_s;                           /* '<Root>/V_s' */
   float V_max;                         /* '<Root>/V_max' */
-  float ref_speed;
   double MTPA_FWC_condition;           /* '<Root>/MTPA_FWC_condition' */
   double Throttle_en;                  /* '<Root>/Throttle_en' */
   ThrottleState Throttle_State;        /* '<Root>/Throttle_State' */
   bool Throttle_error;                 /* '<Root>/Throttle_error' */
+  float Ref_speed_out_RPM;             /* '<Root>/Ref_speed_out_RPM' */
+  float T_gen;                         /* '<Root>/T_gen' */
 } ExtY_FOC_MTPA_FWC_FF_T;
 
 /* Real-time Model Data Structure */
 struct tag_RTM_FOC_MTPA_FWC_FF_T {
   const char * volatile errorStatus;
+
+  /*
+   * Timing:
+   * The following substructure contains information regarding
+   * the timing information for the model.
+   */
+  struct {
+    struct {
+      uint8_t TID0_1;
+    } RateInteraction;
+  } Timing;
 };
 
 /* Block signals (default storage) */
@@ -192,11 +206,10 @@ extern RT_MODEL_FOC_MTPA_FWC_FF_T *const FOC_MTPA_FWC_FF_M;
  * Block '<S158>/Data Type Propagation' : Unused code path elimination
  * Block '<S159>/Data Type Duplicate' : Unused code path elimination
  * Block '<S159>/Data Type Propagation' : Unused code path elimination
- * Block '<S8>/FixPt Data Type Duplicate' : Unused code path elimination
- * Block '<S173>/Data Type Duplicate' : Unused code path elimination
- * Block '<S173>/Data Type Propagation' : Unused code path elimination
- * Block '<S217>/Data Type Duplicate' : Unused code path elimination
- * Block '<S217>/Data Type Propagation' : Unused code path elimination
+ * Block '<S216>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S216>/Data Type Propagation' : Unused code path elimination
+ * Block '<S227>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S227>/Data Type Propagation' : Unused code path elimination
  * Block '<S1>/Scope1' : Unused code path elimination
  * Block '<S228>/Data Type Duplicate' : Unused code path elimination
  * Block '<S228>/Data Type Propagation' : Unused code path elimination
@@ -230,10 +243,9 @@ extern RT_MODEL_FOC_MTPA_FWC_FF_T *const FOC_MTPA_FWC_FF_M;
  * Block '<S145>/Kc' : Eliminated nontunable gain of 1
  * Block '<S156>/Zero-Order Hold' : Eliminated since input and output rates are identical
  * Block '<S157>/Zero-Order Hold' : Eliminated since input and output rates are identical
- * Block '<S8>/Zero-Order Hold' : Eliminated since input and output rates are identical
- * Block '<S2>/Rate Transition' : Eliminated since input and output rates are identical
- * Block '<S201>/Kb' : Eliminated nontunable gain of 1
- * Block '<S221>/Kt' : Eliminated nontunable gain of 1
+ * Block '<S200>/Kb' : Eliminated nontunable gain of 1
+ * Block '<S220>/Kt' : Eliminated nontunable gain of 1
+ * Block '<S9>/Zero-Order Hold' : Eliminated since input and output rates are identical
  * Block '<S3>/Zero-Order Hold' : Eliminated since input and output rates are identical
  * Block '<S11>/FilterConstant' : Unused code path elimination
  * Block '<S11>/OneMinusFilterConstant' : Unused code path elimination
@@ -278,8 +290,8 @@ extern RT_MODEL_FOC_MTPA_FWC_FF_T *const FOC_MTPA_FWC_FF_M;
  * '<S5>'   : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Inner PID loop'
  * '<S6>'   : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Inverse_Clarke_Park'
  * '<S7>'   : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/MTPA_FWC'
- * '<S8>'   : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Rate Limiter Dynamic'
- * '<S9>'   : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem'
+ * '<S8>'   : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem'
+ * '<S9>'   : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem1'
  * '<S10>'  : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Clarke_Park/Clarke Transform'
  * '<S11>'  : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Clarke_Park/IIR Filter'
  * '<S12>'  : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Clarke_Park/IIR Filter1'
@@ -443,61 +455,61 @@ extern RT_MODEL_FOC_MTPA_FWC_FF_T *const FOC_MTPA_FWC_FF_M;
  * '<S170>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/MTPA_FWC/Rate Limiter Dynamic1/Saturation Dynamic'
  * '<S171>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/MTPA_FWC/Subsystem/Chart'
  * '<S172>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/MTPA_FWC/Subsystem1/FNR_switching'
- * '<S173>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Rate Limiter Dynamic/Saturation Dynamic'
- * '<S174>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd'
- * '<S175>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Anti-windup'
- * '<S176>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/D Gain'
- * '<S177>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/External Derivative'
- * '<S178>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Filter'
- * '<S179>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Filter ICs'
- * '<S180>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/I Gain'
- * '<S181>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Ideal P Gain'
- * '<S182>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Ideal P Gain Fdbk'
- * '<S183>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Integrator'
- * '<S184>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Integrator ICs'
- * '<S185>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/N Copy'
- * '<S186>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/N Gain'
- * '<S187>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/P Copy'
- * '<S188>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Parallel P Gain'
- * '<S189>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Reset Signal'
- * '<S190>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Saturation'
- * '<S191>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Saturation Fdbk'
- * '<S192>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Sum'
- * '<S193>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Sum Fdbk'
- * '<S194>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tracking Mode'
- * '<S195>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tracking Mode Sum'
- * '<S196>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tsamp - Integral'
- * '<S197>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tsamp - Ngain'
- * '<S198>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/postSat Signal'
- * '<S199>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/preInt Signal'
- * '<S200>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/preSat Signal'
- * '<S201>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Anti-windup/Back Calculation'
- * '<S202>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/D Gain/External Parameters'
- * '<S203>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/External Derivative/Error'
- * '<S204>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Filter/Disc. Forward Euler Filter'
- * '<S205>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Filter ICs/Internal IC - Filter'
- * '<S206>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/I Gain/External Parameters'
- * '<S207>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Ideal P Gain/Passthrough'
- * '<S208>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Ideal P Gain Fdbk/Disabled'
- * '<S209>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Integrator/Discrete'
- * '<S210>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Integrator ICs/Internal IC'
- * '<S211>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/N Copy/Disabled'
- * '<S212>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/N Gain/External Parameters'
- * '<S213>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/P Copy/Disabled'
- * '<S214>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Parallel P Gain/External Parameters'
- * '<S215>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Reset Signal/Disabled'
- * '<S216>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Saturation/External'
- * '<S217>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Saturation/External/Saturation Dynamic'
- * '<S218>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Saturation Fdbk/Disabled'
- * '<S219>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Sum/Sum_PID'
- * '<S220>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Sum Fdbk/Disabled'
- * '<S221>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tracking Mode/Enabled'
- * '<S222>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tracking Mode Sum/Tracking Mode'
- * '<S223>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tsamp - Integral/TsSignalSpecification'
- * '<S224>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tsamp - Ngain/Passthrough'
- * '<S225>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/postSat Signal/Forward_Path'
- * '<S226>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/preInt Signal/Internal PreInt'
- * '<S227>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/preSat Signal/Forward_Path'
+ * '<S173>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd'
+ * '<S174>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Anti-windup'
+ * '<S175>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/D Gain'
+ * '<S176>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/External Derivative'
+ * '<S177>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Filter'
+ * '<S178>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Filter ICs'
+ * '<S179>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/I Gain'
+ * '<S180>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Ideal P Gain'
+ * '<S181>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Ideal P Gain Fdbk'
+ * '<S182>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Integrator'
+ * '<S183>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Integrator ICs'
+ * '<S184>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/N Copy'
+ * '<S185>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/N Gain'
+ * '<S186>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/P Copy'
+ * '<S187>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Parallel P Gain'
+ * '<S188>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Reset Signal'
+ * '<S189>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Saturation'
+ * '<S190>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Saturation Fdbk'
+ * '<S191>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Sum'
+ * '<S192>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Sum Fdbk'
+ * '<S193>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tracking Mode'
+ * '<S194>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tracking Mode Sum'
+ * '<S195>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tsamp - Integral'
+ * '<S196>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tsamp - Ngain'
+ * '<S197>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/postSat Signal'
+ * '<S198>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/preInt Signal'
+ * '<S199>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/preSat Signal'
+ * '<S200>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Anti-windup/Back Calculation'
+ * '<S201>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/D Gain/External Parameters'
+ * '<S202>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/External Derivative/Error'
+ * '<S203>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Filter/Disc. Forward Euler Filter'
+ * '<S204>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Filter ICs/Internal IC - Filter'
+ * '<S205>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/I Gain/External Parameters'
+ * '<S206>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Ideal P Gain/Passthrough'
+ * '<S207>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Ideal P Gain Fdbk/Disabled'
+ * '<S208>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Integrator/Discrete'
+ * '<S209>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Integrator ICs/Internal IC'
+ * '<S210>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/N Copy/Disabled'
+ * '<S211>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/N Gain/External Parameters'
+ * '<S212>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/P Copy/Disabled'
+ * '<S213>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Parallel P Gain/External Parameters'
+ * '<S214>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Reset Signal/Disabled'
+ * '<S215>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Saturation/External'
+ * '<S216>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Saturation/External/Saturation Dynamic'
+ * '<S217>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Saturation Fdbk/Disabled'
+ * '<S218>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Sum/Sum_PID'
+ * '<S219>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Sum Fdbk/Disabled'
+ * '<S220>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tracking Mode/Enabled'
+ * '<S221>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tracking Mode Sum/Tracking Mode'
+ * '<S222>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tsamp - Integral/TsSignalSpecification'
+ * '<S223>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/Tsamp - Ngain/Passthrough'
+ * '<S224>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/postSat Signal/Forward_Path'
+ * '<S225>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/preInt Signal/Internal PreInt'
+ * '<S226>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem/PI Vd/preSat Signal/Forward_Path'
+ * '<S227>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/FOC_MTPA_FWC/Subsystem1/Saturation Dynamic'
  * '<S228>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Subsystem/Saturation Dynamic'
  */
 #endif                                 /* FOC_MTPA_FWC_FF_h_ */

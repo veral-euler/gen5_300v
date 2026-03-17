@@ -227,6 +227,7 @@ void disable_drive(void)
     /* Resetting FOC data structures after error trigger */
     (void)memset(&FOC_MTPA_FWC_FF_U, 0, sizeof(ExtU_FOC_MTPA_FWC_FF_T));
     (void)memset(&FOC_MTPA_FWC_FF_Y, 0, sizeof(ExtY_FOC_MTPA_FWC_FF_T));
+    (void)memset(&d, 0, sizeof(data));
   }
   #endif
 }
