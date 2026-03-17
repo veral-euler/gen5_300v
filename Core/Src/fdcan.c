@@ -372,10 +372,10 @@ void Send_Data_On_CAN_410(void) {
 
 	can_data[0] = CONFIG_VERSION_MAJOR;
 	can_data[1] = CONFIG_VERSION_MINOR;
-	can_data[3] = CONFIG_VERSION_SUBMINOR;
-	can_data[4] = FIRMWARE_VERSION_MAJOR;
-	can_data[5] = FIRMWARE_VERSION_MINOR;
-	can_data[6] = FIRMWARE_VERSION_SUBMINOR;
+	can_data[2] = CONFIG_VERSION_SUBMINOR;
+	can_data[3] = FIRMWARE_VERSION_MAJOR;
+	can_data[4] = FIRMWARE_VERSION_MINOR;
+	can_data[5] = FIRMWARE_VERSION_SUBMINOR;
 
 	_fdcan_transmit_on_can(0x410, 0, can_data, 0x08);
 }

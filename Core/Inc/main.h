@@ -45,6 +45,7 @@ extern "C" {
 #define THROTTLE_BASED_REF  0
 #define CAN_BASED_THRV		1
 #define THR_BASED_THRV		0
+#define ENABLE_TUNING		0
 
 #define CONFIG_VERSION_MAJOR 		0x05
 #define CONFIG_VERSION_MINOR 		0x00
@@ -315,7 +316,7 @@ void Error_Handler(void);
 #define REV_MAX_SPEED			1800.0f
 #define FWC_LIMIT				10.0f
 
-#define TIM1_PSC			19
+#define TIM1_PSC			9
 #define TIM1_ARR			2499
 #define TIM1_DEAD_TIME		100
 #define TIM1_ARR_HALF		1250.0f

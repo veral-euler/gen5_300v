@@ -25,7 +25,7 @@ void Motor_Alignment_Routine(void)
             __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, ALIGN_DUTY);
             __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ALIGN_DUTY);
 
-            HAL_Delay(200);
+            HAL_Delay(40);
 
             __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
             __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
@@ -35,7 +35,7 @@ void Motor_Alignment_Routine(void)
             HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
             HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
 
-            if (count >= 20) {
+            if (count >= 5) {
                 d.start_alignment = 0;
                 d.end_alignment = 1;
                 d.count_at_alignment = __HAL_TIM_GET_COUNTER(&htim2);

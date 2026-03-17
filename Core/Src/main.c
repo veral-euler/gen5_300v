@@ -142,17 +142,24 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  #if ENABLE_TUNING
   Read_EEPROM_at_init();
+  
+  if (cS == INIT)
+  {
+    cS = ANGLE_CALIB;
+    Motor_Alignment_Routine();
+  }
+  else if (cS == ANGLE_CALIB_DONE)
+  {
+    set_Initial_angle();
+  }
+  #endif
 
-  // if (cS == INIT)
-  // {
-  //   cS = ANGLE_CALIB;
-  //   Motor_Alignment_Routine();
-  // }
-  // else if (cS == ANGLE_CALIB_DONE)
-  // {
+  #if !ENABLE_TUNING
+  d.offset_angle_elec = OFFSET_CALC_ELEC;
   set_Initial_angle();
-  // }
+  #endif
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -193,8 +200,6 @@ int main(void)
 
   /*Sending Heartbeat message once at init and sending PID values*/
   _fdcan_transmit_on_can(0x400, 0, heart_beat_init, 0x08);
-  /* Sending Firmware Ver and Config Ver at startup */
-  Send_Data_On_CAN_410();
   /* Enable LED */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12, GPIO_PIN_SET);
 
@@ -498,6 +503,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       Send_Data_On_CAN_407();
       Send_Data_On_CAN_408();
       Send_Data_On_CAN_409();
+      /* Sending Firmware Ver and Config Ver */
+      Send_Data_On_CAN_410();
       #endif
 
       #if VH_CAN_ID
