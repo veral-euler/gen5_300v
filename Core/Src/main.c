@@ -453,6 +453,26 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       #endif
     }
     #endif
+  }
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM17)
+  {
+    /* Time counter for CAN transmission */
+    static uint16_t can_counter = 0;
+    can_counter++;
+
+    #if ENABLE_FAULTS
+    if (cS == FOC_START) 
+    {
+      /* Temperature and Encoder disconnection errors */
+      Sensor_Disconnection_Check();
+      /* Limit Error Checks */
+      Error_Check();
+    }
+    #endif
 
     if (cS == ANGLE_OFFSET_STORE)
     {
@@ -467,25 +487,26 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       }
       HAL_NVIC_SystemReset();
     }
-  }
-}
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  if (htim->Instance == TIM17)
-  {
-    /* Time counter for CAN transmission */
-    static uint16_t can_counter = 0;
-    can_counter++;
+    if (cS == RESET_STATE) 
+    {
+      /* Turn off drive completely */
+      HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, TIM1_ARR_HALF);
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, TIM1_ARR_HALF);
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, TIM1_ARR_HALF);
+      __HAL_TIM_MOE_DISABLE(&htim1);
 
-    #if ENABLE_FAULTS
-    if (cS == FOC_START) {
-      /* Temperature and Encoder disconnection errors */
-      Sensor_Disconnection_Check();
-      /* Limit Error Checks */
-      Error_Check();
+      /* Stopping ADC injected interrupt completely */
+      HAL_ADCEx_InjectedStop_IT(&hadc2);
+
+      /* Reset FOC Model data structs */
+      (void)memset(&FOC_MTPA_FWC_FF_U, 0, sizeof(ExtU_FOC_MTPA_FWC_FF_T));
+      (void)memset(&FOC_MTPA_FWC_FF_Y, 0, sizeof(ExtY_FOC_MTPA_FWC_FF_T));
+      
+      /* Calling NVIC Reset to reset the system */
+      HAL_NVIC_SystemReset();
     }
-    #endif
 
     /* Queue messages every 500ms */
     if (can_counter >= CAN_BUS_CYCLE)
@@ -597,6 +618,18 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage = can_d.can_instV;
   }
   #endif
+
+  if (RxMessageBuf.Identifier == 0x111) {
+    can_d.reset_flag = rxMsg[0];
+    
+    if (can_d.reset_flag == (uint8_t)1 && fabsf(d.RPM) <= 10.0f) {
+      /* Setting fnr state to neutral and making speed ref to 0 */
+      d.speed_ref = FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = 0.0f;
+      fnr_state = NEUTRAL;
+      pw_state = ECO;
+      cS = RESET_STATE;
+    }
+  }
 }
 
 /* FDCAN TX Complete Callback - automatically sends next message */

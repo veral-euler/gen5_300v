@@ -176,6 +176,7 @@ typedef struct foc_pid_t {
 typedef struct can_data_t {
 	uint8_t direction;
 	uint8_t power_mode;
+	uint8_t reset_flag;
 	float can_Ld;
 	float can_Lq;
 	float can_Lambda;
@@ -238,7 +239,8 @@ typedef enum currSession {
 	OPEN_FOC_START,
 	CURR_SENS_CALIB,
 	FOC_START,
-	CONT_ERROR
+	CONT_ERROR,
+	RESET_STATE
 } currSession;
 
 typedef enum fnr_state_t {
@@ -310,6 +312,9 @@ void Error_Handler(void);
 #define SPEED_REF_RPM_MAX		500.0f
 #define MIN_RPM_FOR_MOTOR_START 80.0f
 #define RAD_S_TO_RPM   			9.549296f
+
+#define ALIGNMENT_PULSE_MS		40
+#define ALIGNMENT_REP_COUNT		5
 
 #define ECO_MAX_SPEED			4500.0f
 #define SPORTS_MAX_SPEED		6000.0f
