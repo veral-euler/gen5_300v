@@ -169,6 +169,7 @@ typedef struct foc_pid_t {
 	float Kd_Filter;
 	float Output_Up_Limit;
 	float Output_Low_Limit;
+	float Back_Kaw;
 } foc_pid_t;
 
 typedef struct can_data_t {
@@ -333,7 +334,7 @@ void Error_Handler(void);
 #define TIM17_ARR			2499
 #define HIGH_PULSE16_ERROR	0.024574f
 #define OFFSET_CALC_ELEC 	0.15f//1.1913f
-#define OFFSET_CALC_MECH	0.67f
+#define OFFSET_CALC_MECH	0.66f
 
 #define MTR_NTC_R25			10000.0f
 #define MTC_NTC_R25			10000.0f
@@ -368,6 +369,7 @@ void Error_Handler(void);
 #define SPEED_KD_FILTER			5.0f
 #define SPEED_PID_OUT_UPL		MOTOR_PEAK_AC
 #define SPEED_PID_OUT_LOWL		0.0f
+#define SPEED_PID_BACK_KAW		ROOT2
 /* ID PID */
 #define ID_KP					0.4f
 #define ID_KI					6.0f
@@ -375,6 +377,7 @@ void Error_Handler(void);
 #define ID_KD_FILTER			5.0f
 #define ID_PID_OUT_UPL			SVM_VOLTAGE_LIMIT
 #define ID_PID_OUT_LOWL			-SVM_VOLTAGE_LIMIT
+#define ID_PID_BACK_KAW			3.87298f
 /* IQ PID */
 #define IQ_KP					0.3f
 #define IQ_KI					7.0f
@@ -382,6 +385,7 @@ void Error_Handler(void);
 #define IQ_KD_FILTER			5.0f
 #define IQ_PID_OUT_UPL			SVM_VOLTAGE_LIMIT
 #define IQ_PID_OUT_LOWL			-SVM_VOLTAGE_LIMIT
+#define IQ_PID_BACK_KAW			4.8304589f
 
 #define THR_MIN_VAL 			0.9f
 #define THR_MAX_VAL				4.0f

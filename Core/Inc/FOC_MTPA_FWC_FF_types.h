@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_MTPA_FWC_FF'.
  *
- * Model version                  : 18.345
+ * Model version                  : 18.348
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Tue Mar 17 15:55:35 2026
+ * C/C++ source code generated on : Fri Mar 20 14:59:13 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M

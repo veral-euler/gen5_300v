@@ -377,6 +377,7 @@ void Send_Data_On_CAN_410(void) {
 	can_data[3] = FIRMWARE_VERSION_MAJOR;
 	can_data[4] = FIRMWARE_VERSION_MINOR;
 	can_data[5] = FIRMWARE_VERSION_SUBMINOR;
+	can_data[6] = (uint8_t)(FOC_MTPA_FWC_FF_Y.MTPA_FWC_condition);
 
 	_fdcan_transmit_on_can(0x410, 0, can_data, 0x08);
 }

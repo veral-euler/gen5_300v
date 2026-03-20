@@ -71,7 +71,7 @@ void rt_OneStep(void)
     /* Set model inputs associated with subrates here */
     /* Gathering speed feedback data and setting motor start flag */
     Speed_Sense(d.mech_angle);
-    FOC_MTPA_FWC_FF_U.MtrSpd = fabsf(d.rad_s);
+    FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec = fabsf(d.rad_s);
     if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START)
     {
       d.motor_start = 1;

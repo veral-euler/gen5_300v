@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_MTPA_FWC_FF'.
  *
- * Model version                  : 18.345
+ * Model version                  : 18.348
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Tue Mar 17 15:55:35 2026
+ * C/C++ source code generated on : Fri Mar 20 14:59:13 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -114,13 +114,13 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
   float rtb_TrigonometricFunction_tmp;
   float rtb_sum_Ds;
   float rtb_Add1_l;
+  float rtb_Divide;
   float rtb_Gain;
   float rtb_Sum_f;
   float rtb_TmpSignalConversionAtMath_0;
   float rtb_UkYk1;
   float rtb_UkYk1_k;
   float rtb_V_qo;
-  float rtb_add_c;
   int32_t rtb_State;
   bool guard1;
   bool guard2;
@@ -160,7 +160,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_DW.Delay_DSTATE = 0.0F;
   }
 
-  /* AlgorithmDescriptorDelegate generated from: '<S22>/a16' incorporates:
+  /* Product: '<S156>/delta fall limit' incorporates:
    *  Inport: '<Root>/Rate_limiter'
    *  Product: '<S9>/delta rise limit'
    *  SampleTimeMath: '<S9>/sample time'
@@ -168,52 +168,31 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    * About '<S9>/sample time':
    *  y = K where K = ( w * Ts )
    *   */
-  FOC_MTPA_FWC_FF_Y.Id = FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_up *
-    0.0001F;
+  FOC_MTPA_FWC_FF_Y.Id_ref_final =
+    FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_up * 0.0001F;
 
-  /* RateTransition: '<S2>/Rate Transition' */
+  /* RateTransition: '<S1>/Rate Transition' */
   if (FOC_MTPA_FWC_FF_M->Timing.RateInteraction.TID0_1 == 1) {
-    /* RateTransition: '<S2>/Rate Transition' */
-    FOC_MTPA_FWC_FF_B.Iq_gen = FOC_MTPA_FWC_FF_DW.RateTransition_Buffer0;
+    /* RateTransition: '<S1>/Rate Transition' */
+    FOC_MTPA_FWC_FF_B.T_ref_final = FOC_MTPA_FWC_FF_DW.RateTransition_Buffer0;
   }
 
-  /* End of RateTransition: '<S2>/Rate Transition' */
-
-  /* Switch: '<S2>/Switch' incorporates:
-   *  Delay: '<S1>/Delay One Step'
-   *  Inport: '<Root>/Iq_Torque_ratio'
-   *  Inport: '<Root>/Speed_1_Torque_0'
-   *  Inport: '<Root>/T_ref'
-   *  Product: '<S2>/Product1'
-   *  Switch: '<S1>/Switch2'
-   */
-  if (FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 > 0.0F) {
-    rtb_Gain = (float)(FOC_MTPA_FWC_FF_B.Iq_gen *
-                       FOC_MTPA_FWC_FF_U.Iq_Torque_ratio);
-  } else if (FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE > 2.0F) {
-    /* Switch: '<S1>/Switch2' incorporates:
-     *  Constant: '<S1>/Constant1'
-     */
-    rtb_Gain = 0.0F;
-  } else {
-    rtb_Gain = FOC_MTPA_FWC_FF_U.RefTrq;
-  }
+  /* End of RateTransition: '<S1>/Rate Transition' */
 
   /* Sum: '<S9>/Difference Inputs1' incorporates:
    *  Delay: '<S9>/Delay'
-   *  Switch: '<S2>/Switch'
    *
    * Block description for '<S9>/Difference Inputs1':
    *
    *  Add in CPU
    */
-  rtb_UkYk1 = rtb_Gain - FOC_MTPA_FWC_FF_DW.Delay_DSTATE;
+  rtb_UkYk1 = FOC_MTPA_FWC_FF_B.T_ref_final - FOC_MTPA_FWC_FF_DW.Delay_DSTATE;
 
-  /* Switch: '<S227>/Switch2' incorporates:
-   *  RelationalOperator: '<S227>/LowerRelop1'
+  /* Switch: '<S173>/Switch2' incorporates:
+   *  RelationalOperator: '<S173>/LowerRelop1'
    */
-  if (!(rtb_UkYk1 > FOC_MTPA_FWC_FF_Y.Id)) {
-    /* AlgorithmDescriptorDelegate generated from: '<S22>/a16' incorporates:
+  if (!(rtb_UkYk1 > FOC_MTPA_FWC_FF_Y.Id_ref_final)) {
+    /* Product: '<S156>/delta fall limit' incorporates:
      *  Inport: '<Root>/Rate_limiter'
      *  Product: '<S9>/delta fall limit'
      *  SampleTimeMath: '<S9>/sample time'
@@ -221,21 +200,21 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      * About '<S9>/sample time':
      *  y = K where K = ( w * Ts )
      *   */
-    FOC_MTPA_FWC_FF_Y.Id = 0.0001F *
+    FOC_MTPA_FWC_FF_Y.Id_ref_final = 0.0001F *
       FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_down;
 
-    /* Switch: '<S227>/Switch' incorporates:
-     *  RelationalOperator: '<S227>/UpperRelop'
+    /* Switch: '<S173>/Switch' incorporates:
+     *  RelationalOperator: '<S173>/UpperRelop'
      */
-    if (!(rtb_UkYk1 < FOC_MTPA_FWC_FF_Y.Id)) {
-      /* AlgorithmDescriptorDelegate generated from: '<S22>/a16' */
-      FOC_MTPA_FWC_FF_Y.Id = rtb_UkYk1;
+    if (!(rtb_UkYk1 < FOC_MTPA_FWC_FF_Y.Id_ref_final)) {
+      /* Product: '<S156>/delta fall limit' */
+      FOC_MTPA_FWC_FF_Y.Id_ref_final = rtb_UkYk1;
     }
 
-    /* End of Switch: '<S227>/Switch' */
+    /* End of Switch: '<S173>/Switch' */
   }
 
-  /* End of Switch: '<S227>/Switch2' */
+  /* End of Switch: '<S173>/Switch2' */
 
   /* Sum: '<S9>/Difference Inputs2' incorporates:
    *  Delay: '<S9>/Delay'
@@ -244,20 +223,19 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *
    *  Add in CPU
    */
-  FOC_MTPA_FWC_FF_Y.T_gen = FOC_MTPA_FWC_FF_Y.Id +
+  FOC_MTPA_FWC_FF_Y.T_gen = FOC_MTPA_FWC_FF_Y.Id_ref_final +
     FOC_MTPA_FWC_FF_DW.Delay_DSTATE;
 
-  /* Product: '<S156>/delta fall limit' incorporates:
+  /* Product: '<S155>/Divide' incorporates:
    *  Abs: '<S155>/Abs1'
    *  Constant: '<S155>/Constant1'
    *  Gain: '<S155>/Gain'
    *  Inport: '<Root>/Motor_Parameters'
-   *  Product: '<S155>/Divide'
    *  Product: '<S155>/Product'
    */
-  FOC_MTPA_FWC_FF_Y.Id_ref_final = fabsf(2.0F * FOC_MTPA_FWC_FF_Y.T_gen) /
-    (float)(FOC_MTPA_FWC_FF_U.Motor_Parameters.Lambda *
-            FOC_MTPA_FWC_FF_U.Motor_Parameters.Pole_Pairs * 3.0);
+  rtb_Divide = fabsf(2.0F * FOC_MTPA_FWC_FF_Y.T_gen) / (float)
+    (FOC_MTPA_FWC_FF_U.Motor_Parameters.Lambda *
+     FOC_MTPA_FWC_FF_U.Motor_Parameters.Pole_Pairs * 3.0);
 
   /* Switch: '<S168>/Switch2' incorporates:
    *  Inport: '<Root>/Id_Iq_MTPA_limit'
@@ -265,26 +243,17 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  RelationalOperator: '<S168>/UpperRelop'
    *  Switch: '<S168>/Switch'
    */
-  if (FOC_MTPA_FWC_FF_Y.Id_ref_final >
-      FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_up_limit) {
-    /* Product: '<S156>/delta fall limit' */
-    FOC_MTPA_FWC_FF_Y.Id_ref_final =
-      FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_up_limit;
-  } else if (FOC_MTPA_FWC_FF_Y.Id_ref_final <
-             FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_low_limit) {
-    /* Product: '<S156>/delta fall limit' incorporates:
-     *  Switch: '<S168>/Switch'
-     */
-    FOC_MTPA_FWC_FF_Y.Id_ref_final =
-      FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_low_limit;
+  if (rtb_Divide > FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_up_limit) {
+    rtb_Divide = FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_up_limit;
+  } else if (rtb_Divide < FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_low_limit) {
+    /* Switch: '<S168>/Switch' */
+    rtb_Divide = FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_low_limit;
   }
 
   /* End of Switch: '<S168>/Switch2' */
 
-  /* Product: '<S156>/delta fall limit' incorporates:
-   *  Math: '<S155>/Math Function2'
-   */
-  FOC_MTPA_FWC_FF_Y.Id_ref_final *= FOC_MTPA_FWC_FF_Y.Id_ref_final;
+  /* Math: '<S155>/Math Function2' */
+  rtb_Divide *= rtb_Divide;
 
   /* Sum: '<S155>/Subtract' incorporates:
    *  Abs: '<S155>/Abs2'
@@ -294,8 +263,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Sum: '<S155>/Add'
    */
   FOC_MTPA_FWC_FF_Y.Id_ref_MTPA = FOC_MTPA_FWC_FF_Y.Id_error - sqrtf(fabsf
-    (FOC_MTPA_FWC_FF_Y.Id_error * FOC_MTPA_FWC_FF_Y.Id_error + 0.5F *
-     FOC_MTPA_FWC_FF_Y.Id_ref_final));
+    (FOC_MTPA_FWC_FF_Y.Id_error * FOC_MTPA_FWC_FF_Y.Id_error + 0.5F * rtb_Divide));
 
   /* Switch: '<S167>/Switch2' incorporates:
    *  Inport: '<Root>/Id_Iq_MTPA_limit'
@@ -324,17 +292,16 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Math: '<S155>/Math Function3'
    *  Sum: '<S155>/Subtract1'
    */
-  FOC_MTPA_FWC_FF_Y.Iq_ref_MTPA = sqrtf(fabsf(FOC_MTPA_FWC_FF_Y.Id_ref_final -
+  FOC_MTPA_FWC_FF_Y.Iq_ref_MTPA = sqrtf(fabsf(rtb_Divide -
     FOC_MTPA_FWC_FF_Y.Id_ref_MTPA * FOC_MTPA_FWC_FF_Y.Id_ref_MTPA));
 
   /* Product: '<S156>/delta fall limit' incorporates:
-   *  DataTypeConversion: '<S1>/Data Type Conversion'
-   *  Inport: '<Root>/Actual Speed_mech_rpm'
+   *  Delay: '<S1>/Delay One Step'
    *  Inport: '<Root>/Motor_Parameters'
    *  Product: '<S160>/Product'
    */
   FOC_MTPA_FWC_FF_Y.Id_ref_final = FOC_MTPA_FWC_FF_U.Motor_Parameters.Pole_Pairs
-    * d.rad_s;
+    * FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE;
 
   /* Gain: '<S160>/Gain' incorporates:
    *  Inport: '<Root>/Motor_Parameters'
@@ -354,10 +321,10 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
               FOC_MTPA_FWC_FF_U.Motor_Parameters.Lambda) *
     FOC_MTPA_FWC_FF_Y.Id_ref_final;
 
-  /* Outputs for IfAction SubSystem: '<S7>/If Action Subsystem1' incorporates:
+  /* Outputs for IfAction SubSystem: '<S8>/If Action Subsystem1' incorporates:
    *  ActionPort: '<S154>/Action Port'
    */
-  /* If: '<S7>/If' incorporates:
+  /* If: '<S8>/If' incorporates:
    *  Math: '<S160>/Square'
    *  Math: '<S160>/Square1'
    *  Sqrt: '<S160>/Sqrt'
@@ -366,7 +333,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    */
   FOC_MTPA_FWC_FF_Y.V_s = sqrtf(rtb_UkYk1 * rtb_UkYk1 + rtb_V_qo * rtb_V_qo);
 
-  /* End of Outputs for SubSystem: '<S7>/If Action Subsystem1' */
+  /* End of Outputs for SubSystem: '<S8>/If Action Subsystem1' */
 
   /* Chart: '<S160>/Chart' */
   guard1 = false;
@@ -398,25 +365,25 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
   }
 
   if (guard2) {
-    /* Outputs for IfAction SubSystem: '<S7>/If Action Subsystem' incorporates:
+    /* Outputs for IfAction SubSystem: '<S8>/If Action Subsystem' incorporates:
      *  ActionPort: '<S153>/Action Port'
      */
-    /* If: '<S7>/If' incorporates:
-     *  Merge: '<S7>/Merge'
+    /* If: '<S8>/If' incorporates:
+     *  Merge: '<S8>/Merge'
      *  SignalConversion generated from: '<S153>/Id_ref'
      *  SignalConversion generated from: '<S153>/Iq_ref'
      */
     FOC_MTPA_FWC_FF_B.Merge[0] = FOC_MTPA_FWC_FF_Y.Id_ref_MTPA;
     FOC_MTPA_FWC_FF_B.Merge[1] = FOC_MTPA_FWC_FF_Y.Iq_ref_MTPA;
 
-    /* End of Outputs for SubSystem: '<S7>/If Action Subsystem' */
+    /* End of Outputs for SubSystem: '<S8>/If Action Subsystem' */
   }
 
   if (guard1) {
-    /* Outputs for IfAction SubSystem: '<S7>/If Action Subsystem1' incorporates:
+    /* Outputs for IfAction SubSystem: '<S8>/If Action Subsystem1' incorporates:
      *  ActionPort: '<S154>/Action Port'
      */
-    /* If: '<S7>/If' incorporates:
+    /* If: '<S8>/If' incorporates:
      *  Constant: '<S162>/Constant'
      *  Constant: '<S162>/Constant1'
      *  Constant: '<S162>/Modulation index threshold'
@@ -428,7 +395,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      *  Fcn: '<S165>/theta->y'
      *  Gain: '<S162>/Gain'
      *  Gain: '<S162>/Gain1'
-     *  Merge: '<S7>/Merge'
+     *  Merge: '<S8>/Merge'
      *  Product: '<S162>/Product'
      *  Product: '<S164>/Product'
      *  Saturate: '<S162>/Saturation'
@@ -442,13 +409,13 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      *  UnitDelay: '<S162>/Unit Delay'
      */
     if (FOC_MTPA_FWC_FF_Y.V_max > 0.1F) {
-      rtb_Gain = FOC_MTPA_FWC_FF_Y.V_max;
+      rtb_UkYk1 = FOC_MTPA_FWC_FF_Y.V_max;
     } else {
-      rtb_Gain = 0.1F;
+      rtb_UkYk1 = 0.1F;
     }
 
     FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE += ((float)(1.0 -
-      FOC_MTPA_FWC_FF_Y.V_s / rtb_Gain) * can_d.Kfw + can_d.Kaw *
+      FOC_MTPA_FWC_FF_Y.V_s / rtb_UkYk1) * can_d.Kfw + can_d.Kaw *
       FOC_MTPA_FWC_FF_DW.UnitDelay_DSTATE_p) * 0.0001F;
     if (FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE > 1.0F) {
       rtb_UkYk1 = 1.0F;
@@ -468,10 +435,15 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_B.Merge[0] = rtb_V_qo * cosf(rtb_UkYk1);
     FOC_MTPA_FWC_FF_B.Merge[1] = rtb_V_qo * sinf(rtb_UkYk1);
 
-    /* End of Outputs for SubSystem: '<S7>/If Action Subsystem1' */
+    /* End of Outputs for SubSystem: '<S8>/If Action Subsystem1' */
   }
 
   /* End of Chart: '<S160>/Chart' */
+
+  /* Abs: '<S161>/Abs' incorporates:
+   *  Delay: '<S1>/Delay One Step'
+   */
+  rtb_UkYk1 = fabsf(FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE);
 
   /* Logic: '<S161>/Logical Operator' incorporates:
    *  Inport: '<Root>/Throttle_input'
@@ -485,8 +457,6 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
       FOC_MTPA_FWC_FF_U.Throttle_input.Min_Throttle_Voltage));
 
   /* Chart: '<S161>/FNR_switching' incorporates:
-   *  DataTypeConversion: '<S1>/Data Type Conversion'
-   *  Inport: '<Root>/Actual Speed_mech_rpm'
    *  Inport: '<Root>/Drive_State'
    *  Inport: '<Root>/RPM_min_limit'
    */
@@ -552,18 +522,16 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
         FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
       } else {
         tmp = !FOC_MTPA_FWC_FF_Y.Throttle_error;
-        if ((FOC_MTPA_FWC_FF_U.Drive_State == 2.0F) && ((float)
-             FOC_MTPA_FWC_FF_U.MtrSpd <= FOC_MTPA_FWC_FF_U.RPM_min_limit) && tmp)
-        {
+        if ((FOC_MTPA_FWC_FF_U.Drive_State == 2.0F) && (rtb_UkYk1 <=
+             FOC_MTPA_FWC_FF_U.RPM_min_limit) && tmp) {
           FOC_MTPA_FWC_FF_DW.durationCounter_1_n = 0U;
           FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Reverse;
 
           /* Outport: '<Root>/Throttle_en' */
           FOC_MTPA_FWC_FF_Y.Throttle_en = 1.0;
           FOC_MTPA_FWC_FF_Y.Throttle_State = Reverse;
-        } else if ((FOC_MTPA_FWC_FF_U.Drive_State == 1.0F) && ((float)
-                    FOC_MTPA_FWC_FF_U.MtrSpd <= FOC_MTPA_FWC_FF_U.RPM_min_limit)
-                   && tmp) {
+        } else if ((FOC_MTPA_FWC_FF_U.Drive_State == 1.0F) && (rtb_UkYk1 <=
+                    FOC_MTPA_FWC_FF_U.RPM_min_limit) && tmp) {
           FOC_MTPA_FWC_FF_DW.durationCounter_1 = 0U;
           FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Forward;
 
@@ -600,18 +568,16 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
         FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
       } else {
         tmp = !FOC_MTPA_FWC_FF_Y.Throttle_error;
-        if ((FOC_MTPA_FWC_FF_U.Drive_State == 2.0F) && ((float)
-             FOC_MTPA_FWC_FF_U.MtrSpd <= FOC_MTPA_FWC_FF_U.RPM_min_limit) && tmp)
-        {
+        if ((FOC_MTPA_FWC_FF_U.Drive_State == 2.0F) && (rtb_UkYk1 <=
+             FOC_MTPA_FWC_FF_U.RPM_min_limit) && tmp) {
           FOC_MTPA_FWC_FF_DW.durationCounter_1_n = 0U;
           FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Reverse;
 
           /* Outport: '<Root>/Throttle_en' */
           FOC_MTPA_FWC_FF_Y.Throttle_en = 1.0;
           FOC_MTPA_FWC_FF_Y.Throttle_State = Reverse;
-        } else if ((FOC_MTPA_FWC_FF_U.Drive_State == 1.0F) && ((float)
-                    FOC_MTPA_FWC_FF_U.MtrSpd <= FOC_MTPA_FWC_FF_U.RPM_min_limit)
-                   && tmp) {
+        } else if ((FOC_MTPA_FWC_FF_U.Drive_State == 1.0F) && (rtb_UkYk1 <=
+                    FOC_MTPA_FWC_FF_U.RPM_min_limit) && tmp) {
           FOC_MTPA_FWC_FF_DW.durationCounter_1 = 0U;
           FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Forward;
 
@@ -667,8 +633,8 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
       /* case IN_Throttle_error: */
       FOC_MTPA_FWC_FF_Y.Throttle_en = 0.0;
       FOC_MTPA_FWC_FF_Y.Throttle_State = Throttle_Error;
-      if ((FOC_MTPA_FWC_FF_U.Drive_State == 3.0F) && ((float)
-           FOC_MTPA_FWC_FF_U.MtrSpd <= FOC_MTPA_FWC_FF_U.RPM_min_limit) &&
+      if ((FOC_MTPA_FWC_FF_U.Drive_State == 3.0F) && (rtb_UkYk1 <=
+           FOC_MTPA_FWC_FF_U.RPM_min_limit) &&
           (!FOC_MTPA_FWC_FF_Y.Throttle_error)) {
         FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
         FOC_MTPA_FWC_FF_Y.Throttle_State = Neutral;
@@ -794,15 +760,15 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
 
   /* End of Outputs for SubSystem: '<S14>/Two phase CRL wrap' */
 
-  /* Trigonometry: '<S4>/Trigonometric Function' incorporates:
+  /* Trigonometry: '<S5>/Trigonometric Function' incorporates:
    *  Inport: '<Root>/angle'
-   *  Trigonometry: '<S6>/Trigonometric Function1'
+   *  Trigonometry: '<S7>/Trigonometric Function1'
    */
   rtb_TrigonometricFunction_tmp = sinf(FOC_MTPA_FWC_FF_U.MtrElcPos);
 
-  /* Trigonometry: '<S4>/Trigonometric Function1' incorporates:
+  /* Trigonometry: '<S5>/Trigonometric Function1' incorporates:
    *  Inport: '<Root>/angle'
-   *  Trigonometry: '<S6>/Trigonometric Function'
+   *  Trigonometry: '<S7>/Trigonometric Function'
    */
   rtb_TrigonometricFunction1_tmp = cosf(FOC_MTPA_FWC_FF_U.MtrElcPos);
 
@@ -815,8 +781,8 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Product: '<S22>/bsin'
    *  Sum: '<S22>/sum_Ds'
    *  Switch: '<S23>/Switch'
-   *  Trigonometry: '<S4>/Trigonometric Function'
-   *  Trigonometry: '<S4>/Trigonometric Function1'
+   *  Trigonometry: '<S5>/Trigonometric Function'
+   *  Trigonometry: '<S5>/Trigonometric Function1'
    */
   FOC_MTPA_FWC_FF_Y.Id = (float)(FOC_MTPA_FWC_FF_U.PhaseCurrent[0] *
     rtb_TrigonometricFunction1_tmp + rtb_sum_Ds * rtb_TrigonometricFunction_tmp);
@@ -828,8 +794,8 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Product: '<S22>/bcos'
    *  Sum: '<S22>/sum_Qs'
    *  Switch: '<S23>/Switch'
-   *  Trigonometry: '<S4>/Trigonometric Function'
-   *  Trigonometry: '<S4>/Trigonometric Function1'
+   *  Trigonometry: '<S5>/Trigonometric Function'
+   *  Trigonometry: '<S5>/Trigonometric Function1'
    */
   FOC_MTPA_FWC_FF_Y.Iq = (float)(rtb_sum_Ds * rtb_TrigonometricFunction1_tmp -
     FOC_MTPA_FWC_FF_U.PhaseCurrent[0] * rtb_TrigonometricFunction_tmp);
@@ -851,7 +817,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_DW.UnitDelay_DSTATE + FOC_MTPA_FWC_FF_Y.Id *
     FOC_MTPA_FWC_FF_U.IIR_Filter_Coefficient.Id_Filter_coefficient;
 
-  /* Switch: '<S4>/Switch' incorporates:
+  /* Switch: '<S5>/Switch' incorporates:
    *  Inport: '<Root>/IIR_Filter_Coefficient'
    */
   if (FOC_MTPA_FWC_FF_U.IIR_Filter_Coefficient.Id_Filter_switch > 0.0F) {
@@ -861,7 +827,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_Y.Id = FOC_MTPA_FWC_FF_DW.UnitDelay_DSTATE;
   }
 
-  /* End of Switch: '<S4>/Switch' */
+  /* End of Switch: '<S5>/Switch' */
 
   /* Sum: '<S28>/Sum3' */
   FOC_MTPA_FWC_FF_Y.Id_error = FOC_MTPA_FWC_FF_Y.Id_ref_final -
@@ -910,7 +876,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
 
   /* End of Switch: '<S131>/Switch2' */
 
-  /* Gain: '<S5>/Gain' incorporates:
+  /* Gain: '<S6>/Gain' incorporates:
    *  Inport: '<Root>/Bus_Voltage'
    */
   rtb_Gain = 0.577350259F * FOC_MTPA_FWC_FF_U.BusVoltage_V;
@@ -1009,12 +975,10 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
 
   /* End of Switch: '<S159>/Switch2' */
 
-  /* Sum: '<S27>/Sum2' incorporates:
-   *  DataTypeConversion: '<S1>/Data Type Conversion'
-   *  Gain: '<S30>/wm_pu2si_mech2elec'
-   *  Inport: '<Root>/Actual Speed_mech_rpm'
+  /* Gain: '<S30>/wm_pu2si_mech2elec' incorporates:
+   *  Delay: '<S1>/Delay One Step'
    */
-  FOC_MTPA_FWC_FF_Y.Iq_error = POLEPAIRS * d.rad_s;
+  rtb_Divide = POLEPAIRS * FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE;
 
   /* Gain: '<S30>/NegSign' incorporates:
    *  Inport: '<Root>/Motor_Parameters'
@@ -1022,7 +986,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Switch: '<S31>/Switch1'
    */
   rtb_UkYk1_k = -(FOC_MTPA_FWC_FF_U.Motor_Parameters.Lq *
-                  FOC_MTPA_FWC_FF_Y.Iq_ref_final * FOC_MTPA_FWC_FF_Y.Iq_error);
+                  FOC_MTPA_FWC_FF_Y.Iq_ref_final * rtb_Divide);
 
   /* Switch: '<S32>/Switch2' incorporates:
    *  RelationalOperator: '<S32>/LowerRelop1'
@@ -1040,7 +1004,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     rtb_UkYk1_k = -rtb_Gain;
   }
 
-  /* Sum: '<S5>/Add' incorporates:
+  /* Sum: '<S6>/Add' incorporates:
    *  Switch: '<S32>/Switch2'
    */
   FOC_MTPA_FWC_FF_Y.Vd = FOC_MTPA_FWC_FF_Y.Vd_PID + rtb_UkYk1_k;
@@ -1052,11 +1016,11 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Switch: '<S25>/Switch'
    */
   if (FOC_MTPA_FWC_FF_Y.Vd > FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_flux_PID) {
-    /* Sum: '<S5>/Add' */
+    /* Sum: '<S6>/Add' */
     FOC_MTPA_FWC_FF_Y.Vd = FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_flux_PID;
   } else if (FOC_MTPA_FWC_FF_Y.Vd <
              FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_flux_PID) {
-    /* Sum: '<S5>/Add' incorporates:
+    /* Sum: '<S6>/Add' incorporates:
      *  Switch: '<S25>/Switch'
      */
     FOC_MTPA_FWC_FF_Y.Vd = FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_flux_PID;
@@ -1073,8 +1037,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    */
   rtb_UkYk1_k = (FOC_MTPA_FWC_FF_U.Motor_Parameters.Ld *
                  FOC_MTPA_FWC_FF_Y.Id_ref_final +
-                 FOC_MTPA_FWC_FF_U.Motor_Parameters.Lambda) *
-    FOC_MTPA_FWC_FF_Y.Iq_error;
+                 FOC_MTPA_FWC_FF_U.Motor_Parameters.Lambda) * rtb_Divide;
 
   /* Switch: '<S33>/Switch2' incorporates:
    *  RelationalOperator: '<S33>/LowerRelop1'
@@ -1110,7 +1073,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_DW.UnitDelay_DSTATE_f + FOC_MTPA_FWC_FF_Y.Iq *
     FOC_MTPA_FWC_FF_U.IIR_Filter_Coefficient.Iq_Filter_coefficient;
 
-  /* Switch: '<S4>/Switch1' incorporates:
+  /* Switch: '<S5>/Switch1' incorporates:
    *  Inport: '<Root>/IIR_Filter_Coefficient'
    */
   if (FOC_MTPA_FWC_FF_U.IIR_Filter_Coefficient.Iq_Filter_switch > 0.0F) {
@@ -1120,7 +1083,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_Y.Iq = FOC_MTPA_FWC_FF_DW.UnitDelay_DSTATE_f;
   }
 
-  /* End of Switch: '<S4>/Switch1' */
+  /* End of Switch: '<S5>/Switch1' */
 
   /* Sum: '<S27>/Sum2' */
   FOC_MTPA_FWC_FF_Y.Iq_error = FOC_MTPA_FWC_FF_Y.Iq_ref_final -
@@ -1169,7 +1132,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
 
   /* End of Switch: '<S77>/Switch2' */
 
-  /* Sum: '<S5>/Add1' */
+  /* Sum: '<S6>/Add1' */
   FOC_MTPA_FWC_FF_Y.Vq = rtb_Gain + FOC_MTPA_FWC_FF_Y.Vq_PID;
 
   /* Switch: '<S26>/Switch2' incorporates:
@@ -1179,11 +1142,11 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Switch: '<S26>/Switch'
    */
   if (FOC_MTPA_FWC_FF_Y.Vq > FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_torque_PID) {
-    /* Sum: '<S5>/Add1' */
+    /* Sum: '<S6>/Add1' */
     FOC_MTPA_FWC_FF_Y.Vq = FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_torque_PID;
   } else if (FOC_MTPA_FWC_FF_Y.Vq <
              FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_torque_PID) {
-    /* Sum: '<S5>/Add1' incorporates:
+    /* Sum: '<S6>/Add1' incorporates:
      *  Switch: '<S26>/Switch'
      */
     FOC_MTPA_FWC_FF_Y.Vq = FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_torque_PID;
@@ -1204,24 +1167,24 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
   /* Gain: '<S145>/one_by_two' incorporates:
    *  AlgorithmDescriptorDelegate generated from: '<S146>/a16'
    */
-  rtb_add_c = 0.5F * rtb_TmpSignalConversionAtMath_0;
+  rtb_Gain = 0.5F * rtb_TmpSignalConversionAtMath_0;
 
   /* Gain: '<S145>/sqrt3_by_two' incorporates:
    *  Product: '<S146>/dsin'
    *  Product: '<S146>/qcos'
    *  Sum: '<S146>/sum_beta'
    */
-  rtb_Gain = ((float)(FOC_MTPA_FWC_FF_Y.Vq * rtb_TrigonometricFunction1_tmp) +
-              (float)(FOC_MTPA_FWC_FF_Y.Vd * rtb_TrigonometricFunction_tmp)) *
+  rtb_Divide = ((float)(FOC_MTPA_FWC_FF_Y.Vq * rtb_TrigonometricFunction1_tmp) +
+                (float)(FOC_MTPA_FWC_FF_Y.Vd * rtb_TrigonometricFunction_tmp)) *
     0.866025388F;
 
   /* End of Outputs for SubSystem: '<S143>/Two inputs CRL' */
 
   /* Sum: '<S145>/add_b' */
-  rtb_Add1_l = rtb_Gain - rtb_add_c;
+  rtb_Add1_l = rtb_Divide - rtb_Gain;
 
   /* Sum: '<S145>/add_c' */
-  rtb_add_c = (0.0F - rtb_add_c) - rtb_Gain;
+  rtb_Gain = (0.0F - rtb_Gain) - rtb_Divide;
 
   /* Outputs for Atomic SubSystem: '<S143>/Two inputs CRL' */
   /* Gain: '<S151>/one_by_two' incorporates:
@@ -1230,16 +1193,16 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  MinMax: '<S151>/Min'
    *  Sum: '<S151>/Add'
    */
-  rtb_Gain = (fmaxf(fmaxf(rtb_TmpSignalConversionAtMath_0, rtb_Add1_l),
-                    rtb_add_c) + fminf(fminf(rtb_TmpSignalConversionAtMath_0,
-    rtb_Add1_l), rtb_add_c)) * -0.5F;
+  rtb_Divide = (fmaxf(fmaxf(rtb_TmpSignalConversionAtMath_0, rtb_Add1_l),
+                      rtb_Gain) + fminf(fminf(rtb_TmpSignalConversionAtMath_0,
+    rtb_Add1_l), rtb_Gain)) * -0.5F;
 
   /* Outport: '<Root>/Va' incorporates:
    *  AlgorithmDescriptorDelegate generated from: '<S146>/a16'
    *  Gain: '<S150>/Gain'
    *  Sum: '<S150>/Add3'
    */
-  FOC_MTPA_FWC_FF_Y.Va = (rtb_TmpSignalConversionAtMath_0 + rtb_Gain) *
+  FOC_MTPA_FWC_FF_Y.Va = (rtb_TmpSignalConversionAtMath_0 + rtb_Divide) *
     1.15470052F;
 
   /* End of Outputs for SubSystem: '<S143>/Two inputs CRL' */
@@ -1248,110 +1211,38 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Gain: '<S150>/Gain'
    *  Sum: '<S150>/Add1'
    */
-  FOC_MTPA_FWC_FF_Y.Vb = (rtb_Add1_l + rtb_Gain) * 1.15470052F;
+  FOC_MTPA_FWC_FF_Y.Vb = (rtb_Add1_l + rtb_Divide) * 1.15470052F;
 
   /* Outport: '<Root>/Vc' incorporates:
    *  Gain: '<S150>/Gain'
    *  Sum: '<S150>/Add2'
    */
-  FOC_MTPA_FWC_FF_Y.Vc = (rtb_Gain + rtb_add_c) * 1.15470052F;
+  FOC_MTPA_FWC_FF_Y.Vc = (rtb_Divide + rtb_Gain) * 1.15470052F;
 
-  /* DataTypeConversion: '<S1>/Data Type Conversion1' incorporates:
-   *  Delay: '<S1>/Delay One Step'
-   */
-  FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE = (float)
+  /* DataTypeConversion: '<S1>/Data Type Conversion1' */
+  FOC_MTPA_FWC_FF_B.DataTypeConversion1 = (float)
     FOC_MTPA_FWC_FF_Y.Throttle_State;
 
-  /* Delay: '<S3>/Delay' incorporates:
-   *  Constant: '<S3>/Constant'
-   */
-  if (FOC_MTPA_FWC_FF_DW.icLoad_k) {
-    FOC_MTPA_FWC_FF_DW.Delay_DSTATE_c = 0.0F;
-  }
-
   /* Switch: '<S1>/Switch' incorporates:
-   *  Constant: '<S1>/Constant'
-   *  Delay: '<S1>/Delay One Step'
-   *  Inport: '<Root>/Ref_Speed_mech_rpm'
+   *  Constant: '<S2>/Constant'
+   *  RelationalOperator: '<S2>/Compare'
    */
-  if (FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE > 2.0F) {
-    rtb_sum_Ds = 0.0;
+  if (FOC_MTPA_FWC_FF_B.DataTypeConversion1 != 2.0F) {
+    /* Update for Delay: '<S1>/Delay One Step' incorporates:
+     *  Inport: '<Root>/Actual Speed_mech_rad//sec'
+     */
+    FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE =
+      FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec;
   } else {
-    rtb_sum_Ds = FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm;
+    /* Update for Delay: '<S1>/Delay One Step' incorporates:
+     *  Gain: '<S1>/Gain'
+     *  Inport: '<Root>/Actual Speed_mech_rad//sec'
+     */
+    FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE =
+      -FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec;
   }
 
-  /* Sum: '<S3>/Difference Inputs1' incorporates:
-   *  Delay: '<S3>/Delay'
-   *  Switch: '<S1>/Switch'
-   *
-   * Block description for '<S3>/Difference Inputs1':
-   *
-   *  Add in CPU
-   */
-  rtb_add_c = (float)(rtb_sum_Ds - FOC_MTPA_FWC_FF_DW.Delay_DSTATE_c);
-
-  /* Product: '<S3>/delta rise limit' incorporates:
-   *  Inport: '<Root>/Rate_limiter'
-   *  SampleTimeMath: '<S3>/sample time'
-   *
-   * About '<S3>/sample time':
-   *  y = K where K = ( w * Ts )
-   *   */
-  rtb_Gain = FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_up * 0.0001F;
-
-  /* Switch: '<S228>/Switch2' incorporates:
-   *  RelationalOperator: '<S228>/LowerRelop1'
-   */
-  if (!(rtb_add_c > rtb_Gain)) {
-    /* Switch: '<S1>/Switch1' incorporates:
-     *  Delay: '<S1>/Delay One Step'
-     *  Inport: '<Root>/Rate_limiter'
-     */
-    if (FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE > 2.0F) {
-      rtb_Gain = FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_down_neutral;
-    } else {
-      rtb_Gain = FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_down;
-    }
-
-    /* Product: '<S3>/delta fall limit' incorporates:
-     *  SampleTimeMath: '<S3>/sample time'
-     *  Switch: '<S1>/Switch1'
-     *
-     * About '<S3>/sample time':
-     *  y = K where K = ( w * Ts )
-     *   */
-    rtb_Gain *= 0.0001F;
-
-    /* Switch: '<S228>/Switch' incorporates:
-     *  RelationalOperator: '<S228>/UpperRelop'
-     */
-    if (!(rtb_add_c < rtb_Gain)) {
-      rtb_Gain = rtb_add_c;
-    }
-
-    /* End of Switch: '<S228>/Switch' */
-  }
-
-  /* End of Switch: '<S228>/Switch2' */
-
-  /* Sum: '<S3>/Difference Inputs2' incorporates:
-   *  Delay: '<S3>/Delay'
-   *
-   * Block description for '<S3>/Difference Inputs2':
-   *
-   *  Add in CPU
-   */
-  FOC_MTPA_FWC_FF_Y.Ref_speed_out_RPM = rtb_Gain +
-    FOC_MTPA_FWC_FF_DW.Delay_DSTATE_c;
-
-  /* Outport: '<Root>/Speed_error' incorporates:
-   *  DataTypeConversion: '<S1>/Data Type Conversion'
-   *  Gain: '<S1>/rpm to Rad//sec'
-   *  Inport: '<Root>/Actual Speed_mech_rpm'
-   *  Sum: '<S8>/Subtract'
-   */
-  FOC_MTPA_FWC_FF_Y.Speed_error = 0.104719758F *
-    FOC_MTPA_FWC_FF_Y.Ref_speed_out_RPM - (float)FOC_MTPA_FWC_FF_U.MtrSpd;
+  /* End of Switch: '<S1>/Switch' */
 
   /* Outport: '<Root>/MTPA_FWC_condition' */
   FOC_MTPA_FWC_FF_Y.MTPA_FWC_condition = rtb_State;
@@ -1374,7 +1265,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
   FOC_MTPA_FWC_FF_DW.Integrator_DSTATE += ((FOC_MTPA_FWC_FF_Y.Id_error *
     FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Ki_flux_PID_MTPA +
     (FOC_MTPA_FWC_FF_Y.Vd_PID - FOC_MTPA_FWC_FF_Y.Vd_PID)) +
-    (FOC_MTPA_FWC_FF_Y.Vd_PID - rtb_V_qo)) * 0.0001F;
+    (FOC_MTPA_FWC_FF_Y.Vd_PID - rtb_V_qo) * can_d.canId_PID.Back_Kaw) * 0.0001F;
   if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE > SVM_VOLTAGE_LIMIT) {
     FOC_MTPA_FWC_FF_DW.Integrator_DSTATE = SVM_VOLTAGE_LIMIT;
   } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE < -SVM_VOLTAGE_LIMIT) {
@@ -1401,7 +1292,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
   FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h += (((FOC_MTPA_FWC_FF_Y.Vq_PID -
     FOC_MTPA_FWC_FF_Y.Vq_PID) * -10.0F + FOC_MTPA_FWC_FF_Y.Iq_error *
     FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Ki_torque_PID_MTPA) +
-    (FOC_MTPA_FWC_FF_Y.Vq_PID - rtb_Sum_f)) * 0.0001F;
+    (FOC_MTPA_FWC_FF_Y.Vq_PID - rtb_Sum_f) * can_d.canIq_PID.Back_Kaw) * 0.0001F;
   if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h > SVM_VOLTAGE_LIMIT) {
     FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h = SVM_VOLTAGE_LIMIT;
   } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h < -SVM_VOLTAGE_LIMIT) {
@@ -1412,91 +1303,219 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
 
   /* Update for DiscreteIntegrator: '<S64>/Filter' */
   FOC_MTPA_FWC_FF_DW.Filter_DSTATE_d += 0.0001F * rtb_UkYk1_k;
-
-  /* Update for Delay: '<S3>/Delay' */
-  FOC_MTPA_FWC_FF_DW.icLoad_k = false;
-  FOC_MTPA_FWC_FF_DW.Delay_DSTATE_c = FOC_MTPA_FWC_FF_Y.Ref_speed_out_RPM;
 }
 
 /* Model step function for TID1 */
 void FOC_MTPA_FWC_FF_step1(void)       /* Sample time: [0.001s, 0.0s] */
 {
-  float rtb_NProdOut_j;
-  float rtb_Sum_o;
+  float tmp;
+  float rtb_Switch3;
+  float rtb_UkYk1;
+  float rtb_deltafalllimit_j;
 
-  /* Product: '<S211>/NProd Out' incorporates:
-   *  DiscreteIntegrator: '<S203>/Filter'
-   *  Inport: '<Root>/MTPA_PID'
-   *  Outport: '<Root>/Speed_error'
-   *  Product: '<S201>/DProd Out'
-   *  Sum: '<S203>/SumD'
+  /* Outputs for Atomic SubSystem: '<S1>/Outer_Loop' */
+  /* Delay: '<S174>/Delay' incorporates:
+   *  Constant: '<S174>/Constant'
    */
-  rtb_NProdOut_j = (FOC_MTPA_FWC_FF_Y.Speed_error *
-                    FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA
-                    - FOC_MTPA_FWC_FF_DW.Filter_DSTATE_i) *
+  if (FOC_MTPA_FWC_FF_DW.icLoad_k) {
+    FOC_MTPA_FWC_FF_DW.Delay_DSTATE_c = 0.0F;
+  }
+
+  /* Product: '<S174>/delta rise limit' incorporates:
+   *  Inport: '<Root>/Rate_limiter'
+   *  SampleTimeMath: '<S174>/sample time'
+   *
+   * About '<S174>/sample time':
+   *  y = K where K = ( w * Ts )
+   *   */
+  rtb_deltafalllimit_j = FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_up *
+    0.001F;
+
+  /* Switch: '<S4>/Switch' incorporates:
+   *  Constant: '<S4>/Constant'
+   *  Inport: '<Root>/Ref_Speed_mech_rpm'
+   */
+  if (FOC_MTPA_FWC_FF_B.DataTypeConversion1 > 2.0F) {
+    tmp = 0.0;
+  } else {
+    tmp = FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm;
+  }
+
+  /* Sum: '<S174>/Difference Inputs1' incorporates:
+   *  Delay: '<S174>/Delay'
+   *  Switch: '<S4>/Switch'
+   *
+   * Block description for '<S174>/Difference Inputs1':
+   *
+   *  Add in CPU
+   */
+  rtb_UkYk1 = (float)(tmp - FOC_MTPA_FWC_FF_DW.Delay_DSTATE_c);
+
+  /* Switch: '<S176>/Switch2' incorporates:
+   *  RelationalOperator: '<S176>/LowerRelop1'
+   */
+  if (!(rtb_UkYk1 > rtb_deltafalllimit_j)) {
+    /* Switch: '<S4>/Switch1' incorporates:
+     *  Inport: '<Root>/Rate_limiter'
+     */
+    if (FOC_MTPA_FWC_FF_B.DataTypeConversion1 > 2.0F) {
+      rtb_deltafalllimit_j =
+        FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_down_neutral;
+    } else {
+      rtb_deltafalllimit_j = FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_down;
+    }
+
+    /* Product: '<S174>/delta fall limit' incorporates:
+     *  SampleTimeMath: '<S174>/sample time'
+     *  Switch: '<S4>/Switch1'
+     *
+     * About '<S174>/sample time':
+     *  y = K where K = ( w * Ts )
+     *   */
+    rtb_deltafalllimit_j *= 0.001F;
+
+    /* Switch: '<S176>/Switch' incorporates:
+     *  RelationalOperator: '<S176>/UpperRelop'
+     */
+    if (!(rtb_UkYk1 < rtb_deltafalllimit_j)) {
+      rtb_deltafalllimit_j = rtb_UkYk1;
+    }
+
+    /* End of Switch: '<S176>/Switch' */
+  }
+
+  /* End of Switch: '<S176>/Switch2' */
+
+  /* Sum: '<S174>/Difference Inputs2' incorporates:
+   *  Delay: '<S174>/Delay'
+   *
+   * Block description for '<S174>/Difference Inputs2':
+   *
+   *  Add in CPU
+   */
+  FOC_MTPA_FWC_FF_Y.Ref_speed_out_RPM = rtb_deltafalllimit_j +
+    FOC_MTPA_FWC_FF_DW.Delay_DSTATE_c;
+
+  /* Sum: '<S175>/Subtract' incorporates:
+   *  Gain: '<S4>/rpm to Rad//sec'
+   *  Inport: '<Root>/Actual Speed_mech_rad//sec'
+   */
+  FOC_MTPA_FWC_FF_Y.Speed_error = 0.104719758F *
+    FOC_MTPA_FWC_FF_Y.Ref_speed_out_RPM -
+    FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec;
+
+  /* Product: '<S215>/NProd Out' incorporates:
+   *  DiscreteIntegrator: '<S207>/Filter'
+   *  Inport: '<Root>/MTPA_PID'
+   *  Product: '<S205>/DProd Out'
+   *  Sum: '<S207>/SumD'
+   */
+  rtb_UkYk1 = (FOC_MTPA_FWC_FF_Y.Speed_error *
+               FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA -
+               FOC_MTPA_FWC_FF_DW.Filter_DSTATE_c) *
     FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Filter_speed_PID_MTPA;
 
-  /* Sum: '<S218>/Sum' incorporates:
-   *  DiscreteIntegrator: '<S208>/Integrator'
+  /* Sum: '<S222>/Sum' incorporates:
+   *  DiscreteIntegrator: '<S212>/Integrator'
    *  Inport: '<Root>/MTPA_PID'
-   *  Outport: '<Root>/Speed_error'
-   *  Product: '<S213>/PProd Out'
+   *  Product: '<S217>/PProd Out'
    */
-  rtb_Sum_o = (FOC_MTPA_FWC_FF_Y.Speed_error *
-               FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kp_speed_PID_MTPA +
-               FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b) + rtb_NProdOut_j;
+  rtb_deltafalllimit_j = (FOC_MTPA_FWC_FF_Y.Speed_error *
+    FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kp_speed_PID_MTPA +
+    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_g) + rtb_UkYk1;
 
-  /* Switch: '<S216>/Switch2' incorporates:
+  /* Switch: '<S220>/Switch2' incorporates:
    *  Inport: '<Root>/MTPA_PID'
-   *  RelationalOperator: '<S216>/LowerRelop1'
-   *  RelationalOperator: '<S216>/UpperRelop'
-   *  Switch: '<S216>/Switch'
+   *  RelationalOperator: '<S220>/LowerRelop1'
+   *  RelationalOperator: '<S220>/UpperRelop'
+   *  Switch: '<S220>/Switch'
    */
-  if (rtb_Sum_o > FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA) {
-    /* Switch: '<S216>/Switch2' */
+  if (rtb_deltafalllimit_j > FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA)
+  {
+    /* Switch: '<S220>/Switch2' */
     FOC_MTPA_FWC_FF_Y.Iq_gen =
       FOC_MTPA_FWC_FF_U.MTPA_PID.Up_Limit_speed_PID_MTPA;
-  } else if (rtb_Sum_o < FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_speed_PID_MTPA) {
-    /* Switch: '<S216>/Switch2' incorporates:
-     *  Switch: '<S216>/Switch'
+  } else if (rtb_deltafalllimit_j <
+             FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_speed_PID_MTPA) {
+    /* Switch: '<S220>/Switch2' incorporates:
+     *  Switch: '<S220>/Switch'
      */
     FOC_MTPA_FWC_FF_Y.Iq_gen =
       FOC_MTPA_FWC_FF_U.MTPA_PID.Low_Limit_speed_PID_MTPA;
   } else {
-    /* Switch: '<S216>/Switch2' incorporates:
-     *  Switch: '<S216>/Switch'
+    /* Switch: '<S220>/Switch2' incorporates:
+     *  Switch: '<S220>/Switch'
      */
-    FOC_MTPA_FWC_FF_Y.Iq_gen = rtb_Sum_o;
+    FOC_MTPA_FWC_FF_Y.Iq_gen = rtb_deltafalllimit_j;
   }
 
-  /* End of Switch: '<S216>/Switch2' */
+  /* End of Switch: '<S220>/Switch2' */
 
-  /* RateTransition: '<S2>/Rate Transition' */
-  FOC_MTPA_FWC_FF_DW.RateTransition_Buffer0 = FOC_MTPA_FWC_FF_Y.Iq_gen;
-
-  /* Update for DiscreteIntegrator: '<S208>/Integrator' incorporates:
-   *  Inport: '<Root>/MTPA_PID'
-   *  Outport: '<Root>/Speed_error'
-   *  Product: '<S205>/IProd Out'
-   *  Sum: '<S200>/SumI2'
-   *  Sum: '<S200>/SumI4'
-   *  Sum: '<S220>/SumI3'
-   *  Sum: '<S221>/SumI1'
+  /* Switch: '<S4>/Switch3' incorporates:
+   *  Delay: '<S4>/Delay One Step'
+   *  Inport: '<Root>/Iq_Torque_ratio'
+   *  Inport: '<Root>/Speed_1_Torque_0'
+   *  Inport: '<Root>/T_ref'
+   *  Product: '<S4>/Product1'
+   *  Switch: '<S4>/Switch2'
    */
-  FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b += ((FOC_MTPA_FWC_FF_Y.Speed_error *
+  if (FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 > 0.0F) {
+    rtb_Switch3 = (float)(FOC_MTPA_FWC_FF_Y.Iq_gen *
+                          FOC_MTPA_FWC_FF_U.Iq_Torque_ratio);
+  } else if (FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE_m > 2.0F) {
+    /* Switch: '<S4>/Switch2' incorporates:
+     *  Constant: '<S4>/Constant1'
+     */
+    rtb_Switch3 = 0.0F;
+  } else {
+    rtb_Switch3 = FOC_MTPA_FWC_FF_U.RefTrq;
+  }
+
+  /* End of Switch: '<S4>/Switch3' */
+  /* End of Outputs for SubSystem: '<S1>/Outer_Loop' */
+
+  /* Outport: '<Root>/Iq_gen1' */
+  FOC_MTPA_FWC_FF_Y.Iq_gen1 = FOC_MTPA_FWC_FF_Y.Iq_gen;
+
+  /* RateTransition: '<S1>/Rate Transition' */
+  FOC_MTPA_FWC_FF_DW.RateTransition_Buffer0 = rtb_Switch3;
+
+  /* Update for Atomic SubSystem: '<S1>/Outer_Loop' */
+  /* Update for Delay: '<S4>/Delay One Step' */
+  FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE_m =
+    FOC_MTPA_FWC_FF_B.DataTypeConversion1;
+
+  /* Update for Delay: '<S174>/Delay' */
+  FOC_MTPA_FWC_FF_DW.icLoad_k = false;
+  FOC_MTPA_FWC_FF_DW.Delay_DSTATE_c = FOC_MTPA_FWC_FF_Y.Ref_speed_out_RPM;
+
+  /* Outputs for Atomic SubSystem: '<S1>/Outer_Loop' */
+  /* Update for DiscreteIntegrator: '<S212>/Integrator' incorporates:
+   *  Inport: '<Root>/MTPA_PID'
+   *  Product: '<S209>/IProd Out'
+   *  Sum: '<S204>/SumI2'
+   *  Sum: '<S204>/SumI4'
+   *  Sum: '<S224>/SumI3'
+   *  Sum: '<S225>/SumI1'
+   */
+  FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_g += ((FOC_MTPA_FWC_FF_Y.Speed_error *
     FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Ki_speed_PID_MTPA +
     (FOC_MTPA_FWC_FF_Y.Iq_gen - FOC_MTPA_FWC_FF_Y.Iq_gen)) +
-    (FOC_MTPA_FWC_FF_Y.Iq_gen - rtb_Sum_o)) * 0.001F;
-  if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b > MOTOR_PEAK_AC) {
-    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b = MOTOR_PEAK_AC;
-  } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b < -MOTOR_PEAK_AC) {
-    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_b = -MOTOR_PEAK_AC;
+    (FOC_MTPA_FWC_FF_Y.Iq_gen - rtb_deltafalllimit_j) * can_d.canSpeed_PID.Back_Kaw) * 0.001F;
+
+  /* End of Outputs for SubSystem: '<S1>/Outer_Loop' */
+  if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_g > MOTOR_PEAK_AC) {
+    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_g = MOTOR_PEAK_AC;
+  } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_g < -MOTOR_PEAK_AC) {
+    FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_g = -MOTOR_PEAK_AC;
   }
 
-  /* End of Update for DiscreteIntegrator: '<S208>/Integrator' */
+  /* End of Update for DiscreteIntegrator: '<S212>/Integrator' */
 
-  /* Update for DiscreteIntegrator: '<S203>/Filter' */
-  FOC_MTPA_FWC_FF_DW.Filter_DSTATE_i += 0.001F * rtb_NProdOut_j;
+  /* Update for DiscreteIntegrator: '<S207>/Filter' */
+  FOC_MTPA_FWC_FF_DW.Filter_DSTATE_c += 0.001F * rtb_UkYk1;
+
+  /* End of Update for SubSystem: '<S1>/Outer_Loop' */
 }
 
 /* Model initialize function */
@@ -1510,21 +1529,24 @@ void FOC_MTPA_FWC_FF_initialize(void)
   /* InitializeConditions for Delay: '<S9>/Delay' */
   FOC_MTPA_FWC_FF_DW.icLoad = true;
 
-  /* InitializeConditions for Delay: '<S1>/Delay One Step' */
-  FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE = 3.0F;
-
   /* InitializeConditions for Delay: '<S156>/Delay' */
   FOC_MTPA_FWC_FF_DW.icLoad_p = true;
 
   /* InitializeConditions for Delay: '<S157>/Delay' */
   FOC_MTPA_FWC_FF_DW.icLoad_l = true;
 
-  /* InitializeConditions for Delay: '<S3>/Delay' */
-  FOC_MTPA_FWC_FF_DW.icLoad_k = true;
-
-  /* SystemInitialize for IfAction SubSystem: '<S7>/If Action Subsystem1' */
+  /* SystemInitialize for IfAction SubSystem: '<S8>/If Action Subsystem1' */
   /* InitializeConditions for DiscreteIntegrator: '<S162>/Discrete-Time Integrator' */
   FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE = 1.0F;
+
+  /* End of SystemInitialize for SubSystem: '<S8>/If Action Subsystem1' */
+
+  /* SystemInitialize for Atomic SubSystem: '<S1>/Outer_Loop' */
+  /* InitializeConditions for Delay: '<S4>/Delay One Step' */
+  FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE_m = 3.0F;
+
+  /* InitializeConditions for Delay: '<S174>/Delay' */
+  FOC_MTPA_FWC_FF_DW.icLoad_k = true;
 
   FOC_MTPA_FWC_FF_U.BusVoltage_V = OP_VOLTAGE;
   FOC_MTPA_FWC_FF_U.Iq_Torque_ratio = CURR_TORQUE_RATIO;
@@ -1592,7 +1614,7 @@ void FOC_MTPA_FWC_FF_initialize(void)
   FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 1.0f;
   FOC_MTPA_FWC_FF_U.RefTrq = 0.0f;
 
-  /* End of SystemInitialize for SubSystem: '<S7>/If Action Subsystem1' */
+  /* End of SystemInitialize for SubSystem: '<S1>/Outer_Loop' */
 }
 
 /* Model terminate function */
