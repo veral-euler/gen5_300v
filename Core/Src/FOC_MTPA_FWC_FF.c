@@ -110,9 +110,9 @@ float rt_hypotf_snf(float u0, float u1)
 /* Model step function for TID0 */
 void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
 {
-  double rtb_TrigonometricFunction1_tmp;
-  double rtb_TrigonometricFunction_tmp;
-  double rtb_sum_Ds;
+  float rtb_TrigonometricFunction1_tmp;
+  float rtb_TrigonometricFunction_tmp;
+  float rtb_sum_Ds;
   float rtb_Add1_l;
   float rtb_Gain;
   float rtb_Sum_f;
@@ -334,7 +334,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Product: '<S160>/Product'
    */
   FOC_MTPA_FWC_FF_Y.Id_ref_final = FOC_MTPA_FWC_FF_U.Motor_Parameters.Pole_Pairs
-    * (float)FOC_MTPA_FWC_FF_U.MtrSpd;
+    * d.rad_s;
 
   /* Gain: '<S160>/Gain' incorporates:
    *  Inport: '<Root>/Motor_Parameters'
@@ -1014,7 +1014,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Gain: '<S30>/wm_pu2si_mech2elec'
    *  Inport: '<Root>/Actual Speed_mech_rpm'
    */
-  FOC_MTPA_FWC_FF_Y.Iq_error = POLEPAIRS * (float)FOC_MTPA_FWC_FF_U.MtrSpd;
+  FOC_MTPA_FWC_FF_Y.Iq_error = POLEPAIRS * d.rad_s;
 
   /* Gain: '<S30>/NegSign' incorporates:
    *  Inport: '<Root>/Motor_Parameters'

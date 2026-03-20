@@ -126,6 +126,7 @@ typedef struct data {
 	uint32_t thr_v_mv;
 	float pack_current;
 	float offset_angle_elec;
+	float offset_angle_mech;
 	float speed_ref;
 	float count_delta;
 	float Kvf;
@@ -294,10 +295,10 @@ void Error_Handler(void);
 #define ONE_BY_ROOT2			0.70710678f
 #define ADC_TO_CURR				0.0407496f
 #define ALIGN_DUTY				1000
-#define RS		  				0.0102f
-#define LQ						0.0001258f
-#define LD						0.0000544f
-#define LAMBDA					0.032f
+#define RS		  				0.01047f
+#define LQ						0.000386f
+#define LD						0.000148f
+#define LAMBDA					0.0236f
 #define CURR_TORQUE_RATIO		0.1673f //(Max_Torque/Max_A)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
@@ -318,7 +319,7 @@ void Error_Handler(void);
 
 #define ECO_MAX_SPEED			4500.0f
 #define SPORTS_MAX_SPEED		6000.0f
-#define REV_MAX_SPEED			1800.0f
+#define REV_MAX_SPEED			6000.0f
 #define FWC_LIMIT				10.0f
 
 #define TIM1_PSC			9
@@ -332,6 +333,7 @@ void Error_Handler(void);
 #define TIM17_ARR			2499
 #define HIGH_PULSE16_ERROR	0.024574f
 #define OFFSET_CALC_ELEC 	0.15f//1.1913f
+#define OFFSET_CALC_MECH	0.67f
 
 #define MTR_NTC_R25			10000.0f
 #define MTC_NTC_R25			10000.0f

@@ -78,9 +78,9 @@ typedef struct {
 /* External inputs (root inport signals with default storage) */
 typedef struct {
   float Ref_Speed_mech_rpm;            /* '<Root>/Ref_Speed_mech_rpm' */
-  double MtrSpd;                       /* '<Root>/Actual Speed_mech_rpm' */
-  double MtrElcPos;                    /* '<Root>/angle' */
-  double PhaseCurrent[3];              /* '<Root>/Phase Current' */
+  float MtrSpd;                       /* '<Root>/Actual Speed_mech_rpm' */
+  float MtrElcPos;                    /* '<Root>/angle' */
+  float PhaseCurrent[3];              /* '<Root>/Phase Current' */
   PID_MTPABus MTPA_PID;                /* '<Root>/MTPA_PID' */
   Rate_limiterBus Rate_limiter;        /* '<Root>/Rate_limiter' */
   IIR_FilterBus IIR_Filter_Coefficient;/* '<Root>/IIR_Filter_Coefficient' */
@@ -88,10 +88,10 @@ typedef struct {
   float BusVoltage_V;                  /* '<Root>/Bus_Voltage' */
   ThrottleBus Throttle_input;          /* '<Root>/Throttle_input' */
   Id_Iq_MTPA_limitBus Id_Iq_MTPA_limit;/* '<Root>/Id_Iq_MTPA_limit' */
-  double Iq_Torque_ratio;              /* '<Root>/Iq_Torque_ratio' */
+  float Iq_Torque_ratio;              /* '<Root>/Iq_Torque_ratio' */
   float Speed_1_Torque_0;              /* '<Root>/Speed_1_Torque_0' */
   float RefTrq;                        /* '<Root>/T_ref' */
-  double Is_max;                       /* '<Root>/Is_max' */
+  float Is_max;                       /* '<Root>/Is_max' */
   float Drive_State;                   /* '<Root>/Drive_State' */
   float RPM_min_limit;                 /* '<Root>/RPM_min_limit' */
 } ExtU_FOC_MTPA_FWC_FF_T;
@@ -117,8 +117,8 @@ typedef struct {
   float Iq_ref_MTPA;                   /* '<Root>/Iq_ref_MTPA' */
   float V_s;                           /* '<Root>/V_s' */
   float V_max;                         /* '<Root>/V_max' */
-  double MTPA_FWC_condition;           /* '<Root>/MTPA_FWC_condition' */
-  double Throttle_en;                  /* '<Root>/Throttle_en' */
+  float MTPA_FWC_condition;           /* '<Root>/MTPA_FWC_condition' */
+  float Throttle_en;                  /* '<Root>/Throttle_en' */
   ThrottleState Throttle_State;        /* '<Root>/Throttle_State' */
   bool Throttle_error;                 /* '<Root>/Throttle_error' */
   float Ref_speed_out_RPM;             /* '<Root>/Ref_speed_out_RPM' */

@@ -71,7 +71,7 @@ void rt_OneStep(void)
     /* Set model inputs associated with subrates here */
     /* Gathering speed feedback data and setting motor start flag */
     Speed_Sense(d.mech_angle);
-    FOC_MTPA_FWC_FF_U.MtrSpd= fabsf(d.rad_s);
+    FOC_MTPA_FWC_FF_U.MtrSpd = fabsf(d.rad_s);
     if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START)
     {
       d.motor_start = 1;
@@ -97,7 +97,7 @@ void set_Initial_angle(void)
   /* Calculating the startup angle and converting to TIM2 counts */
   d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - HIGH_PULSE16_ERROR;
   d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
-  d.Count_From_Duty = (uint16_t)((d.Angle_From_Duty / TWO_PI) * (TIM2_ARR + 1));
+  d.Count_From_Duty = (uint32_t)((d.Angle_From_Duty / TWO_PI) * (TIM2_ARR + 1));
 
   /* Checking for PWM disconnection error */
   if (encoder_pwm_error_check() == !HAL_OK)
