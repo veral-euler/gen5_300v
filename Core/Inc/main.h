@@ -126,7 +126,9 @@ typedef struct data {
 	uint32_t thr_v_mv;
 	float pack_current;
 	float offset_angle_elec;
-	float offset_angle_mech;
+	float offset_angle_mech_cw;
+	float offset_angle_mech_ccw;
+	float offset_angle_mech_avg;
 	float speed_ref;
 	float count_delta;
 	float Kvf;
@@ -334,7 +336,9 @@ void Error_Handler(void);
 #define TIM17_ARR			2499
 #define HIGH_PULSE16_ERROR	0.024574f
 #define OFFSET_CALC_ELEC 	0.15f//1.1913f
-#define OFFSET_CALC_MECH	0.66f
+#define OFFSET_CALC_MECH_CW		0.6211f
+#define OFFSET_CALC_MECH_CCW	0.6502f
+#define OFFSET_CALC_MECH_AVG	0.63565f
 
 #define MTR_NTC_R25			10000.0f
 #define MTC_NTC_R25			10000.0f

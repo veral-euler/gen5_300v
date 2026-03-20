@@ -284,7 +284,7 @@ void Send_Data_On_CAN_404(void) {
 void Send_Data_On_CAN_405(void) {
 	uint8_t can_data[8] = {0};
 
-	uint16_t can_offsetAngle = (uint16_t)(d.offset_angle_mech * 1000.0f);
+	uint16_t can_offsetAngle = (uint16_t)(d.offset_angle_mech_avg * 1000.0f);
 	uint16_t can_thrVoltage = (uint16_t)(FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage * 1000.0f);
 
 	can_data[0] = (uint8_t)(fnr_state);
@@ -308,11 +308,17 @@ void Send_Data_On_CAN_406(void) {
 
 	uint16_t can_tx_Kfw = (uint16_t)(can_d.Kfw * 1.0E3f);
 	uint16_t can_tx_Kaw = (uint16_t)(can_d.Kaw * 1.0E3f);
+	uint16_t can_Vs = (uint16_t)(FOC_MTPA_FWC_FF_Y.V_s * 1000.0f);
+	uint16_t can_Vmax = (uint16_t)(FOC_MTPA_FWC_FF_Y.V_max * 1000.0f);
 
 	can_data[0] = (uint8_t)(can_tx_Kfw & 0xFF);
 	can_data[1] = (uint8_t)((can_tx_Kfw >> 8) & 0xFF);
 	can_data[2] = (uint8_t)(can_tx_Kaw & 0xFF);
 	can_data[3] = (uint8_t)((can_tx_Kaw >> 8) & 0xFF);
+	can_data[4] = (uint8_t)(can_Vs & 0xFF);
+	can_data[5] = (uint8_t)((can_Vs >> 8) & 0xFF);
+	can_data[6] = (uint8_t)(can_Vmax & 0xFF);
+	can_data[7] = (uint8_t)((can_Vmax >> 8) & 0xFF);
 
 	CAN_Queue_Push_And_Kickstart(0x406, 0, can_data, 0x08);
 }

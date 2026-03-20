@@ -158,7 +158,9 @@ int main(void)
 
   #if !ENABLE_TUNING
   d.offset_angle_elec = OFFSET_CALC_ELEC;
-  d.offset_angle_mech = OFFSET_CALC_MECH;
+  d.offset_angle_mech_cw = OFFSET_CALC_MECH_CW;
+  d.offset_angle_mech_ccw = OFFSET_CALC_MECH_CCW;
+  d.offset_angle_mech_avg = OFFSET_CALC_MECH_AVG;
   set_Initial_angle();
   #endif
   /* USER CODE END WHILE */
@@ -398,7 +400,12 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
       /* Updating angle data */
       d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
-      d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS) - d.offset_angle_mech;
+      if (FOC_MTPA_FWC_FF_Y.Throttle_State == (ThrottleState)FORWARD)
+        d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS) - d.offset_angle_mech_cw;
+      else if (FOC_MTPA_FWC_FF_Y.Throttle_State == (ThrottleState)REVERSE)
+        d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS) - d.offset_angle_mech_ccw;
+      else if (FOC_MTPA_FWC_FF_Y.Throttle_State == (ThrottleState)NEUTRAL)
+        d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS) - d.offset_angle_mech_avg;
       d.mech_angle = fmodf(d.mech_angle, TWO_PI);
       d.elec_angle = (d.mech_angle * POLEPAIRS);
       d.elec_angle = fmodf(d.elec_angle, TWO_PI);
