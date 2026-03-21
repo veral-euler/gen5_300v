@@ -512,11 +512,11 @@ void Open_FOC0_initialize(void)
   Open_FOC0_DW.objisempty = true;
   Open_FOC0_DW.obj.isInitialized = 1;
 
-  Open_FOC0_U.Theta_1_Speed_0 = 0;
-  Open_FOC0_U.Theta_e_ref = 0;
+  Open_FOC0_U.Theta_1_Speed_0 = 1;
+  Open_FOC0_U.Theta_e_ref = 0.0f;
   Open_FOC0_U.Pole_pairs = POLEPAIRS;
-  Open_FOC0_U.Id_ref = -10.0f;
-  Open_FOC0_U.Iq_ref = 10.0f;
+  Open_FOC0_U.Id_ref = 0.0;
+  Open_FOC0_U.Iq_ref = 0.0;
 
   /* Rate Limiter Settings */
   Open_FOC0_U.Speed_ref = 0.0f;
@@ -525,21 +525,21 @@ void Open_FOC0_initialize(void)
   
   /* PID Settings */
   /* D Axis PID */
-  Open_FOC0_U.Kp_d_axis = 0.08f;
-  Open_FOC0_U.Ki_d_axis = 4.0f;
-  Open_FOC0_U.Kd__d_axis = 0.00001f;
-  Open_FOC0_U.Filter_d_axis = 5.0f;
+  Open_FOC0_U.Kp_d_axis = ID_KP;
+  Open_FOC0_U.Ki_d_axis = ID_KI;
+  Open_FOC0_U.Kd__d_axis = ID_KD;
+  Open_FOC0_U.Filter_d_axis = ID_KD_FILTER;
   /* Q Axis PID */
-  Open_FOC0_U.Kp_q_axis = 0.08f;
-  Open_FOC0_U.Ki_q_axis = 6.0f;
-  Open_FOC0_U.Kd_q_axis = 0.00001f;
-  Open_FOC0_U.Filter_q_axis = 5.0f;
+  Open_FOC0_U.Kp_q_axis = IQ_KP;
+  Open_FOC0_U.Ki_q_axis = IQ_KI;
+  Open_FOC0_U.Kd_q_axis = IQ_KD;
+  Open_FOC0_U.Filter_q_axis = IQ_KD_FILTER;
 
   /* Voltage limits */
-  Open_FOC0_U.Vd_up_limit = 5.0f;
-  Open_FOC0_U.Vd_low_limit = -5.0f;
-  Open_FOC0_U.Vq_up_limit = 5.0f;
-  Open_FOC0_U.Vq_low_limit = -5.0f;
+  Open_FOC0_U.Vd_up_limit = SVM_VOLTAGE_LIMIT;
+  Open_FOC0_U.Vd_low_limit = -SVM_VOLTAGE_LIMIT;
+  Open_FOC0_U.Vq_up_limit = SVM_VOLTAGE_LIMIT;
+  Open_FOC0_U.Vq_low_limit = -SVM_VOLTAGE_LIMIT;
 
 }
 

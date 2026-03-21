@@ -11,32 +11,34 @@ static uint8_t crc8(const uint8_t *data, uint8_t len){
   return crc;
 }
 
-uint8_t EEPROM_Write_Page0(uint16_t offset){
-  uint8_t page[5];
+uint8_t EEPROM_Write_Page0(uint16_t offset_cw, uint16_t offset_ccw){
+  uint8_t page[7];
 
   page[0] = EEPROM_MAGIC_NUM;
 
-  page[1] = (offset >> 8) & 0xFF;
-  page[2] = (offset >> 0) & 0xFF;
+  page[1] = (offset_cw >> 8) & 0xFF;
+  page[2] = (offset_cw >> 0) & 0xFF;
+  page[3] = (offset_ccw >> 8) & 0xFF;
+  page[4] = (offset_ccw >> 0) & 0xFF;
 
-  page[3] = 1;
+  page[5] = 1;
 
-  page[4] = crc8(page, 4);
+  page[6] = crc8(page, 6);
 
-  return EEPROM_Write(0x00, page, 5);
+  return EEPROM_Write(0x00, page, 7);
 }
 
-uint8_t EEPROM_Read_Page0(uint16_t* offset){
-  uint8_t page[5];
+uint8_t EEPROM_Read_Page0(uint16_t* offset_cw, uint16_t* offset_ccw){
+  uint8_t page[7];
 
-  if(EEPROM_Read(0x00, page, 5) != HAL_OK){
+  if(EEPROM_Read(0x00, page, 7) != HAL_OK){
     cS = INIT;
     d.start_alignment = 1;
     d.end_alignment = 0;
     return HAL_ERROR;
   }
 
-  if (page[3] == 1) {
+  if (page[5] == 1) {
     cS = ANGLE_CALIB_DONE;
     d.start_alignment = 0;
     d.end_alignment = 1;
@@ -44,9 +46,9 @@ uint8_t EEPROM_Read_Page0(uint16_t* offset){
     cS = INIT;
   }
 
-  uint8_t calc_crc = crc8(page, 4);
+  uint8_t calc_crc = crc8(page, 6);
 
-  if(calc_crc != page[4]){
+  if(calc_crc != page[6]){
     cS = INIT;
     d.start_alignment = 1;
     d.end_alignment = 0;
@@ -60,18 +62,23 @@ uint8_t EEPROM_Read_Page0(uint16_t* offset){
     return EEPROM_NO_MAGIC_NUM;
   }
 
-  *offset = (page[1] << 8) | page[2];
+  *offset_cw = (page[1] << 8) | page[2];
+  *offset_ccw = (page[3] << 8) | page[4];
 
   return HAL_OK;
 }
 
 void Read_EEPROM_at_init(void) {
-  if (EEPROM_Read_Page0(&d.offset_angle_elec_16bit) == HAL_OK) {
-    d.offset_angle_elec = (float)d.offset_angle_elec_16bit / 100.0f;
+  if (EEPROM_Read_Page0(&d.offset_angle_mech_cw_16bit, &d.offset_angle_mech_ccw_16bit) == HAL_OK) {
+    d.offset_angle_mech_cw = (float)d.offset_angle_mech_cw_16bit / 100.0f;
+    d.offset_angle_mech_ccw = (float)d.offset_angle_mech_ccw_16bit / 100.0f;
+    d.offset_angle_mech_avg = (d.offset_angle_mech_ccw + d.offset_angle_mech_cw) / 2.0f;
   } else {
     er.eeprom_read_error = 1;
     err = EEPROM_READ_ERROR;
-    d.offset_angle_elec = OFFSET_CALC_ELEC;
+    d.offset_angle_mech_cw = OFFSET_CALC_MECH_CW;
+    d.offset_angle_mech_ccw = OFFSET_CALC_MECH_CCW;
+    d.offset_angle_mech_avg = (d.offset_angle_mech_ccw + d.offset_angle_mech_cw) / 2.0f;
   }
 }
 

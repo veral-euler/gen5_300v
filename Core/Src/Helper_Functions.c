@@ -95,7 +95,7 @@ void rt_OneStep(void)
 void set_Initial_angle(void)
 {
   /* Calculating the startup angle and converting to TIM2 counts */
-  d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * 2.0f * M_PI - HIGH_PULSE16_ERROR;
+  d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * TWO_PI - HIGH_PULSE16_ERROR;
   d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
   d.Count_From_Duty = (uint32_t)((d.Angle_From_Duty / TWO_PI) * (TIM2_ARR + 1));
 
@@ -116,10 +116,12 @@ void set_Initial_angle(void)
 
   /* Disabling the encoder PWM input capture */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+  #if !ENABLE_TUNING
   HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_1);
   HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_2);
   HAL_TIM_IC_DeInit(&htim5);
   HAL_TIM_Base_MspDeInit(&htim5);
+  #endif
   cS = CURR_SENS_CALIB;
 }
 

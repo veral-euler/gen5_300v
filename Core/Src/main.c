@@ -74,9 +74,14 @@ uint16_t counter = 0;
 uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 
+/* Autotune stuct instances */
+tag_AngleAutoTuneOutputParam TagAutotuneOutput;
+tag_AngleAutoTuneInputParam TagAutotuneInput;
+tag_AutotuneConfig AutotuneConfig;
+
 fnr_state_t fnr_state = NEUTRAL;
 power_mode_t pw_state = ECO;
-currSession cS = ANGLE_CALIB_DONE;
+currSession cS = INIT;
 errors_nums err = NO_ERROR;
 errors er = {0};
 can_data_t can_d = {.can_Lambda = LAMBDA, .can_Ld = LD, .can_Lq = LQ, .Kaw = FW_KAW, .Kfw = FW_KFW, .canSpeed_PID.Kp = SPEED_KP, .canSpeed_PID.Ki = SPEED_KI, .canSpeed_PID.Kd = SPEED_KD, .canSpeed_PID.Back_Kaw = SPEED_PID_BACK_KAW, .canSpeed_PID.Kd_Filter = SPEED_KD_FILTER, .canSpeed_PID.Output_Up_Limit = SPEED_PID_OUT_UPL, .canSpeed_PID.Output_Low_Limit = SPEED_PID_OUT_LOWL, .canId_PID.Kp = ID_KP, .canId_PID.Ki = ID_KI, .canId_PID.Kd = ID_KD, .canId_PID.Back_Kaw = ID_PID_BACK_KAW, .canId_PID.Kd_Filter = ID_KD_FILTER, .canId_PID.Output_Up_Limit = ID_PID_OUT_UPL, .canId_PID.Output_Low_Limit = ID_PID_OUT_LOWL, .canIq_PID.Kp = IQ_KP, .canIq_PID.Ki = IQ_KI, .canIq_PID.Kd = IQ_KD, .canIq_PID.Back_Kaw = IQ_PID_BACK_KAW, .canIq_PID.Kd_Filter = IQ_KD_FILTER, .canIq_PID.Output_Up_Limit = IQ_PID_OUT_UPL, .canIq_PID.Output_Low_Limit = IQ_PID_OUT_LOWL};
@@ -143,24 +148,19 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   #if ENABLE_TUNING
-  Read_EEPROM_at_init();
-  
-  if (cS == INIT)
-  {
-    cS = ANGLE_CALIB;
-    Motor_Alignment_Routine();
-  }
-  else if (cS == ANGLE_CALIB_DONE)
-  {
-    set_Initial_angle();
-  }
+  /* Setting Auto tune algo input params */
+  AutotuneConfig.f_idSetRef = AUTO_TUNING_IDREF;
+  AutotuneConfig.f_IdRefIncrementValue = AUTOTUNE_IDREF_INCREMENT;
+  AutotuneConfig.f_CalibElectricalAngleInc = AUTOTUNE_ANGLE_INCREMENT;
+  AutotuneConfig.F_MaxVd = MAX_VD;
+  AutotuneConfig.F_MinVd = MIN_VD;
+  AutotuneInit(&AutotuneConfig);
+  set_Initial_angle();
   #endif
 
   #if !ENABLE_TUNING
-  d.offset_angle_elec = OFFSET_CALC_ELEC;
-  d.offset_angle_mech_cw = OFFSET_CALC_MECH_CW;
-  d.offset_angle_mech_ccw = OFFSET_CALC_MECH_CCW;
-  d.offset_angle_mech_avg = OFFSET_CALC_MECH_AVG;
+  Read_EEPROM_at_init();
+  HAL_Delay(10);
   set_Initial_angle();
   #endif
   /* USER CODE END WHILE */
@@ -184,12 +184,10 @@ int main(void)
   // FOC_MTPA_FF_initialize();
   // FOC_LivGguard_initialize();
   FOC_MTPA_FWC_FF_initialize();
+  Open_FOC0_initialize();
   // FOC_Basic_FF_initialize();
   #if PROTECTION_MODEL
   MCU_Protections_initialize();
-  #endif
-  #if OPEN_FOC
-  Open_FOC0_initialize();
   #endif
   RateLimiter_Init(&limiter, 100.0f, 600.0f, 0.0f);
   HAL_Delay(100);
@@ -239,10 +237,6 @@ int main(void)
     MCU_Protections_step();
     /* Checking the MCU Protections Model output flags and setting error flags */
     Model_Output_Flag_Checks();
-    #endif
-
-    #if OPEN_FOC
-    Open_FOC0_U.Speed_ref = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
     #endif
 
     #if CLOSED_FOC
@@ -304,12 +298,12 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         if (d.init_check == HAL_OK)
         {
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-          #if OPEN_FOC
-          cS = OPEN_FOC_START;
-          #endif
-          
-          #if CLOSED_FOC
+          #if CLOSED_FOC & !ENABLE_TUNING
           cS = FOC_START;
+          #endif
+
+          #if ENABLE_TUNING
+          cS = ANGLE_CALIB;
           #endif
         }
         else if (d.init_check == !HAL_OK)
@@ -322,10 +316,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
         #if DISABLE_FAULTS
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-        #if OPEN_FOC
-        cS = OPEN_FOC_START;
-        #endif
-        
         #if CLOSED_FOC
         cS = FOC_START;
         #endif
@@ -333,21 +323,96 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       }
     }
 
-    #if OPEN_FOC
-    if (cS == OPEN_FOC_START)
+    if (cS == ANGLE_CALIB)
     {
-      /* Updating phase current data */
-      Open_FOC0_U.Phase_current[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
-      Open_FOC0_U.Phase_current[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
-      Open_FOC0_U.Phase_current[0] = 0.0f - Open_FOC0_U.Phase_current[1] - Open_FOC0_U.Phase_current[2];
+      static uint8_t milli_counter = 0; 
+      milli_counter++;
 
-      /* Running Open FOC model */
-      Open_FOC0_step();
+      if(!TagAutotuneOutput.AutotuneCompleteflag){
+        TagAutotuneInput.AutotuneFlag = ANGLE_AUTOTUNE; 
+      }
+      else{
+        TagAutotuneInput.AutotuneFlag = NORMAL_RUN;
+      }
 
-      /* SVM and PWM update */
-      d.Va_SVM = Open_FOC0_Y.Va;
-      d.Vb_SVM = Open_FOC0_Y.Vb;
-      d.Vc_SVM = Open_FOC0_Y.Vc;
+      if(milli_counter >= 10)
+      {
+        milli_counter = 0;
+        TagAutotuneInput.f_Pwmangle = d.abs_Angle_pwm;
+        TagAutotuneInput.f_MotorRpm = d.RPM;
+        TagAutotuneInput.f_Vq = FOC_MTPA_FWC_FF_Y.Vq;
+        TagAutotuneInput.f_Vd = FOC_MTPA_FWC_FF_Y.Vd;
+
+        AngleAutotuningRoutine(&TagAutotuneInput, &TagAutotuneOutput);
+      }
+
+
+      if(TagAutotuneOutput.MotorloopStatus == Open_Loop){
+          /* Updating phase current data */
+          Open_FOC0_U.Phase_current[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+          Open_FOC0_U.Phase_current[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
+          Open_FOC0_U.Phase_current[0] = 0.0f - Open_FOC0_U.Phase_current[1] - Open_FOC0_U.Phase_current[2];
+
+          Open_FOC0_U.Id_ref = TagAutotuneOutput.f_Idref;
+          Open_FOC0_U.Iq_ref = TagAutotuneOutput.f_Iqref;
+          Open_FOC0_U.Theta_e_ref = TagAutotuneOutput.f_Electricalangle;
+
+          /* Running Open FOC model */
+          Open_FOC0_step();
+
+          d.Va_SVM = Open_FOC0_Y.Va;
+          d.Vb_SVM = Open_FOC0_Y.Vb;
+          d.Vc_SVM = Open_FOC0_Y.Vc;
+      }
+
+      else if(TagAutotuneOutput.MotorloopStatus == Closed_Loop){
+        /* Updating pahse current data */
+        FOC_MTPA_FWC_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+        FOC_MTPA_FWC_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
+        FOC_MTPA_FWC_FF_U.PhaseCurrent[0] = 0.0f - FOC_MTPA_FWC_FF_U.PhaseCurrent[1] - FOC_MTPA_FWC_FF_U.PhaseCurrent[2];
+      
+        FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage = THR_MIN_VAL;
+        FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = TagAutotuneOutput.f_MotorRpmRef;
+
+        if(TagAutotuneOutput.CalibrationDirection == Motor_Forward){
+          FOC_MTPA_FWC_FF_U.Drive_State = Forward;
+          d.ATA_Offset = TagAutotuneOutput.f_Offset_CW;
+        }
+        else if(TagAutotuneOutput.CalibrationDirection == Motor_Reverse){
+          FOC_MTPA_FWC_FF_U.Drive_State = Reverse;
+          d.ATA_Offset = TagAutotuneOutput.f_Offset_CCW;
+        }
+        else if(TagAutotuneOutput.CalibrationDirection == Motor_Neutral){
+          FOC_MTPA_FWC_FF_U.Drive_State = Neutral;
+        }
+        else{
+          FOC_MTPA_FWC_FF_U.Drive_State = Throttle_Error;
+        }
+
+        d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
+        d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS) - d.ATA_Offset;
+        d.mech_angle = fmodf(d.mech_angle, TWO_PI);
+
+        /* Updating elec angle data */
+        d.elec_angle = (d.mech_angle * POLEPAIRS);
+        d.elec_angle = fmodf(d.elec_angle, TWO_PI);
+        FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle;
+
+        /* Running the FOC model */
+        rt_OneStep();
+
+        /* SVM and PWM update */
+        d.Va_SVM = FOC_MTPA_FWC_FF_Y.Va;
+        d.Vb_SVM = FOC_MTPA_FWC_FF_Y.Vb;
+        d.Vc_SVM = FOC_MTPA_FWC_FF_Y.Vc;
+      }
+
+      if (TagAutotuneOutput.AutotuneCompleteflag == true)
+      {
+        d.offset_angle_mech_cw = TagAutotuneOutput.f_Offset_CW;
+        d.offset_angle_mech_ccw = TagAutotuneOutput.f_Offset_CCW;
+        cS = ANGLE_OFFSET_STORE;
+      }
 
       if (d.Va_SVM > d.Vmax_SVM)
       {
@@ -384,7 +449,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, d.pwm_b);
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, d.pwm_c);
     }
-    #endif
 
     #if CLOSED_FOC
     if (cS == FOC_START)
@@ -473,7 +537,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     can_counter++;
 
     #if ENABLE_FAULTS
-    if (cS == FOC_START) 
+    if (cS == FOC_START || cS == ANGLE_CALIB) 
     {
       /* Temperature and Encoder disconnection errors */
       Sensor_Disconnection_Check();
@@ -485,15 +549,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (cS == ANGLE_OFFSET_STORE)
     {
       // TODO: Store the angle offset in flash memory and read it on startup to avoid doing the offset calibration on every power cycle
-      uint16_t offset_eeprom = (uint16_t)(d.offset_angle_elec * 100.0f);
-      if (EEPROM_Write_Page0(offset_eeprom) == HAL_OK)
+      uint16_t offset_eeprom_cw = (uint16_t)(d.offset_angle_mech_cw * 100.0f);
+      uint16_t offset_eeprom_ccw = (uint16_t)(d.offset_angle_mech_ccw * 100.0f);
+      d.offset_angle_mech_avg = (offset_eeprom_ccw + offset_eeprom_cw) / 2.0f;
+      if (EEPROM_Write_Page0(offset_eeprom_cw, offset_eeprom_ccw) == HAL_OK)
         cS = ANGLE_CALIB_DONE;
       else
       {
         er.eeprom_write_error = 1;
         err = EEPROM_WRITE_ERROR;
       }
-      HAL_NVIC_SystemReset();
     }
 
     if (cS == RESET_STATE) 
@@ -693,6 +758,9 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
         d.Duty = (HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) * 100.0f) / d.ICvalue;
 
         d.Frequency = (float)HAL_RCC_GetSysClockFreq() / (d.ICvalue * (TIM5_PSC + 1));
+
+        d.abs_Angle_pwm = (100.0f - d.Duty) * 0.01f * TWO_PI - HIGH_PULSE16_ERROR;
+        d.abs_Angle_pwm = fmodf(d.abs_Angle_pwm, TWO_PI);
       }
     }
   }

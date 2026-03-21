@@ -32,7 +32,6 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #define EST_CYC_CNT			1
-#define OPEN_FOC			0
 #define CLOSED_FOC			1
 #define PROTECTION_MODEL	0
 #define ENABLE_FAULTS		1
@@ -61,6 +60,7 @@ extern "C" {
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "Autotune101.h"
 #include "Speed_Sensing.h"
 #include "NTC_Temp_Reading.h"
 #if PROTECTION_MODEL
@@ -68,6 +68,7 @@ extern "C" {
 #endif
 // #include "FOC_LivGguard.h"
 #include "FOC_MTPA_FWC_FF.h"
+#include "Open_FOC0.h"
 // #include "FOC_Basic_FF.h"
 #include "fdcan.h"
 #include "Rate_Limiter.h"
@@ -79,9 +80,6 @@ extern "C" {
 #include "Peripheral_Init.h"
 #if THROTTLE_BASED_REF
 #include "throttle_map.h"
-#endif
-#if OPEN_FOC
-#include "Open_FOC0.h"
 #endif
 /* USER CODE END Includes */
 
@@ -110,7 +108,8 @@ typedef struct data {
 	uint16_t pwm_a;
 	uint16_t pwm_b;
 	uint16_t pwm_c;
-	uint16_t offset_angle_elec_16bit;
+	uint16_t offset_angle_mech_cw_16bit;
+	uint16_t offset_angle_mech_ccw_16bit;
 	uint16_t mtc_analog_val;
 	uint16_t mtr_analog_val;
 	uint32_t count_at_alignment;
@@ -136,6 +135,7 @@ typedef struct data {
 	float t_req;
 	float ICvalue;
 	float Duty;
+	float abs_Angle_pwm;
 	float Angle_From_Duty;
 	float Frequency;
 	float pole_pair;
@@ -162,6 +162,7 @@ typedef struct data {
 	float rms_c;
 	float rms_total;
 	float throttle_v;
+	float ATA_Offset;
 } data;
 
 typedef struct foc_pid_t {
