@@ -147,22 +147,23 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  #if ENABLE_TUNING
-  /* Setting Auto tune algo input params */
-  AutotuneConfig.f_idSetRef = AUTO_TUNING_IDREF;
-  AutotuneConfig.f_IdRefIncrementValue = AUTOTUNE_IDREF_INCREMENT;
-  AutotuneConfig.f_CalibElectricalAngleInc = AUTOTUNE_ANGLE_INCREMENT;
-  AutotuneConfig.F_MaxVd = MAX_VD;
-  AutotuneConfig.F_MinVd = MIN_VD;
-  AutotuneInit(&AutotuneConfig);
-  set_Initial_angle();
-  #endif
-
-  #if !ENABLE_TUNING
+  /* First read EEPROM for calib done flag */
   Read_EEPROM_at_init();
   HAL_Delay(10);
-  set_Initial_angle();
-  #endif
+
+  if (cS == INIT) {
+    set_Initial_angle();
+    /* Setting Auto tune algo input params */
+    AutotuneConfig.f_idSetRef = AUTO_TUNING_IDREF;
+    AutotuneConfig.f_IdRefIncrementValue = AUTOTUNE_IDREF_INCREMENT;
+    AutotuneConfig.f_CalibElectricalAngleInc = AUTOTUNE_ANGLE_INCREMENT;
+    AutotuneConfig.F_MaxVd = MAX_VD;
+    AutotuneConfig.F_MinVd = MIN_VD;
+    AutotuneInit(&AutotuneConfig);
+  } else if (cS == ANGLE_CALIB_DONE) {
+    set_Initial_angle();
+    Disable_tim5();
+  }
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -239,7 +240,6 @@ int main(void)
     Model_Output_Flag_Checks();
     #endif
 
-    #if CLOSED_FOC
     #if CAN_BASED_REF
     FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
     #endif
@@ -248,7 +248,6 @@ int main(void)
     uint32_t target_rpm = ThrottleMap_GetRPM(&g_throttle_cfg, d.thr_v_mv);
     /* Pass target_rpm into your FOC speed reference */
     FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = target_rpm;
-    #endif
     #endif
   }
   /* USER CODE END 3 */
@@ -298,13 +297,10 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         if (d.init_check == HAL_OK)
         {
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-          #if CLOSED_FOC & !ENABLE_TUNING
-          cS = FOC_START;
-          #endif
-
-          #if ENABLE_TUNING
-          cS = ANGLE_CALIB;
-          #endif
+          if (d.start_alignment == 1 && d.end_alignment == 0)
+            cS = ANGLE_CALIB;
+          else
+            cS = FOC_START;
         }
         else if (d.init_check == !HAL_OK)
         {
@@ -316,9 +312,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
         #if DISABLE_FAULTS
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-        #if CLOSED_FOC
         cS = FOC_START;
-        #endif
         #endif
       }
     }
@@ -409,6 +403,8 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
       if (TagAutotuneOutput.AutotuneCompleteflag == true)
       {
+        d.start_alignment = 0;
+        d.end_alignment = 1;
         d.offset_angle_mech_cw = TagAutotuneOutput.f_Offset_CW;
         d.offset_angle_mech_ccw = TagAutotuneOutput.f_Offset_CCW;
         cS = ANGLE_OFFSET_STORE;
@@ -450,7 +446,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, d.pwm_c);
     }
 
-    #if CLOSED_FOC
     if (cS == FOC_START)
     {
       #if EST_CYC_CNT
@@ -524,7 +519,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.cycles = end - start;
       #endif
     }
-    #endif
   }
 }
 
@@ -553,7 +547,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       uint16_t offset_eeprom_ccw = (uint16_t)(d.offset_angle_mech_ccw * 100.0f);
       d.offset_angle_mech_avg = (offset_eeprom_ccw + offset_eeprom_cw) / 2.0f;
       if (EEPROM_Write_Page0(offset_eeprom_cw, offset_eeprom_ccw) == HAL_OK)
+      {
         cS = ANGLE_CALIB_DONE;
+        HAL_NVIC_SystemReset();
+      }
       else
       {
         er.eeprom_write_error = 1;

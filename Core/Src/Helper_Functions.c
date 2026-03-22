@@ -114,15 +114,16 @@ void set_Initial_angle(void)
 
   HAL_Delay(100);
 
-  /* Disabling the encoder PWM input capture */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
-  #if !ENABLE_TUNING
+  cS = CURR_SENS_CALIB;
+}
+
+void Disable_tim5(void)
+{
   HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_1);
   HAL_TIM_IC_Stop_IT(&htim5, TIM_CHANNEL_2);
   HAL_TIM_IC_DeInit(&htim5);
   HAL_TIM_Base_MspDeInit(&htim5);
-  #endif
-  cS = CURR_SENS_CALIB;
 }
 
 void power_mode_fnr_switch(void)

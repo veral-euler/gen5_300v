@@ -44,6 +44,8 @@ uint8_t EEPROM_Read_Page0(uint16_t* offset_cw, uint16_t* offset_ccw){
     d.end_alignment = 1;
   } else {
     cS = INIT;
+    d.start_alignment = 1;
+    d.end_alignment = 0;
   }
 
   uint8_t calc_crc = crc8(page, 6);

@@ -32,7 +32,6 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #define EST_CYC_CNT			1
-#define CLOSED_FOC			1
 #define PROTECTION_MODEL	0
 #define ENABLE_FAULTS		1
 #define DISABLE_FAULTS		0
@@ -44,7 +43,6 @@ extern "C" {
 #define THROTTLE_BASED_REF  0
 #define CAN_BASED_THRV		1
 #define THR_BASED_THRV		0
-#define ENABLE_TUNING		0
 
 #define CONFIG_VERSION_MAJOR 		0x05
 #define CONFIG_VERSION_MINOR 		0x00

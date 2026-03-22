@@ -450,21 +450,16 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  RelationalOperator: '<S161>/Relational Operator'
    *  RelationalOperator: '<S161>/Relational Operator1'
    */
-  #if ENABLE_TUNING
-  FOC_MTPA_FWC_FF_Y.Throttle_error = false;
-    // ((FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage >=
-    //   FOC_MTPA_FWC_FF_U.Throttle_input.Max_Throttle_Voltage) ||
-    //  (FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage <=
-    //   FOC_MTPA_FWC_FF_U.Throttle_input.Min_Throttle_Voltage));
-  #endif
+  if (cS == ANGLE_CALIB)
+    FOC_MTPA_FWC_FF_Y.Throttle_error = false;
 
-  #if !ENABLE_TUNING
-  FOC_MTPA_FWC_FF_Y.Throttle_error =
+  if (cS == FOC_START) {
+    FOC_MTPA_FWC_FF_Y.Throttle_error =
     ((FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage >=
       FOC_MTPA_FWC_FF_U.Throttle_input.Max_Throttle_Voltage) ||
      (FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage <=
       FOC_MTPA_FWC_FF_U.Throttle_input.Min_Throttle_Voltage));
-  #endif
+  }
 
   /* Chart: '<S161>/FNR_switching' incorporates:
    *  Inport: '<Root>/Drive_State'

@@ -6,6 +6,7 @@
 void power_mode_fnr_switch(void);
 void set_Initial_angle(void);
 void disable_drive(void);
+void Disable_tim5(void);
 void rt_OneStep(void);
 
 #endif /* end __HELPER_FUNCTIONS_H_ */
