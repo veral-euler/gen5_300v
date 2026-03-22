@@ -147,6 +147,7 @@ file(GLOB HAL_SOURCES
 set(INCLUDE_DIRS
     Core/Inc
     Core/Src
+    Core/Libs/Include
     ${CUBE_FW_PATH}/CMSIS/Device/ST/${MCU_FAMILY}/Include
     ${CUBE_FW_PATH}/CMSIS/Include
     ${CUBE_FW_PATH}/${MCU_FAMILY}_HAL_Driver/Inc
@@ -214,6 +215,14 @@ set(LINKER_FLAGS
 )
 
 # ==============================================================================
+# [9.5] IMPORTED STATIC LIBRARY — Pre-built angle offset lib
+# ==============================================================================
+add_library(AngleOffset STATIC IMPORTED)
+set_target_properties(AngleOffset PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/Core/Libs/libAngle_Offset_101.a"
+)
+
+# ==============================================================================
 # [10] EXECUTABLE TARGET — No need to edit below this line normally
 # ==============================================================================
 
@@ -242,6 +251,8 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 target_link_options(${PROJECT_NAME} PRIVATE
     ${LINKER_FLAGS}
 )
+
+target_link_libraries(${PROJECT_NAME} PRIVATE AngleOffset)
 
 # ==============================================================================
 # [11] POST-BUILD — Generate .hex, .bin and print size

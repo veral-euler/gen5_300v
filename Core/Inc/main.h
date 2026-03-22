@@ -60,7 +60,7 @@ extern "C" {
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "Autotune101.h"
+#include "../Libs/Include/Autotune101.h"
 #include "Speed_Sensing.h"
 #include "NTC_Temp_Reading.h"
 #if PROTECTION_MODEL
