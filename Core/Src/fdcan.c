@@ -306,8 +306,8 @@ void Send_Data_On_CAN_405(void) {
 void Send_Data_On_CAN_406(void) {
 	uint8_t can_data[8] = {0};
 
-	uint16_t can_tx_Kfw = (uint16_t)(can_d.Kfw * 1.0E3f);
-	uint16_t can_tx_Kaw = (uint16_t)(can_d.Kaw * 1.0E3f);
+	uint16_t can_tx_Kfw = (uint16_t)(can_d.canFW_params.Kfw * 1.0E3f);
+	uint16_t can_tx_Kaw = (uint16_t)(can_d.canFW_params.Kaw * 1.0E3f);
 	uint16_t can_Vs = (uint16_t)(FOC_MTPA_FWC_FF_Y.V_s * 1000.0f);
 	uint16_t can_Vmax = (uint16_t)(FOC_MTPA_FWC_FF_Y.V_max * 1000.0f);
 

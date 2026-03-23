@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_MTPA_FWC_FF'.
  *
- * Model version                  : 18.348
+ * Model version                  : 18.354
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Fri Mar 20 14:59:13 2026
+ * C/C++ source code generated on : Fri Mar 20 19:48:55 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -146,6 +146,19 @@ typedef struct {
   float Iq_up_limit;
   float Iq_low_limit;
 } Id_Iq_MTPA_limitBus;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_FWCBus_
+#define DEFINED_TYPEDEF_FOR_FWCBus_
+
+typedef struct {
+  float Kfw;
+  float Kaw;
+  float FW_Int_reset_factor;
+  float M2F_factor;
+  float F2M_factor;
+} FWCBus;
 
 #endif
 

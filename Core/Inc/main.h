@@ -173,6 +173,14 @@ typedef struct foc_pid_t {
 	float Back_Kaw;
 } foc_pid_t;
 
+typedef struct foc_fw_t {
+	float Kaw;
+	float Kfw;
+	float M_to_F;
+	float F_to_M;
+	float Rst_Factor;
+} foc_fw_t;
+
 typedef struct can_data_t {
 	uint8_t direction;
 	uint8_t power_mode;
@@ -180,9 +188,8 @@ typedef struct can_data_t {
 	float can_Ld;
 	float can_Lq;
 	float can_Lambda;
-	float Kfw;
-	float Kaw;
 	float can_instV;
+	foc_fw_t canFW_params;
 	foc_pid_t canSpeed_PID;
 	foc_pid_t canId_PID;
 	foc_pid_t canIq_PID;
@@ -321,7 +328,7 @@ void Error_Handler(void);
 
 #define ECO_MAX_SPEED			4500.0f
 #define SPORTS_MAX_SPEED		6000.0f
-#define REV_MAX_SPEED			1800.0f
+#define REV_MAX_SPEED			6000.0f
 #define FWC_LIMIT				10.0f
 
 #define TIM1_PSC			9
@@ -365,6 +372,9 @@ void Error_Handler(void);
 /* FW Kfw and Kaw */
 #define FW_KFW					0.001f
 #define FW_KAW					10.0f
+#define FW_M2F					0.9f
+#define FW_F2M					0.8f
+#define FW_RST_FACTOR			0.9f
 /* Speed PID */
 #define SPEED_KP				4.0f
 #define SPEED_KI				8.0f
