@@ -10,8 +10,8 @@
 #include "main.h"
 
 /* ─── Throttle Hardware Limits ─────────────────────────────────────────────── */
-#define THROTTLE_V_MIN_MV           900U
-#define THROTTLE_V_MAX_MV           4000U
+#define THROTTLE_V_MIN_MV           980U
+#define THROTTLE_V_MAX_MV           3900U
 
 /* ─── RPM Absolute Limits ───────────────────────────────────────────────────  */
 #define RPM_MIN                     0U

@@ -300,7 +300,7 @@ void Error_Handler(void);
 #define RS		  				0.01047f
 #define LQ						0.000386f
 #define LD						0.000148f
-#define LAMBDA					0.0236f
+#define LAMBDA					0.0263f
 #define CURR_TORQUE_RATIO		0.1673f //(Max_Torque/Max_A)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
@@ -321,7 +321,7 @@ void Error_Handler(void);
 
 #define ECO_MAX_SPEED			4500.0f
 #define SPORTS_MAX_SPEED		6000.0f
-#define REV_MAX_SPEED			6000.0f
+#define REV_MAX_SPEED			1800.0f
 #define FWC_LIMIT				10.0f
 
 #define TIM1_PSC			9

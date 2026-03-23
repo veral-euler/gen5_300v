@@ -20,27 +20,30 @@
 
 #ifndef AUTOTUNE101_H_
 #define AUTOTUNE101_H_
+
+#include "main.h"
+
 //Configuration Parameters
-#include "stdint.h"
 #define AO_SET_TIME             2000
 #define AUTOTUNE_FREERUNCOUNT	10000
 #define RATED_TUNING_RPM		2000
 #define AUTOTUN_SPEED_RAMP_TIME	1
 #define AUTOTUNE_SPEED_RAMP		10
-#define MAX_ITERATION			3
+#define MAX_ITERATION			4
 #define MAX_VD				    (float)(-0.51)
 #define MIN_VD				    (float)(-1.0)
 #define TUNING_CALC_RPM			(RATED_TUNING_RPM-100)
 #define	ALIGNEMENT_TMO           615
 #define AVERAGE_SAMPLE           128
 #define AUTO_TUNING_IDREF        (float)42.0
-#define AUTOTUNE_ANGLE_INCREMENT (float)0.007
+#define AUTOTUNE_ANGLE_INCREMENT (float)0.001
 #define AUTOTUNE_IDREF_INCREMENT (float)0.02
-#define ANGLE_RAD_360            (float)6.28
+#define ANGLE_RAD_360            (float)TWO_PI
 #define MOTOR_POLE_PAIRS		 3//Motor pole pairs
 #define	OFFSET_NEGATE			-1
 #define AUTOTUNESTATE_CHANGE_TMO	2000
 #define VD_VQ_AVERAGE_COUNT			256
+
 typedef enum{
     NORMAL_RUN,
     ANGLE_AUTOTUNE,
