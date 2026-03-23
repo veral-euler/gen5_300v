@@ -1630,8 +1630,8 @@ void FOC_MTPA_FWC_FF_initialize(void)
   FOC_MTPA_FWC_FF_U.IIR_Filter_Coefficient.Id_Filter_coefficient = 0.9f;
   FOC_MTPA_FWC_FF_U.IIR_Filter_Coefficient.Iq_Filter_coefficient = 0.9f; 
 
-  FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 1.0f;
   FOC_MTPA_FWC_FF_U.RefTrq = 0.0f;
+  FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = 0.0f;
 
   /* End of SystemInitialize for SubSystem: '<S1>/Outer_Loop' */
 }

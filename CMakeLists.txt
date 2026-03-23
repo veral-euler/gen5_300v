@@ -122,6 +122,7 @@ set(APP_SOURCES
     Core/Src/throttle_map.c
     Core/Src/Helper_Functions.c
     Core/Src/Peripheral_Init.c
+    Core/Src/Torque_Management.c
     Core/Startup/startup_stm32h743zitx.s   # ← generated startup file
     # Core/Src/myfile.c
     # Core/Src/mydriver.cpp

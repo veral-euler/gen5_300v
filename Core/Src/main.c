@@ -241,13 +241,22 @@ int main(void)
     #endif
 
     #if CAN_BASED_REF
-    FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
+    if (cS == FOC_START && FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 == 1)
+      FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
     #endif
 
     #if THROTTLE_BASED_REF
-    uint32_t target_rpm = ThrottleMap_GetRPM(&g_throttle_cfg, d.thr_v_mv);
-    /* Pass target_rpm into your FOC speed reference */
-    FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = target_rpm;
+    if (FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 == 1 && cS == FOC_START) {
+      d.speed_ref = (float)ThrottleMap_GetRPM(&g_throttle_cfg, d.thr_v_mv);
+      /* Pass target_rpm into your FOC speed reference */
+      FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = d.speed_ref;
+    } else if (FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 == 0 && cS == FOC_START) {
+      float max_torque = get_torque_speed_limit(d.rad_s);
+      float torque_ref = ThrottleMap_GetTorque(&g_throttle_cfg, d.thr_v_mv, max_torque);
+      d.torque_final = apply_torque_scaling(torque_ref, d.rad_s, pw_state, (float)d.Mtr_temp, (float)d.Mtc_temp, &taper_state, &derate_result);
+      /* Pass target_reftrq into your FOC Torque reference */
+      FOC_MTPA_FWC_FF_U.RefTrq = d.torque_final;
+    }
     #endif
   }
   /* USER CODE END 3 */
@@ -297,10 +306,13 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         if (d.init_check == HAL_OK)
         {
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-          if (d.start_alignment == 1 && d.end_alignment == 0)
+          if (d.start_alignment == 1 && d.end_alignment == 0) {
+            FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 1.0f;
             cS = ANGLE_CALIB;
-          else
+          } else {
+            FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 0.0f;
             cS = FOC_START;
+          }
         }
         else if (d.init_check == !HAL_OK)
         {
