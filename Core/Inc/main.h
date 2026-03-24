@@ -87,7 +87,7 @@ extern "C" {
 
 #define ECO_MAX_SPEED			4500.0f
 #define SPORTS_MAX_SPEED		6000.0f
-#define REV_MAX_SPEED			6000.0f
+#define REV_MAX_SPEED			1900.0f
 #define FWC_LIMIT				10.0f
 
 #define TIM1_PSC			9
@@ -159,8 +159,8 @@ extern "C" {
 #define IQ_PID_OUT_LOWL			-SVM_VOLTAGE_LIMIT
 #define IQ_PID_BACK_KAW			4.8304589f
 
-#define THR_MIN_VAL 			0.9f
-#define THR_MAX_VAL				4.0f
+#define THR_MIN_VAL 			0.8f
+#define THR_MAX_VAL				4.1f
 #define MIN_RPM_CHANGE_LIM		10.0f
 
 #include <math.h>

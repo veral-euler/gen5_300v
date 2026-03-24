@@ -92,15 +92,29 @@ float get_torque_speed_limit(float speed_rad_s)
  * @return  Torque scale factor [0.0, 1.0].
  */
 float get_speed_taper_scale(float speed_rad_s, power_mode_t drive_mode,
-                             SpeedTaperState_t *state)
+                             fnr_state_t direction, SpeedTaperState_t *state)
 {
-    /* Select speed limit based on drive mode */
+    /* -------------------------------------------------------------------
+     * Select speed limit:
+     * REVERSE — fixed limit, ECO/SPORTS irrelevant
+     * FORWARD — ECO or SPORTS limit
+     * NEUTRAL — taper not applicable, return 1.0 (torque_ref will be 0 anyway)
+     * ------------------------------------------------------------------- */
     float speed_limit_rpm;
-    switch (drive_mode)
+    switch (direction)
     {
-        case ECO:    speed_limit_rpm = SPEED_LIMIT_ECO_RPM;    break;
-        case SPORTS: speed_limit_rpm = SPEED_LIMIT_SPORTS_RPM; break;
-        default:     speed_limit_rpm = SPEED_LIMIT_ECO_RPM;    break;
+        case REVERSE:
+            speed_limit_rpm = SPEED_LIMIT_REVERSE_RPM;
+            break;
+
+        case FORWARD:
+            speed_limit_rpm = (drive_mode == ECO) ? SPEED_LIMIT_ECO_RPM
+                                                  : SPEED_LIMIT_SPORTS_RPM;
+            break;
+
+        case NEUTRAL:
+        default:
+            return 1.0f;
     }
 
     float speed_rpm       = RADS_TO_RPM(fabsf(speed_rad_s));
@@ -234,8 +248,9 @@ TempDerateResult_t get_temp_derate_scale(float motor_temp, float ctrl_temp)
  * @return  Scaled torque reference (Nm) to pass to FOC model.
  */
 float apply_torque_scaling(float torque_ref, float speed_rad_s,
-                            power_mode_t drive_mode, float motor_temp,
-                            float ctrl_temp, SpeedTaperState_t *taper_state,
+                            power_mode_t drive_mode, fnr_state_t direction,
+                            float motor_temp, float ctrl_temp,
+                            SpeedTaperState_t *taper_state,
                             TempDerateResult_t *derate_result_out)
 {
     /* Step 1: Torque-speed characteristic limit (motor capability) */
@@ -256,7 +271,7 @@ float apply_torque_scaling(float torque_ref, float speed_rad_s,
 
     /* Step 3: Speed taper on derated torque */
     float speed_scale = get_speed_taper_scale(speed_rad_s, drive_mode,
-                                               taper_state);
+                                               direction, taper_state);
 
     return torque_derated * speed_scale;
 }

@@ -56,6 +56,7 @@ typedef struct {
 /* Speed limits per drive mode (RPM) */
 #define SPEED_LIMIT_ECO_RPM         ECO_MAX_SPEED
 #define SPEED_LIMIT_SPORTS_RPM      SPORTS_MAX_SPEED
+#define SPEED_LIMIT_REVERSE_RPM     REV_MAX_SPEED   /* Fixed — ECO/SPORTS ignored in REVERSE */
 
 /* Taper band — linear scale from 1.0 to 0.0 within this band below limit */
 #define TAPER_BAND_RPM              400.0f
@@ -128,7 +129,7 @@ float get_torque_speed_limit(float speed_rad_s);
  * @return Torque scale factor [0.0, 1.0].
  */
 float get_speed_taper_scale(float speed_rad_s, power_mode_t drive_mode,
-                             SpeedTaperState_t *state);
+                             fnr_state_t direction, SpeedTaperState_t *state);
 
 /**
  * @brief  Compute torque derating scale from motor and controller temperatures.
@@ -156,8 +157,9 @@ TempDerateResult_t get_temp_derate_scale(float motor_temp, float ctrl_temp);
  * @return Scaled torque reference (Nm) to pass to FOC model.
  */
 float apply_torque_scaling(float torque_ref, float speed_rad_s,
-                            power_mode_t drive_mode, float motor_temp,
-                            float ctrl_temp, SpeedTaperState_t *taper_state,
+                            power_mode_t drive_mode, fnr_state_t direction,
+                            float motor_temp, float ctrl_temp,
+                            SpeedTaperState_t *taper_state,
                             TempDerateResult_t *derate_result_out);
 
 

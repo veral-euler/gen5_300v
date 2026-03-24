@@ -253,7 +253,7 @@ int main(void)
     } else if (FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 == 0 && cS == FOC_START) {
       float max_torque = get_torque_speed_limit(d.rad_s);
       float torque_ref = ThrottleMap_GetTorque(&g_throttle_cfg, d.thr_v_mv, max_torque);
-      d.torque_final = apply_torque_scaling(torque_ref, d.rad_s, pw_state, (float)d.Mtr_temp, (float)d.Mtc_temp, &taper_state, &derate_result);
+      d.torque_final = apply_torque_scaling(torque_ref, d.rad_s, pw_state, fnr_state, (float)d.Mtr_temp, (float)d.Mtc_temp, &taper_state, &derate_result);
       /* Pass target_reftrq into your FOC Torque reference */
       FOC_MTPA_FWC_FF_U.RefTrq = d.torque_final;
     }
