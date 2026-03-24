@@ -619,7 +619,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       Send_on_CAN_717(fabsf(d.RPM));
       Send_on_CAN_715(fabsf(d.RPM), d.Vdc, d.Aux_dc);
       Send_on_CAN_716(d.vrms, d.irms);
-      Send_on_CAN_724(fabsf(FOC_MTPA_FWC_FF_Y.Iq_gen) * CURR_TORQUE_RATIO);
+      Send_on_CAN_724(FOC_MTPA_FWC_FF_Y.T_gen);
       Send_on_CAN_726();
       #endif
     }

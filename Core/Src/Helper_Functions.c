@@ -139,6 +139,9 @@ void power_mode_fnr_switch(void)
   {
     fnr_state = NEUTRAL;
     d.speed_ref = 0.0f;
+    d.torque_final = 0.0f;
+    FOC_MTPA_FWC_FF_U.RefTrq = 0.0f;
+    FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = 0.0f;
     FOC_MTPA_FWC_FF_U.Drive_State = NEUTRAL;
   }
   else if (d.forward_pin == GPIO_PIN_RESET && d.reverse_pin == GPIO_PIN_SET)
