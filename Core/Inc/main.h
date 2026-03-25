@@ -35,14 +35,15 @@ extern "C" {
 #define PROTECTION_MODEL	0
 #define ENABLE_FAULTS		1
 #define DISABLE_FAULTS		0
-#define VH_CAN_ID			0
-#define DEBUG_CAN_ID		1
+#define VH_CAN_ID			1
+#define DEBUG_CAN_ID		0
 #define CAN_BASED_REF		0
 #define CAN_BASED_DIR		0
 #define THROTTLE_BASED_DIR	1
 #define THROTTLE_BASED_REF  1
 #define CAN_BASED_THRV		0
 #define THR_BASED_THRV		1
+#define FORCE_TUNE			1
 
 #define CONFIG_VERSION_MAJOR 		0x05
 #define CONFIG_VERSION_MINOR 		0x00

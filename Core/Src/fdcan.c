@@ -155,6 +155,7 @@ void _fdcan_filter_IDList(uint32_t can_receive_id, uint8_t format, uint32_t filt
 
 void FDCAN_SETUP()
 {
+	#if DEBUG_CAN_ID
 	_fdcan_filter_IDList(0x102, 0, 0, 0);
 	_fdcan_filter_IDList(0x103, 0, 1, 0);
 	_fdcan_filter_IDList(0x104, 0, 2, 0);
@@ -165,6 +166,7 @@ void FDCAN_SETUP()
 	_fdcan_filter_IDList(0x109, 0, 7, 0);
 	_fdcan_filter_IDList(0x110, 0, 8, 0);
 	_fdcan_filter_IDList(0x111, 0, 9, 0);
+	#endif
 	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_TX_COMPLETE, 0);
 
 	if(HAL_FDCAN_Start(&hfdcan2) != HAL_OK)

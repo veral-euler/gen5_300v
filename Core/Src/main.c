@@ -329,7 +329,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       }
     }
 
-    if (cS == ANGLE_CALIB)
+    else if (cS == ANGLE_CALIB)
     {
       static uint8_t milli_counter = 0; 
       milli_counter++;
@@ -458,7 +458,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, d.pwm_c);
     }
 
-    if (cS == FOC_START)
+    else if (cS == FOC_START)
     {
       #if EST_CYC_CNT
       /* Current count for time estimation */
@@ -539,7 +539,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM17)
   {
     /* Time counter for CAN transmission */
-    static uint16_t can_counter = 0;
+    static uint16_t can_counter = 500;
     can_counter++;
 
     #if ENABLE_FAULTS
