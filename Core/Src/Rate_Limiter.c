@@ -1,6 +1,7 @@
 #include "Rate_Limiter.h"
 
 RateLimiter limiter;
+RateLimiter torqueRate;
 
 /**
  * Initialize the rate limiter

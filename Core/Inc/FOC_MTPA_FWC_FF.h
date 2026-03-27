@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_MTPA_FWC_FF'.
  *
- * Model version                  : 18.354
+ * Model version                  : 18.358
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Fri Mar 20 19:48:55 2026
+ * C/C++ source code generated on : Tue Mar 24 17:42:00 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -65,11 +65,14 @@ typedef struct {
   float UnitDelay_DSTATE_c;            /* '<S162>/Unit Delay' */
   float DiscreteTimeIntegrator_DSTATE; /* '<S162>/Discrete-Time Integrator' */
   float RateTransition_Buffer0;        /* '<S1>/Rate Transition' */
+  float Id_prev;                       /* '<S161>/FNR_switching' */
+  float Iq_prev;                       /* '<S161>/FNR_switching' */
   uint32_t durationCounter_1;          /* '<S161>/FNR_switching' */
-  uint32_t durationCounter_1_n;        /* '<S161>/FNR_switching' */
+  uint32_t durationCounter_1_d;        /* '<S161>/FNR_switching' */
   int8_t DiscreteTimeIntegrator_PrevRese;/* '<S162>/Discrete-Time Integrator' */
-  uint8_t is_active_c1_FOC_MTPA_FWC_FF;/* '<S161>/FNR_switching' */
-  uint8_t is_c1_FOC_MTPA_FWC_FF;       /* '<S161>/FNR_switching' */
+  uint8_t is_active_c2_FOC_MTPA_FWC_FF;/* '<S161>/FNR_switching' */
+  uint8_t is_c2_FOC_MTPA_FWC_FF;       /* '<S161>/FNR_switching' */
+  uint8_t is_Neutral;                  /* '<S161>/FNR_switching' */
   uint8_t is_active_c3_FOC_MTPA_FWC_FF;/* '<S160>/Chart' */
   uint8_t is_c3_FOC_MTPA_FWC_FF;       /* '<S160>/Chart' */
   bool icLoad;                         /* '<S9>/Delay' */
@@ -98,6 +101,7 @@ typedef struct {
   float Drive_State;                   /* '<Root>/Drive_State' */
   float RPM_min_limit;                 /* '<Root>/RPM_min_limit' */
   FWCBus FWC_values;                   /* '<Root>/FWC_values' */
+  float I_dec_rate_FNR;                /* '<Root>/I_dec_rate_FNR' */
 } ExtU_FOC_MTPA_FWC_FF_T;
 
 /* External outputs (root outports fed by signals with default storage) */
@@ -447,7 +451,7 @@ extern RT_MODEL_FOC_MTPA_FWC_FF_T *const FOC_MTPA_FWC_FF_M;
  * '<S158>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/Saturation Dynamic'
  * '<S159>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/Saturation Dynamic1'
  * '<S160>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/Subsystem'
- * '<S161>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/Subsystem1'
+ * '<S161>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/Subsystem3'
  * '<S162>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/If Action Subsystem1/PMSM FWC'
  * '<S163>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/If Action Subsystem1/PMSM FWC/Cartesian to Polar'
  * '<S164>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/If Action Subsystem1/PMSM FWC/Modulation index'
@@ -458,7 +462,7 @@ extern RT_MODEL_FOC_MTPA_FWC_FF_T *const FOC_MTPA_FWC_FF_M;
  * '<S169>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/Rate Limiter Dynamic/Saturation Dynamic'
  * '<S170>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/Rate Limiter Dynamic1/Saturation Dynamic'
  * '<S171>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/Subsystem/Chart'
- * '<S172>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/Subsystem1/FNR_switching'
+ * '<S172>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/MTPA_FWC/Subsystem3/FNR_switching'
  * '<S173>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Inner_Loop/Subsystem1/Saturation Dynamic'
  * '<S174>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Outer_Loop/Subsystem'
  * '<S175>' : 'IPMSM_motor_FOC_MTPA_FWC_FF_try_default_FW/FOC_MTPA_FWC_FF/Outer_Loop/Subsystem1'

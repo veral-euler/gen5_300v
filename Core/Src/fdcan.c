@@ -2,6 +2,7 @@
 
 extern FDCAN_HandleTypeDef hfdcan2;
 FDCAN_RxHeaderTypeDef RxMessageBuf;
+extern TIM_HandleTypeDef htim4;
 
 CAN_TxQueue_t can_tx_queue = {0};
 
@@ -113,6 +114,13 @@ void CAN_Queue_Push_And_Kickstart(uint32_t arbitration_id, uint8_t format, uint8
     }
 }
 
+void Schedule_7Ax_Transmission(void)
+{
+    __HAL_TIM_SET_COUNTER(&htim4, 0);
+    __HAL_TIM_SET_AUTORELOAD(&htim4, (PEGASUS_DEVICE_ID * TICKS_PER_SLOT) - 1);
+    HAL_TIM_Base_Start_IT(&htim4);
+}
+
 void _fdcan_filter_IDList(uint32_t can_receive_id, uint8_t format, uint32_t filter_bank, uint32_t fifo)
 {
 	FDCAN_FilterTypeDef sFilterConfig;
@@ -173,6 +181,8 @@ void FDCAN_SETUP()
 	{
 		Error_Handler();
 	}
+	// In FDCAN setup after HAL_FDCAN_Start()
+	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_BUS_OFF, 0);
 }
 
 void _fdcan_transmit_on_can(uint32_t arbitration_id, uint8_t format, uint8_t * can_data, uint8_t dlc)
@@ -608,5 +618,44 @@ void Send_on_CAN_726()
 	data[7] = (uint8_t)(FIRMWARE_VERSION_SUBMINOR);
 
 	CAN_Queue_Push_And_Kickstart(0x726, 0, data, 0x08);
+}
+
+void Send_on_CAN_7A1(void)
+{
+	uint8_t can_data[8] = {0};
+
+	can_data[0] = (uint8_t)(PEGASUS_DEVICE_ID);
+	can_data[1] = (uint8_t)(FIRMWARE_VERSION_MAJOR);
+	can_data[2] = (uint8_t)(FIRMWARE_VERSION_MINOR);
+	can_data[3] = (uint8_t)(FIRMWARE_VERSION_SUBMINOR);
+	can_data[4] = (uint8_t)(0x00);
+	can_data[5] = (uint8_t)(CONFIG_VERSION_MAJOR);
+	can_data[7] = (uint8_t)(CURR_APP1);
+
+	CAN_Queue_Push_And_Kickstart(0x7A1, 0, can_data, 0x08);
+}
+
+void Send_on_CAN_7A2(void)
+{
+	uint8_t can_data[8] = {0};
+
+	can_data[0] = (uint8_t)(PEGASUS_DEVICE_ID);
+	can_data[1] = (uint8_t)(HARDWARE_VERSION_MAJOR);
+	can_data[2] = (uint8_t)(HARDWARE_VERSION_MINOR);
+	can_data[3] = (uint8_t)(HARDWARE_VERSION_SUBMINOR);
+
+	CAN_Queue_Push_And_Kickstart(0x7A2, 0, can_data, 0x08);
+}
+
+void Send_on_CAN_7A3(void)
+{
+	uint8_t can_data[8] = {0};
+
+	can_data[0] = (uint8_t)(PEGASUS_DEVICE_ID);
+	can_data[1] = (uint8_t)(CONFIG_VERSION_MAJOR);
+	can_data[2] = (uint8_t)(CONFIG_VERSION_MINOR);
+	can_data[3] = (uint8_t)(CONFIG_VERSION_SUBMINOR);
+
+	CAN_Queue_Push_And_Kickstart(0x7A3, 0, can_data, 0x08);
 }
 #endif

@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'FOC_MTPA_FWC_FF'.
  *
- * Model version                  : 18.354
+ * Model version                  : 18.358
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Fri Mar 20 19:48:55 2026
+ * C/C++ source code generated on : Tue Mar 24 17:42:00 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -25,14 +25,16 @@
 /* Named constants for Chart: '<S160>/Chart' */
 #define FOC_MTPA_FWC_FF_IN_FW          ((uint8_t)1U)
 #define FOC_MTPA_FWC_FF_IN_MTPA        ((uint8_t)2U)
+#define FOC_MTPA_FWC_IN_NO_ACTIVE_CHILD ((uint8_t)0U)
 
 /* Named constants for Chart: '<S161>/FNR_switching' */
 #define FOC_MTPA_FWC_FF_IN_Forward     ((uint8_t)1U)
 #define FOC_MTPA_FWC_FF_IN_Initial     ((uint8_t)2U)
-#define FOC_MTPA_FWC_FF_IN_Neutral     ((uint8_t)4U)
-#define FOC_MTPA_FWC_FF_IN_Reverse     ((uint8_t)5U)
-#define FOC_MTPA_FWC__IN_Throttle_error ((uint8_t)6U)
-#define FOC_MTPA__IN_Invalid_transition ((uint8_t)3U)
+#define FOC_MTPA_FWC_FF_IN_Neutral     ((uint8_t)3U)
+#define FOC_MTPA_FWC_FF_IN_Normal      ((uint8_t)2U)
+#define FOC_MTPA_FWC_FF_IN_Reverse     ((uint8_t)4U)
+#define FOC_MTPA_FWC__IN_Throttle_error ((uint8_t)5U)
+#define FOC_MTPA__IN_Invalid_Transition ((uint8_t)1U)
 
 /* Block signals (default storage) */
 B_FOC_MTPA_FWC_FF_T FOC_MTPA_FWC_FF_B;
@@ -49,6 +51,9 @@ ExtY_FOC_MTPA_FWC_FF_T FOC_MTPA_FWC_FF_Y;
 /* Real-time model */
 static RT_MODEL_FOC_MTPA_FWC_FF_T FOC_MTPA_FWC_FF_M_;
 RT_MODEL_FOC_MTPA_FWC_FF_T *const FOC_MTPA_FWC_FF_M = &FOC_MTPA_FWC_FF_M_;
+
+/* Forward declaration for local functions */
+static float FOC_MTPA_FWC_FF_I_ramp(float I_prev, float dec_rate);
 float rt_atan2f_snf(float u0, float u1)
 {
   float y;
@@ -105,6 +110,28 @@ float rt_hypotf_snf(float u0, float u1)
   }
 
   return y;
+}
+
+/* Function for Chart: '<S161>/FNR_switching' */
+static float FOC_MTPA_FWC_FF_I_ramp(float I_prev, float dec_rate)
+{
+  float I_out;
+  if (fabsf(I_prev) > dec_rate) {
+    float tmp;
+    if (rtIsNaNF(I_prev)) {
+      tmp = (rtNaNF);
+    } else if (I_prev < 0.0F) {
+      tmp = -1.0F;
+    } else {
+      tmp = (float)(I_prev > 0.0F);
+    }
+
+    I_out = I_prev - tmp * dec_rate;
+  } else {
+    I_out = 0.0F;
+  }
+
+  return I_out;
 }
 
 /* Model step function for TID0 */
@@ -479,11 +506,12 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
 
   /* Chart: '<S161>/FNR_switching' incorporates:
    *  Inport: '<Root>/Drive_State'
+   *  Inport: '<Root>/I_dec_rate_FNR'
    *  Inport: '<Root>/RPM_min_limit'
    */
-  if (FOC_MTPA_FWC_FF_DW.is_active_c1_FOC_MTPA_FWC_FF == 0) {
-    FOC_MTPA_FWC_FF_DW.is_active_c1_FOC_MTPA_FWC_FF = 1U;
-    FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Initial;
+  if (FOC_MTPA_FWC_FF_DW.is_active_c2_FOC_MTPA_FWC_FF == 0) {
+    FOC_MTPA_FWC_FF_DW.is_active_c2_FOC_MTPA_FWC_FF = 1U;
+    FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Initial;
 
     /* Outport: '<Root>/Throttle_en' */
     FOC_MTPA_FWC_FF_Y.Throttle_en = 0.0;
@@ -491,7 +519,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
     FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
   } else {
-    switch (FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF) {
+    switch (FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF) {
      case FOC_MTPA_FWC_FF_IN_Forward:
       /* Outport: '<Root>/Throttle_en' */
       FOC_MTPA_FWC_FF_Y.Throttle_en = 1.0;
@@ -501,31 +529,32 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
       }
 
       if (FOC_MTPA_FWC_FF_DW.durationCounter_1 > 1000U) {
-        FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF =
+        FOC_MTPA_FWC_FF_DW.Iq_prev = FOC_MTPA_FWC_FF_B.Merge[1];
+        FOC_MTPA_FWC_FF_DW.Id_prev = FOC_MTPA_FWC_FF_B.Merge[0];
+        FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF =
           FOC_MTPA_FWC__IN_Throttle_error;
 
         /* Outport: '<Root>/Throttle_en' */
         FOC_MTPA_FWC_FF_Y.Throttle_en = 0.0;
         FOC_MTPA_FWC_FF_Y.Throttle_State = Throttle_Error;
-        FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
-        FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
       } else if (FOC_MTPA_FWC_FF_U.Drive_State == 2.0F) {
-        FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF =
-          FOC_MTPA__IN_Invalid_transition;
+        FOC_MTPA_FWC_FF_DW.Iq_prev = FOC_MTPA_FWC_FF_B.Merge[1];
+        FOC_MTPA_FWC_FF_DW.Id_prev = FOC_MTPA_FWC_FF_B.Merge[0];
+        FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
 
         /* Outport: '<Root>/Throttle_en' */
         FOC_MTPA_FWC_FF_Y.Throttle_en = 0.0;
         FOC_MTPA_FWC_FF_Y.Throttle_State = Neutral;
-        FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
-        FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
+        FOC_MTPA_FWC_FF_DW.is_Neutral = FOC_MTPA__IN_Invalid_Transition;
       } else if (FOC_MTPA_FWC_FF_U.Drive_State == 3.0F) {
-        FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
+        FOC_MTPA_FWC_FF_DW.Iq_prev = FOC_MTPA_FWC_FF_B.Merge[1];
+        FOC_MTPA_FWC_FF_DW.Id_prev = FOC_MTPA_FWC_FF_B.Merge[0];
+        FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
 
         /* Outport: '<Root>/Throttle_en' */
         FOC_MTPA_FWC_FF_Y.Throttle_en = 0.0;
         FOC_MTPA_FWC_FF_Y.Throttle_State = Neutral;
-        FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
-        FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
+        FOC_MTPA_FWC_FF_DW.is_Neutral = FOC_MTPA_FWC_FF_IN_Normal;
       } else {
         FOC_MTPA_FWC_FF_B.Iq_ref = FOC_MTPA_FWC_FF_B.Merge[1];
         FOC_MTPA_FWC_FF_B.Id_ref = FOC_MTPA_FWC_FF_B.Merge[0];
@@ -537,16 +566,17 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
       FOC_MTPA_FWC_FF_Y.Throttle_en = 0.0;
       FOC_MTPA_FWC_FF_Y.Throttle_State = Neutral;
       if (FOC_MTPA_FWC_FF_U.Drive_State == 3.0F) {
-        FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
+        FOC_MTPA_FWC_FF_DW.Iq_prev = 0.0F;
+        FOC_MTPA_FWC_FF_DW.Id_prev = 0.0F;
+        FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
         FOC_MTPA_FWC_FF_Y.Throttle_State = Neutral;
-        FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
-        FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
+        FOC_MTPA_FWC_FF_DW.is_Neutral = FOC_MTPA_FWC_FF_IN_Normal;
       } else {
         rtb_RelationalOperator = !FOC_MTPA_FWC_FF_Y.Throttle_error;
         if ((FOC_MTPA_FWC_FF_U.Drive_State == 2.0F) && (rtb_UkYk1 <=
              FOC_MTPA_FWC_FF_U.RPM_min_limit) && rtb_RelationalOperator) {
-          FOC_MTPA_FWC_FF_DW.durationCounter_1_n = 0U;
-          FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Reverse;
+          FOC_MTPA_FWC_FF_DW.durationCounter_1_d = 0U;
+          FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Reverse;
 
           /* Outport: '<Root>/Throttle_en' */
           FOC_MTPA_FWC_FF_Y.Throttle_en = 1.0;
@@ -555,24 +585,12 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
                     FOC_MTPA_FWC_FF_U.RPM_min_limit) && rtb_RelationalOperator)
         {
           FOC_MTPA_FWC_FF_DW.durationCounter_1 = 0U;
-          FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Forward;
+          FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Forward;
 
           /* Outport: '<Root>/Throttle_en' */
           FOC_MTPA_FWC_FF_Y.Throttle_en = 1.0;
           FOC_MTPA_FWC_FF_Y.Throttle_State = Forward;
         }
-      }
-      break;
-
-     case FOC_MTPA__IN_Invalid_transition:
-      /* Outport: '<Root>/Throttle_en' */
-      FOC_MTPA_FWC_FF_Y.Throttle_en = 0.0;
-      FOC_MTPA_FWC_FF_Y.Throttle_State = Neutral;
-      if (FOC_MTPA_FWC_FF_U.Drive_State == 3.0F) {
-        FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
-        FOC_MTPA_FWC_FF_Y.Throttle_State = Neutral;
-        FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
-        FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
       }
       break;
 
@@ -583,30 +601,46 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
       if (((FOC_MTPA_FWC_FF_U.Drive_State == 1.0F) &&
            FOC_MTPA_FWC_FF_Y.Throttle_error) || ((FOC_MTPA_FWC_FF_U.Drive_State ==
             2.0F) && FOC_MTPA_FWC_FF_Y.Throttle_error)) {
-        FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF =
+        FOC_MTPA_FWC_FF_DW.is_Neutral = FOC_MTPA_FWC_IN_NO_ACTIVE_CHILD;
+        FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF =
           FOC_MTPA_FWC__IN_Throttle_error;
         FOC_MTPA_FWC_FF_Y.Throttle_State = Throttle_Error;
-        FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
-        FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
       } else {
-        rtb_RelationalOperator = !FOC_MTPA_FWC_FF_Y.Throttle_error;
-        if ((FOC_MTPA_FWC_FF_U.Drive_State == 2.0F) && (rtb_UkYk1 <=
-             FOC_MTPA_FWC_FF_U.RPM_min_limit) && rtb_RelationalOperator) {
-          FOC_MTPA_FWC_FF_DW.durationCounter_1_n = 0U;
-          FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Reverse;
+        FOC_MTPA_FWC_FF_B.Iq_ref = FOC_MTPA_FWC_FF_I_ramp
+          (FOC_MTPA_FWC_FF_DW.Iq_prev, FOC_MTPA_FWC_FF_U.I_dec_rate_FNR);
+        FOC_MTPA_FWC_FF_B.Id_ref = FOC_MTPA_FWC_FF_I_ramp
+          (FOC_MTPA_FWC_FF_DW.Id_prev, FOC_MTPA_FWC_FF_U.I_dec_rate_FNR);
+        FOC_MTPA_FWC_FF_DW.Iq_prev = FOC_MTPA_FWC_FF_B.Iq_ref;
+        FOC_MTPA_FWC_FF_DW.Id_prev = FOC_MTPA_FWC_FF_B.Id_ref;
+        if (FOC_MTPA_FWC_FF_DW.is_Neutral == FOC_MTPA__IN_Invalid_Transition) {
+          if (FOC_MTPA_FWC_FF_U.Drive_State == 3.0F) {
+            FOC_MTPA_FWC_FF_DW.is_Neutral = FOC_MTPA_FWC_FF_IN_Normal;
+          }
+        } else {
+          /* case IN_Normal: */
+          rtb_RelationalOperator = !FOC_MTPA_FWC_FF_Y.Throttle_error;
+          if ((FOC_MTPA_FWC_FF_U.Drive_State == 2.0F) && (rtb_UkYk1 <=
+               FOC_MTPA_FWC_FF_U.RPM_min_limit) && rtb_RelationalOperator) {
+            FOC_MTPA_FWC_FF_DW.is_Neutral = FOC_MTPA_FWC_IN_NO_ACTIVE_CHILD;
+            FOC_MTPA_FWC_FF_DW.durationCounter_1_d = 0U;
+            FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF =
+              FOC_MTPA_FWC_FF_IN_Reverse;
 
-          /* Outport: '<Root>/Throttle_en' */
-          FOC_MTPA_FWC_FF_Y.Throttle_en = 1.0;
-          FOC_MTPA_FWC_FF_Y.Throttle_State = Reverse;
-        } else if ((FOC_MTPA_FWC_FF_U.Drive_State == 1.0F) && (rtb_UkYk1 <=
-                    FOC_MTPA_FWC_FF_U.RPM_min_limit) && rtb_RelationalOperator)
-        {
-          FOC_MTPA_FWC_FF_DW.durationCounter_1 = 0U;
-          FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Forward;
+            /* Outport: '<Root>/Throttle_en' */
+            FOC_MTPA_FWC_FF_Y.Throttle_en = 1.0;
+            FOC_MTPA_FWC_FF_Y.Throttle_State = Reverse;
+          } else if ((FOC_MTPA_FWC_FF_U.Drive_State == 1.0F) && (rtb_UkYk1 <=
+                      FOC_MTPA_FWC_FF_U.RPM_min_limit) && rtb_RelationalOperator)
+          {
+            FOC_MTPA_FWC_FF_DW.is_Neutral = FOC_MTPA_FWC_IN_NO_ACTIVE_CHILD;
+            FOC_MTPA_FWC_FF_DW.durationCounter_1 = 0U;
+            FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF =
+              FOC_MTPA_FWC_FF_IN_Forward;
 
-          /* Outport: '<Root>/Throttle_en' */
-          FOC_MTPA_FWC_FF_Y.Throttle_en = 1.0;
-          FOC_MTPA_FWC_FF_Y.Throttle_State = Forward;
+            /* Outport: '<Root>/Throttle_en' */
+            FOC_MTPA_FWC_FF_Y.Throttle_en = 1.0;
+            FOC_MTPA_FWC_FF_Y.Throttle_State = Forward;
+          }
         }
       }
       break;
@@ -616,35 +650,36 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
       FOC_MTPA_FWC_FF_Y.Throttle_en = 1.0;
       FOC_MTPA_FWC_FF_Y.Throttle_State = Reverse;
       if (!FOC_MTPA_FWC_FF_Y.Throttle_error) {
-        FOC_MTPA_FWC_FF_DW.durationCounter_1_n = 0U;
+        FOC_MTPA_FWC_FF_DW.durationCounter_1_d = 0U;
       }
 
-      if (FOC_MTPA_FWC_FF_DW.durationCounter_1_n > 1000U) {
-        FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF =
+      if (FOC_MTPA_FWC_FF_DW.durationCounter_1_d > 1000U) {
+        FOC_MTPA_FWC_FF_DW.Iq_prev = -FOC_MTPA_FWC_FF_B.Merge[1];
+        FOC_MTPA_FWC_FF_DW.Id_prev = FOC_MTPA_FWC_FF_B.Merge[0];
+        FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF =
           FOC_MTPA_FWC__IN_Throttle_error;
 
         /* Outport: '<Root>/Throttle_en' */
         FOC_MTPA_FWC_FF_Y.Throttle_en = 0.0;
         FOC_MTPA_FWC_FF_Y.Throttle_State = Throttle_Error;
-        FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
-        FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
       } else if (FOC_MTPA_FWC_FF_U.Drive_State == 3.0F) {
-        FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
+        FOC_MTPA_FWC_FF_DW.Iq_prev = -FOC_MTPA_FWC_FF_B.Merge[1];
+        FOC_MTPA_FWC_FF_DW.Id_prev = FOC_MTPA_FWC_FF_B.Merge[0];
+        FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
 
         /* Outport: '<Root>/Throttle_en' */
         FOC_MTPA_FWC_FF_Y.Throttle_en = 0.0;
         FOC_MTPA_FWC_FF_Y.Throttle_State = Neutral;
-        FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
-        FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
+        FOC_MTPA_FWC_FF_DW.is_Neutral = FOC_MTPA_FWC_FF_IN_Normal;
       } else if (FOC_MTPA_FWC_FF_U.Drive_State == 1.0F) {
-        FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF =
-          FOC_MTPA__IN_Invalid_transition;
+        FOC_MTPA_FWC_FF_DW.Iq_prev = -FOC_MTPA_FWC_FF_B.Merge[1];
+        FOC_MTPA_FWC_FF_DW.Id_prev = FOC_MTPA_FWC_FF_B.Merge[0];
+        FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
 
         /* Outport: '<Root>/Throttle_en' */
         FOC_MTPA_FWC_FF_Y.Throttle_en = 0.0;
         FOC_MTPA_FWC_FF_Y.Throttle_State = Neutral;
-        FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
-        FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
+        FOC_MTPA_FWC_FF_DW.is_Neutral = FOC_MTPA__IN_Invalid_Transition;
       } else {
         FOC_MTPA_FWC_FF_B.Iq_ref = -FOC_MTPA_FWC_FF_B.Merge[1];
         FOC_MTPA_FWC_FF_B.Id_ref = FOC_MTPA_FWC_FF_B.Merge[0];
@@ -659,10 +694,16 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
       if ((FOC_MTPA_FWC_FF_U.Drive_State == 3.0F) && (rtb_UkYk1 <=
            FOC_MTPA_FWC_FF_U.RPM_min_limit) &&
           (!FOC_MTPA_FWC_FF_Y.Throttle_error)) {
-        FOC_MTPA_FWC_FF_DW.is_c1_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
+        FOC_MTPA_FWC_FF_DW.is_c2_FOC_MTPA_FWC_FF = FOC_MTPA_FWC_FF_IN_Neutral;
         FOC_MTPA_FWC_FF_Y.Throttle_State = Neutral;
-        FOC_MTPA_FWC_FF_B.Iq_ref = 0.0F;
-        FOC_MTPA_FWC_FF_B.Id_ref = 0.0F;
+        FOC_MTPA_FWC_FF_DW.is_Neutral = FOC_MTPA_FWC_FF_IN_Normal;
+      } else {
+        FOC_MTPA_FWC_FF_B.Iq_ref = FOC_MTPA_FWC_FF_I_ramp
+          (FOC_MTPA_FWC_FF_DW.Iq_prev, FOC_MTPA_FWC_FF_U.I_dec_rate_FNR);
+        FOC_MTPA_FWC_FF_B.Id_ref = FOC_MTPA_FWC_FF_I_ramp
+          (FOC_MTPA_FWC_FF_DW.Id_prev, FOC_MTPA_FWC_FF_U.I_dec_rate_FNR);
+        FOC_MTPA_FWC_FF_DW.Iq_prev = FOC_MTPA_FWC_FF_B.Iq_ref;
+        FOC_MTPA_FWC_FF_DW.Id_prev = FOC_MTPA_FWC_FF_B.Id_ref;
       }
       break;
     }
@@ -670,10 +711,10 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
 
   if (FOC_MTPA_FWC_FF_Y.Throttle_error) {
     FOC_MTPA_FWC_FF_DW.durationCounter_1++;
-    FOC_MTPA_FWC_FF_DW.durationCounter_1_n++;
+    FOC_MTPA_FWC_FF_DW.durationCounter_1_d++;
   } else {
     FOC_MTPA_FWC_FF_DW.durationCounter_1 = 0U;
-    FOC_MTPA_FWC_FF_DW.durationCounter_1_n = 0U;
+    FOC_MTPA_FWC_FF_DW.durationCounter_1_d = 0U;
   }
 
   /* End of Chart: '<S161>/FNR_switching' */
@@ -1582,10 +1623,10 @@ void FOC_MTPA_FWC_FF_initialize(void)
   FOC_MTPA_FWC_FF_U.Throttle_input.Min_Throttle_Voltage = THR_MIN_VAL;
 
   /* Id Iq Limits */
-  FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_up_limit = 512.0f;
-  FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_low_limit = -512.0f;
-  FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_up_limit = 512.0f;
-  FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_low_limit = -512.0f;
+  FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_up_limit = 550.0f;
+  FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Iq_low_limit = -550.0f;
+  FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_up_limit = 550.0f;
+  FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_low_limit = -550.0f;
   
   /* Speed Ref Rate Limiter Settings */
   FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_up = 100.0f * 10000.0f;
@@ -1632,6 +1673,7 @@ void FOC_MTPA_FWC_FF_initialize(void)
 
   FOC_MTPA_FWC_FF_U.RefTrq = 0.0f;
   FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = 0.0f;
+  FOC_MTPA_FWC_FF_U.I_dec_rate_FNR = 1.0f * 10000.0f;
 
   /* End of SystemInitialize for SubSystem: '<S1>/Outer_Loop' */
 }

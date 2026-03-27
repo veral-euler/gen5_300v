@@ -4,7 +4,9 @@
 #include "main.h"
 
 /* CAN Message Queue Configuration */
-#define CAN_TX_QUEUE_SIZE 15
+#define CAN_TX_QUEUE_SIZE       15
+#define FRAME_SLOT_MS           2U   // was 1U at 1Mbps, double it at 250kbps
+#define TICKS_PER_SLOT          4U   // 4 ticks × 0.5ms = 2ms per DEVICE_ID slot
 
 typedef struct {
     uint32_t arbitration_id;
@@ -48,6 +50,9 @@ void Send_on_CAN_716(float vrms, float irms);
 void Send_on_CAN_717(float rpm);
 void Send_on_CAN_724(float torque_ref);
 void Send_on_CAN_726(void);
+void Send_on_CAN_7A1(void);
+void Send_on_CAN_7A2(void);
+void Send_on_CAN_7A3(void);
 #endif
 
 void CAN_Queue_Init(void);
@@ -56,6 +61,7 @@ uint8_t CAN_Queue_IsEmpty(void);
 void CAN_Queue_Process(void);
 uint16_t CAN_Queue_GetCount(void);
 void CAN_Queue_Push_And_Kickstart(uint32_t arbitration_id, uint8_t format, uint8_t *data, uint8_t dlc);
+void Schedule_7Ax_Transmission(void);
 
 extern CAN_TxQueue_t can_tx_queue;
 extern FDCAN_RxHeaderTypeDef RxMessageBuf;

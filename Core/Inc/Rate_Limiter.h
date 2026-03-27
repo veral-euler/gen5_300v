@@ -21,5 +21,6 @@ float RateLimiter_Update(RateLimiter *limiter,
                          float current_time);
 
 extern RateLimiter limiter;
+extern RateLimiter torqueRate;
 
 #endif

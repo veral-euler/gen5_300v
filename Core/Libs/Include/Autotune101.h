@@ -35,7 +35,7 @@
 #define TUNING_CALC_RPM			(RATED_TUNING_RPM-100)
 #define	ALIGNEMENT_TMO           615
 #define AVERAGE_SAMPLE           128
-#define AUTO_TUNING_IDREF        (float)50.0
+#define AUTO_TUNING_IDREF        (float)55.0
 #define AUTOTUNE_ANGLE_INCREMENT (float)0.001
 #define AUTOTUNE_IDREF_INCREMENT (float)0.02
 #define ANGLE_RAD_360            (float)TWO_PI

@@ -35,6 +35,7 @@ extern "C" {
 #define PROTECTION_MODEL	0
 #define ENABLE_FAULTS		1
 #define DISABLE_FAULTS		0
+#define ENABLE_ENC_ERRORS	0	
 #define VH_CAN_ID			1
 #define DEBUG_CAN_ID		0
 #define CAN_BASED_REF		0
@@ -43,17 +44,26 @@ extern "C" {
 #define THROTTLE_BASED_REF  1
 #define CAN_BASED_THRV		0
 #define THR_BASED_THRV		1
-#define FORCE_TUNE			1
+#define HLP					0
+#define HI_CITY				1
+#define HI_RANGE			0
+#define RPM_TO_KMPH_HLP		 0.008909f
+#define RPM_TO_KMPH_HI_CITY	 0.01f
+#define RPM_TO_KMPH_HI_RANGE 0.01f
 
+#define PEGASUS_DEVICE_ID			0x03
 #define CONFIG_VERSION_MAJOR 		0x05
 #define CONFIG_VERSION_MINOR 		0x00
 #define CONFIG_VERSION_SUBMINOR 	0x00
 #define FIRMWARE_VERSION_MAJOR  	0x00
 #define FIRMWARE_VERSION_MINOR 		0x0A
 #define FIRMWARE_VERSION_SUBMINOR 	0x11
+#define HARDWARE_VERSION_MAJOR		0x04
+#define HARDWARE_VERSION_MINOR		0x03
+#define HARDWARE_VERSION_SUBMINOR	0x01
 
 #define CURR_APP1					1
-#define CURR_APP2					0
+#define CURR_APP2					2
 
 #define POLEPAIRS 				3.0f
 #define COUNTS_TO_RADS			0.001533981f//(2.0f * (PI / (TIM2_ARR+1)))
@@ -76,7 +86,7 @@ extern "C" {
 #define OP_VOLTAGE				58.0f
 #define AUX_OP_VOLTAGE			12.0f
 #define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
-#define MOTOR_PEAK_ARMS			338.0f
+#define MOTOR_PEAK_ARMS			385.0f
 #define MOTOR_PEAK_AC			(MOTOR_PEAK_ARMS * ROOT2)
 #define V_F_RATIO				0.2875f
 #define SPEED_REF_RPM_MAX		500.0f
@@ -89,6 +99,9 @@ extern "C" {
 #define ECO_MAX_SPEED			4500.0f
 #define SPORTS_MAX_SPEED		6000.0f
 #define REV_MAX_SPEED			1900.0f
+#define ECO_MAX_TORQUE			42.0f
+#define SPORTS_MAX_TORQUE		80.0f
+#define REV_MAX_TORQUE			80.0f
 #define FWC_LIMIT				10.0f
 
 #define TIM1_PSC			9
@@ -112,14 +125,14 @@ extern "C" {
 #define BUS_VDC_SCALE		0.00206f
 #define AUX_VDC_SCALE		0.000188658f
 
-#define MAX_PHASE_CURRENT		512.0f
-#define BUS_DC_OV_LIMIT			80
+#define MAX_PHASE_CURRENT		550.0f
+#define BUS_DC_OV_LIMIT			72
 #define BUS_DC_UV_LIMIT			30
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
 #define CONTRL_TEMP_OT_LIMIT	80
-#define PHASE_OC_COUNT			5
-#define ID_IQ_OC_COUNT			5
+#define PHASE_OC_COUNT			10
+#define ID_IQ_OC_COUNT			10
 #define BUS_DC_OV_COUNT			1
 #define BUS_DC_UV_COUNT			1
 #define CURR_SEN_ANLG_HIGH		40000
@@ -200,6 +213,7 @@ typedef struct data {
 	uint8_t motor_derate_flag;
 	uint8_t throttle_percent;
 	uint8_t regen_flag;
+	uint8_t canBus_ok;
 	uint8_t z_pulse;
 	uint8_t A_Pulse;
 	uint8_t B_Pulse;

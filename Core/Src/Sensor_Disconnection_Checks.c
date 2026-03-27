@@ -171,6 +171,7 @@ uint8_t Initial_Fault_Check(void) {
 }
 
 void Sensor_Disconnection_Check(void) {
+  #if ENABLE_ENC_ERRORS
   static uint16_t encoder_z_fault_check_count = 0;
   static uint16_t encoder_ab_fault_check_count = 0;
   static uint16_t encoder_5v_fault_check_count = 0;
@@ -264,6 +265,7 @@ void Sensor_Disconnection_Check(void) {
       cS = CONT_ERROR;
     }
   }
+  #endif
 
   if (temp_sensor_disconnection_check(d.mtc_analog_val, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
     er.error_triggered = 1;

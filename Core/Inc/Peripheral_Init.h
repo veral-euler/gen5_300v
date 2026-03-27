@@ -15,5 +15,6 @@ void MX_ADC1_Init(void);
 void MX_TIM2_Init(void);
 void MX_FDCAN2_Init(void);
 void MX_I2C2_Init(void);
+void MX_TIM4_Init(void);
 
 #endif /* end __PERIPHERAL_INIT_H_ */

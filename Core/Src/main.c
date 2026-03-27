@@ -50,6 +50,7 @@ I2C_HandleTypeDef hi2c2;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim17;
 
@@ -85,7 +86,7 @@ currSession cS = INIT;
 errors_nums err = NO_ERROR;
 errors er = {0};
 can_data_t can_d = {.can_Lambda = LAMBDA, .can_Ld = LD, .can_Lq = LQ, .canFW_params.M_to_F = FW_M2F, .canFW_params.F_to_M = FW_F2M, .canFW_params.Kaw = FW_KAW, .canFW_params.Kfw = FW_KFW, .canFW_params.Rst_Factor = FW_RST_FACTOR, .canSpeed_PID.Kp = SPEED_KP, .canSpeed_PID.Ki = SPEED_KI, .canSpeed_PID.Kd = SPEED_KD, .canSpeed_PID.Back_Kaw = SPEED_PID_BACK_KAW, .canSpeed_PID.Kd_Filter = SPEED_KD_FILTER, .canSpeed_PID.Output_Up_Limit = SPEED_PID_OUT_UPL, .canSpeed_PID.Output_Low_Limit = SPEED_PID_OUT_LOWL, .canId_PID.Kp = ID_KP, .canId_PID.Ki = ID_KI, .canId_PID.Kd = ID_KD, .canId_PID.Back_Kaw = ID_PID_BACK_KAW, .canId_PID.Kd_Filter = ID_KD_FILTER, .canId_PID.Output_Up_Limit = ID_PID_OUT_UPL, .canId_PID.Output_Low_Limit = ID_PID_OUT_LOWL, .canIq_PID.Kp = IQ_KP, .canIq_PID.Ki = IQ_KI, .canIq_PID.Kd = IQ_KD, .canIq_PID.Back_Kaw = IQ_PID_BACK_KAW, .canIq_PID.Kd_Filter = IQ_KD_FILTER, .canIq_PID.Output_Up_Limit = IQ_PID_OUT_UPL, .canIq_PID.Output_Low_Limit = IQ_PID_OUT_LOWL};
-data d = {.Kvf = V_F_RATIO, .speed_ref = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
+data d = {.canBus_ok = 1, .Kvf = V_F_RATIO, .speed_ref = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
 /* USER CODE END 0 */
 
 /**
@@ -132,8 +133,9 @@ int main(void)
   MX_TIM2_Init();
   MX_FDCAN2_Init();
   MX_I2C2_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-  HAL_Delay(100);
+  HAL_Delay(10);
 
   /* Stopping all TIM1 for safety precauiton at program start */
   HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
@@ -177,7 +179,7 @@ int main(void)
 
   HAL_ADCEx_Calibration_Start(&hadc2, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
   HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED);
-  HAL_Delay(1000);
+  HAL_Delay(10);
 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 5);
 
@@ -191,7 +193,8 @@ int main(void)
   MCU_Protections_initialize();
   #endif
   RateLimiter_Init(&limiter, 100.0f, 600.0f, 0.0f);
-  HAL_Delay(100);
+  RateLimiter_Init(&torqueRate, 10.0f, 10.0f, 0.0f);
+  HAL_Delay(10);
 
   /*Starting FDCAN2, Queue Init and Throttle Init*/
   FDCAN_SETUP();
@@ -249,13 +252,13 @@ int main(void)
     if (FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 == 1 && cS == FOC_START) {
       d.speed_ref = (float)ThrottleMap_GetRPM(&g_throttle_cfg, d.thr_v_mv);
       /* Pass target_rpm into your FOC speed reference */
-      FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = d.speed_ref;
+      FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
     } else if (FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 == 0 && cS == FOC_START) {
       float max_torque = get_torque_speed_limit(d.rad_s);
       float torque_ref = ThrottleMap_GetTorque(&g_throttle_cfg, d.thr_v_mv, max_torque);
       d.torque_final = apply_torque_scaling(torque_ref, d.rad_s, pw_state, fnr_state, (float)d.Mtr_temp, (float)d.Mtc_temp, &taper_state, &derate_result);
       /* Pass target_reftrq into your FOC Torque reference */
-      FOC_MTPA_FWC_FF_U.RefTrq = d.torque_final;
+      FOC_MTPA_FWC_FF_U.RefTrq = RateLimiter_Update(&torqueRate, d.torque_final, ((float)time_stamp_now*0.001f));
     }
     #endif
   }
@@ -536,6 +539,14 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+  if (htim->Instance == TIM4)
+  {
+    HAL_TIM_Base_Stop_IT(&htim4);
+    Send_on_CAN_7A1();
+    Send_on_CAN_7A2();
+    Send_on_CAN_7A3();
+  }
+
   if (htim->Instance == TIM17)
   {
     /* Time counter for CAN transmission */
@@ -595,33 +606,59 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
       can_counter = 0;
 
-      // Only queue - don't process here
-      #if DEBUG_CAN_ID
-      Send_Data_On_CAN_401();
-      Send_Data_On_CAN_402();
-      Send_Data_On_CAN_403();
-      Send_Data_On_CAN_404();
-      Send_Data_On_CAN_405();
-      Send_Data_On_CAN_406();
-      Send_Data_On_CAN_407();
-      Send_Data_On_CAN_408();
-      Send_Data_On_CAN_409();
-      /* Sending Firmware Ver and Config Ver */
-      Send_Data_On_CAN_410();
-      #endif
+      d.canBus_ok = 1;
 
-      #if VH_CAN_ID
-      Send_on_CAN_705(d.Mtr_temp, d.Mtc_temp);
-      Send_on_CAN_706(d.Vdc, fabsf(d.RPM * 0.008909f), er.error_c1);
-      Send_on_CAN_708(er.error_c2, er.error_c3);
-      Send_on_CAN_709(0);
-      Send_on_CAN_710(d.throttle_percent, d.throttle_v);
-      Send_on_CAN_717(fabsf(d.RPM));
-      Send_on_CAN_715(fabsf(d.RPM), d.Vdc, d.Aux_dc);
-      Send_on_CAN_716(d.vrms, d.irms);
-      Send_on_CAN_724(FOC_MTPA_FWC_FF_Y.T_gen);
-      Send_on_CAN_726();
-      #endif
+      /* Check and recover from BUS OFF before queuing */
+      FDCAN_ProtocolStatusTypeDef psr;
+      HAL_FDCAN_GetProtocolStatus(&hfdcan2, &psr);
+
+      if (psr.BusOff)
+      {
+        HAL_FDCAN_Stop(&hfdcan2);
+        CAN_Queue_Init();           // flush stale queue
+        HAL_FDCAN_Start(&hfdcan2);  // re-enters error active after 128×11 recessive bits
+        d.canBus_ok = 0;
+      }
+
+      if (d.canBus_ok)
+      {
+        // Only queue - don't process here
+        #if DEBUG_CAN_ID
+        Send_Data_On_CAN_401();
+        Send_Data_On_CAN_402();
+        Send_Data_On_CAN_403();
+        Send_Data_On_CAN_404();
+        Send_Data_On_CAN_405();
+        Send_Data_On_CAN_406();
+        Send_Data_On_CAN_407();
+        Send_Data_On_CAN_408();
+        Send_Data_On_CAN_409();
+        /* Sending Firmware Ver and Config Ver */
+        Send_Data_On_CAN_410();
+        #endif
+
+        #if VH_CAN_ID
+        Send_on_CAN_705(d.Mtr_temp, d.Mtc_temp);
+        #if HLP
+        Send_on_CAN_706(d.Vdc, fabsf(d.RPM * RPM_TO_KMPH_HLP), er.error_c1);
+        #endif
+        #if HI_CITY
+        Send_on_CAN_706(d.Vdc, fabsf(d.RPM * RPM_TO_KMPH_HI_CITY), er.error_c1);
+        #endif
+        #if HI_RANGE
+        Send_on_CAN_706(d.Vdc, fabsf(d.RPM * RPM_TO_KMPH_HI_RANGE), er.error_c1);
+        #endif
+        Send_on_CAN_708(er.error_c2, er.error_c3);
+        Send_on_CAN_709(0);
+        Send_on_CAN_710(d.throttle_percent, d.throttle_v);
+        Send_on_CAN_715(fabsf(d.RPM), d.Vdc, d.Aux_dc);
+        Send_on_CAN_716(d.vrms, d.irms);
+        Send_on_CAN_717(fabsf(d.RPM));
+        Send_on_CAN_724(FOC_MTPA_FWC_FF_Y.T_gen);
+        Send_on_CAN_726();
+        Schedule_7Ax_Transmission();
+        #endif
+      }
     }
   }
 }
@@ -631,6 +668,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
 {
   HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxMessageBuf, rxMsg);
 
+  #if DEBUG_CAN_ID
   if (RxMessageBuf.Identifier == 0x102) {
     d.speed_ref = (float)((rxMsg[1] << 8) | rxMsg[0]);
   }
@@ -713,6 +751,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
       cS = RESET_STATE;
     }
   }
+  #endif
 }
 
 /* FDCAN TX Complete Callback - automatically sends next message */
@@ -722,6 +761,20 @@ void HAL_FDCAN_TxBufferCompleteCallback(FDCAN_HandleTypeDef *hfdcan, uint32_t Bu
   {
     // Transmission complete, send next message from queue
     CAN_Queue_Process();
+  }
+}
+
+// Callback
+void HAL_FDCAN_ErrorStatusCallback(FDCAN_HandleTypeDef *hfdcan, uint32_t ErrorStatusITs)
+{
+  if (hfdcan->Instance == FDCAN2)
+  {
+    if (ErrorStatusITs & FDCAN_IT_BUS_OFF)
+    {
+      HAL_FDCAN_Stop(&hfdcan2);
+      CAN_Queue_Init();
+      HAL_FDCAN_Start(&hfdcan2);
+    }
   }
 }
 

@@ -20,7 +20,7 @@
  * ========================================================================= */
 
 #define THROTTLE_V_MIN_MV           980U
-#define THROTTLE_V_MAX_MV           4100U
+#define THROTTLE_V_MAX_MV           3800U
 
 /* =========================================================================
  * RPM ABSOLUTE LIMITS
@@ -42,9 +42,9 @@
  * Adjust to match motor datasheet and application requirements.
  * ========================================================================= */
 
-#define TORQUE_CAP_ECO_DEFAULT_NM       50.0f   /* ECO mode max torque (Nm)     */
-#define TORQUE_CAP_SPORTS_DEFAULT_NM    80.0f   /* SPORTS mode max torque (Nm)  */
-#define TORQUE_CAP_REVERSE_DEFAULT_NM   80.0f   /* REVERSE max torque (Nm)      */
+#define TORQUE_CAP_ECO_DEFAULT_NM       ECO_MAX_TORQUE   /* ECO mode max torque (Nm)     */
+#define TORQUE_CAP_SPORTS_DEFAULT_NM    SPORTS_MAX_TORQUE   /* SPORTS mode max torque (Nm)  */
+#define TORQUE_CAP_REVERSE_DEFAULT_NM   REV_MAX_TORQUE   /* REVERSE max torque (Nm)      */
 
 /* =========================================================================
  * THROTTLE MAP CONFIG
