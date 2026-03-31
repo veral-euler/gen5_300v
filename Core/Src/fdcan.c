@@ -412,7 +412,7 @@ void Send_on_CAN_705(float Mtr_Temp, float Cntrl_Temp)
 	float ct_t = Cntrl_Temp + 50.0f;
 	float can_iq = FOC_MTPA_FWC_FF_Y.Iq + 512.0f;
 	float can_id = FOC_MTPA_FWC_FF_Y.Id + 512.0f;
-	float offset_angle = d.offset_angle_elec * 100.0f;
+	float offset_angle = d.offset_angle_mech_cw * 100.0f;
 
 	data[0] = (uint8_t)((uint16_t)mt_t);
 	data[1] = (uint8_t)((uint16_t)ct_t);
@@ -432,6 +432,8 @@ void Send_on_CAN_705(float Mtr_Temp, float Cntrl_Temp)
 void Send_on_CAN_706(float bus_voltage, float Speed_KMPH, uint8_t error_c)
 {
 	uint8_t data[8] = {0};
+
+	float offset_angle = d.offset_angle_mech_ccw * 100.0f;
 
 	if (fnr_state == REVERSE)
 		data[0] = 0x04;
@@ -466,6 +468,9 @@ void Send_on_CAN_706(float bus_voltage, float Speed_KMPH, uint8_t error_c)
 	Speed_KMPH *= 10.0f;
 	data[4] = (uint8_t)((uint16_t)(Speed_KMPH) & 0x00FF);
 	data[5] = (uint8_t)(((uint16_t)(Speed_KMPH) & 0xFF00) >> 8);
+
+	data[6] = (uint8_t)((uint16_t)offset_angle & 0x00FF);
+	data[7] = (uint8_t)(((uint16_t)offset_angle & 0xFF00) >> 8);
 
 	// data[6] = (uint8_t)((uint16_t)(CAN_Counter) & 0x00FF);
 	// data[7] = (uint8_t)(((uint16_t)(CAN_Counter) & 0xFF00) >> 8);
