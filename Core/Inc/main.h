@@ -78,7 +78,7 @@ extern "C" {
 #define LQ						0.000386f
 #define LD						0.000148f
 #define LAMBDA					0.0263f
-#define CURR_TORQUE_RATIO		0.1673f //(Max_Torque/Max_A)
+#define CURR_TORQUE_RATIO		0.15625f //(Max_Torque/Max_A)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
 #define DEG_TWO_PI_3			2.094395f
@@ -146,7 +146,7 @@ extern "C" {
 #define FW_KFW					0.001f
 #define FW_KAW					10.0f
 #define FW_M2F					0.9f
-#define FW_F2M					0.8f
+#define FW_F2M					0.95f
 #define FW_RST_FACTOR			0.9f
 /* Speed PID */
 #define SPEED_KP				4.0f
