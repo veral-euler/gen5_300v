@@ -3,12 +3,6 @@
 
 #include "main.h"
 
-#define EEPROM_ADDRESS          0xA0 // Adjust based on your EEPROM's I2C address
-#define EEPROM_MAGIC_NUM        0x69
-#define EEPROM_NO_MAGIC_NUM     2
-#define EEPROM_PAGE_SIZE        8
-#define EEPROM_WRITE_TIMEOUT    5
-
 /* EEPROM Mem Layout:
         Byte    Data
 Page 0  0       EEPROM_MAGIC_NUM

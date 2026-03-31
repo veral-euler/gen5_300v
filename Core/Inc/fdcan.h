@@ -3,11 +3,6 @@
 
 #include "main.h"
 
-/* CAN Message Queue Configuration */
-#define CAN_TX_QUEUE_SIZE       15
-#define FRAME_SLOT_MS           2U   // was 1U at 1Mbps, double it at 250kbps
-#define TICKS_PER_SLOT          4U   // 4 ticks × 0.5ms = 2ms per DEVICE_ID slot
-
 typedef struct {
     uint32_t arbitration_id;
     uint8_t format;

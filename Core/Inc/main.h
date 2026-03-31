@@ -141,6 +141,25 @@ extern "C" {
 #define ENCODER_CHECK_MS		20
 #define ENCODER_FAULT_MAX_COUNT 5
 
+/* EEPROM Settings */
+#define EEPROM_ADDRESS          0xA0 // Adjust based on your EEPROM's I2C address
+#define EEPROM_MAGIC_NUM        0x69
+#define EEPROM_NO_MAGIC_NUM     2
+#define EEPROM_PAGE_SIZE        8
+#define EEPROM_WRITE_TIMEOUT    5
+
+/* CAN Message Queue Configuration */
+#define CAN_TX_QUEUE_SIZE       15
+#define FRAME_SLOT_MS           2U   // was 1U at 1Mbps, double it at 250kbps
+#define TICKS_PER_SLOT          4U   // 4 ticks × 0.5ms = 2ms per DEVICE_ID slot
+
+/* Speed Sensing Constants */
+#define T_S 0.001f
+#define DERIVATIVE_CONSTANT (1.0f / T_S) // Derivative constant
+#define T_F_ROTOR_SPEED 0.03f // Constant to filter rotor speed
+#define SPEED_FILTER_CONSTANT_1 ((2.0f * T_F_ROTOR_SPEED - T_S) / (2.0f * T_F_ROTOR_SPEED + T_S)) // Constant to filter speed
+#define SPEED_FILTER_CONSTANT_2 (T_S / (2.0f * T_F_ROTOR_SPEED + T_S)) // Constant to filter speed
+
 /* FOC PID Default Settings */
 /* FW Kfw and Kaw */
 #define FW_KFW					0.001f
