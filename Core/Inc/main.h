@@ -37,6 +37,7 @@ extern "C" {
 #define DISABLE_FAULTS		0
 #define ENABLE_ENC_ERRORS	0
 #define FORCE_ANGLETUNE		0
+#define OFFSET_SCHEDULER	0
 
 #define VH_CAN_ID			0
 #define DEBUG_CAN_ID		1
@@ -87,7 +88,7 @@ extern "C" {
 #define ADC_TO_V				0.00005030822f
 #define DEG_TWO_PI_3			2.094395f
 #define DEG_4_PI_3				4.188790f
-#define OP_VOLTAGE				58.0f
+#define OP_VOLTAGE				96.0f
 #define AUX_OP_VOLTAGE			12.0f
 #define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
 #define MOTOR_PEAK_ARMS			385.0f
@@ -130,8 +131,8 @@ extern "C" {
 #define AUX_VDC_SCALE		0.000188658f
 
 #define MAX_PHASE_CURRENT		550.0f
-#define BUS_DC_OV_LIMIT			72
-#define BUS_DC_UV_LIMIT			30
+#define BUS_DC_OV_LIMIT			120
+#define BUS_DC_UV_LIMIT			80
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
 #define CONTRL_TEMP_OT_LIMIT	80
@@ -147,7 +148,7 @@ extern "C" {
 
 /* EEPROM Settings */
 #define EEPROM_ADDRESS          0xA0 // Adjust based on your EEPROM's I2C address
-#define EEPROM_MAGIC_NUM        0x69
+#define EEPROM_MAGIC_NUM        0x15
 #define EEPROM_NO_MAGIC_NUM     2
 #define EEPROM_PAGE_SIZE        8
 #define EEPROM_WRITE_TIMEOUT    5
@@ -205,6 +206,9 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include "app_types.h"
+#if OFFSET_SCHEDULER
+#include "Offset_Scheduler.h"
+#endif
 #include "../Libs/Include/Autotune101.h"
 #include "Speed_Sensing.h"
 #include "NTC_Temp_Reading.h"
@@ -270,6 +274,7 @@ typedef struct data {
 	uint32_t z_count_diff;
 	uint32_t cycles;
 	uint32_t thr_v_mv;
+	float omega_e;
 	float pack_current;
 	float offset_angle_elec;
 	float offset_angle_mech_cw;

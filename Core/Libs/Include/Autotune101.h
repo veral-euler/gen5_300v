@@ -30,7 +30,7 @@
 #define AUTOTUN_SPEED_RAMP_TIME	1
 #define AUTOTUNE_SPEED_RAMP		10
 #define MAX_ITERATION			6
-#define MAX_VD				    (float)(-0.51)
+#define MAX_VD				    (float)(0.5)
 #define MIN_VD				    (float)(-1.5)
 #define TUNING_CALC_RPM			(RATED_TUNING_RPM-100)
 #define	ALIGNEMENT_TMO           615

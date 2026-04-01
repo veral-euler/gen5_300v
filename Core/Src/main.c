@@ -212,6 +212,9 @@ int main(void)
   #endif
   RateLimiter_Init(&limiter, 100.0f, 600.0f, 0.0f);
   RateLimiter_Init(&torqueRate, 10.0f, 10.0f, 0.0f);
+  #if OFFSET_SCHEDULER
+  OffsetScheduler_Init(&g_offset_sched, d.offset_angle_mech_cw, OFFSET_HIGH_RAD, d.offset_angle_mech_ccw);
+  #endif
   HAL_Delay(10);
 
   /*Starting FDCAN2, Queue Init and Throttle Init*/
@@ -514,6 +517,18 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.mech_angle = fmodf(d.mech_angle, TWO_PI);
       d.elec_angle = (d.mech_angle * POLEPAIRS);
       d.elec_angle = fmodf(d.elec_angle, TWO_PI);
+
+      #if OFFSET_SCHEDULER
+      /* Updating mech angle data */
+      d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
+      d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS);
+      d.mech_angle = fmodf(d.mech_angle, TWO_PI);
+
+      /* Updating elec angle data */
+      OffsetScheduler_Update(&g_offset_sched, d.irms, fnr_state, 0.0001f);
+      d.elec_angle = OffsetScheduler_GetTheta(&g_offset_sched, d.mech_angle, d.omega_e, POLEPAIRS);
+      d.elec_angle = fmodf(d.elec_angle, TWO_PI);
+      #endif
       FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle;
 
       /* Running the FOC model */
