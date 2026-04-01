@@ -69,13 +69,14 @@ TIM_HandleTypeDef htim17;
 uint8_t heart_beat_init[8] = {0x01, 0x04};
 uint8_t rxMsg[8] = {0};
 uint16_t injectedVal[2] = {0};
-uint16_t currSensOff[2] = {0.0f};
+uint16_t currSensOff[2] = {0, 0};
 uint16_t adc1_buffer[5] = {0};
 uint16_t counter = 0;
 uint32_t ia_offset = 0;
 uint32_t ib_offset = 0;
 
 /* Autotune stuct instances */
+tag_AngleAutoTuneDebugParam TagAutotuneDebug;
 tag_AngleAutoTuneOutputParam TagAutotuneOutput;
 tag_AngleAutoTuneInputParam TagAutotuneInput;
 tag_AutotuneConfig AutotuneConfig;
@@ -87,6 +88,11 @@ errors_nums err = NO_ERROR;
 errors er = {0};
 can_data_t can_d = {.can_Lambda = LAMBDA, .can_Ld = LD, .can_Lq = LQ, .canFW_params.M_to_F = FW_M2F, .canFW_params.F_to_M = FW_F2M, .canFW_params.Kaw = FW_KAW, .canFW_params.Kfw = FW_KFW, .canFW_params.Rst_Factor = FW_RST_FACTOR, .canSpeed_PID.Kp = SPEED_KP, .canSpeed_PID.Ki = SPEED_KI, .canSpeed_PID.Kd = SPEED_KD, .canSpeed_PID.Back_Kaw = SPEED_PID_BACK_KAW, .canSpeed_PID.Kd_Filter = SPEED_KD_FILTER, .canSpeed_PID.Output_Up_Limit = SPEED_PID_OUT_UPL, .canSpeed_PID.Output_Low_Limit = SPEED_PID_OUT_LOWL, .canId_PID.Kp = ID_KP, .canId_PID.Ki = ID_KI, .canId_PID.Kd = ID_KD, .canId_PID.Back_Kaw = ID_PID_BACK_KAW, .canId_PID.Kd_Filter = ID_KD_FILTER, .canId_PID.Output_Up_Limit = ID_PID_OUT_UPL, .canId_PID.Output_Low_Limit = ID_PID_OUT_LOWL, .canIq_PID.Kp = IQ_KP, .canIq_PID.Ki = IQ_KI, .canIq_PID.Kd = IQ_KD, .canIq_PID.Back_Kaw = IQ_PID_BACK_KAW, .canIq_PID.Kd_Filter = IQ_KD_FILTER, .canIq_PID.Output_Up_Limit = IQ_PID_OUT_UPL, .canIq_PID.Output_Low_Limit = IQ_PID_OUT_LOWL};
 data d = {.canBus_ok = 1, .Kvf = V_F_RATIO, .speed_ref = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
+
+/* P4 pending flags — EEPROM write deferred out of TIM17 ISR */
+static volatile uint8_t  eeprom_write_pending = 0;
+static volatile uint16_t eeprom_cw_pending    = 0;
+static volatile uint16_t eeprom_ccw_pending   = 0;
 /* USER CODE END 0 */
 
 /**
@@ -161,6 +167,18 @@ int main(void)
     AutotuneConfig.f_CalibElectricalAngleInc = AUTOTUNE_ANGLE_INCREMENT;
     AutotuneConfig.F_MaxVd = MAX_VD;
     AutotuneConfig.F_MinVd = MIN_VD;
+    AutotuneConfig.f_Electrical360Rad = ANGLE_RAD_360;
+    AutotuneConfig.u8_MOTOR_POLE_PAIRS = MOTOR_POLE_PAIRS;
+    AutotuneConfig.u16_AO_Set_Time = AO_SET_TIME;
+    AutotuneConfig.u16FreeRunTmo = AUTOTUNE_FREERUNCOUNT;
+    AutotuneConfig.f_Autotune_RPM_Set_Ref = TUNING_CALC_RPM;
+    AutotuneConfig.u16StateChangeTMO = AUTOTUNESTATE_CHANGE_TMO;
+    AutotuneConfig.u16_AUTOTUN_SPEED_RAMP_TIME = AUTOTUN_SPEED_RAMP_TIME;
+    AutotuneConfig.u16_AUTOTUNE_SPEED_RAMP = AUTOTUNE_SPEED_RAMP;
+    AutotuneConfig.u16_MAX_ITERATION = MAX_ITERATION;
+    AutotuneConfig.u16_ALIGNEMENT_TMO = ALIGNEMENT_TMO;
+    AutotuneConfig.u16_AVERAGE_SAMPLE = AVERAGE_SAMPLE;
+    AutotuneConfig.u16_VD_VQ_AVERAGE_COUNT = VD_VQ_AVERAGE_COUNT;
     AutotuneInit(&AutotuneConfig);
   } else if (cS == ANGLE_CALIB_DONE) {
     set_Initial_angle();
@@ -229,6 +247,19 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     uint32_t time_stamp_now = HAL_GetTick();
+
+    /* P4: deferred EEPROM write (ISR set flag to avoid blocking 1kHz TIM17) */
+    if (eeprom_write_pending)
+    {
+      eeprom_write_pending = 0;
+      if (EEPROM_Write_Page0(eeprom_cw_pending, eeprom_ccw_pending) == HAL_OK)
+        HAL_NVIC_SystemReset();
+      else
+      {
+        er.eeprom_write_error = 1;
+        err = EEPROM_WRITE_ERROR;
+      }
+    }
 
     power_mode_fnr_switch();
 
@@ -313,7 +344,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
             FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 1.0f;
             cS = ANGLE_CALIB;
           } else {
-            FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 0.0f;
+            FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 1.0f;
             cS = FOC_START;
           }
         }
@@ -352,7 +383,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         TagAutotuneInput.f_Vq = FOC_MTPA_FWC_FF_Y.Vq;
         TagAutotuneInput.f_Vd = FOC_MTPA_FWC_FF_Y.Vd;
 
-        AngleAutotuningRoutine(&TagAutotuneInput, &TagAutotuneOutput);
+        AngleAutotuningRoutine(&TagAutotuneInput, &TagAutotuneOutput, &TagAutotuneDebug);
       }
 
 
@@ -542,9 +573,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM4)
   {
     HAL_TIM_Base_Stop_IT(&htim4);
+    #if VH_CAN_ID
     Send_on_CAN_7A1();
     Send_on_CAN_7A2();
     Send_on_CAN_7A3();
+    #endif
   }
 
   if (htim->Instance == TIM17)
@@ -565,20 +598,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     if (cS == ANGLE_OFFSET_STORE)
     {
-      // TODO: Store the angle offset in flash memory and read it on startup to avoid doing the offset calibration on every power cycle
-      uint16_t offset_eeprom_cw = (uint16_t)(d.offset_angle_mech_cw * 100.0f);
-      uint16_t offset_eeprom_ccw = (uint16_t)(d.offset_angle_mech_ccw * 100.0f);
-      d.offset_angle_mech_avg = (offset_eeprom_ccw + offset_eeprom_cw) / 2.0f;
-      if (EEPROM_Write_Page0(offset_eeprom_cw, offset_eeprom_ccw) == HAL_OK)
-      {
-        cS = ANGLE_CALIB_DONE;
-        HAL_NVIC_SystemReset();
-      }
-      else
-      {
-        er.eeprom_write_error = 1;
-        err = EEPROM_WRITE_ERROR;
-      }
+      /* P4: set flag only — blocking I2C write deferred to main loop */
+      eeprom_cw_pending  = (uint16_t)(d.offset_angle_mech_cw  * 100.0f);
+      eeprom_ccw_pending = (uint16_t)(d.offset_angle_mech_ccw * 100.0f);
+      d.offset_angle_mech_avg = (eeprom_ccw_pending + eeprom_cw_pending) / 2.0f;
+      eeprom_write_pending = 1;
+      cS = ANGLE_CALIB_DONE;  /* Prevent re-entry; main loop performs the write */
     }
 
     if (cS == RESET_STATE) 
@@ -673,7 +698,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     d.speed_ref = (float)((rxMsg[1] << 8) | rxMsg[0]);
   }
 
-  if (RxMessageBuf.Identifier == 0x103) {
+  else if (RxMessageBuf.Identifier == 0x103) {
     can_d.can_Lambda = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-5f;
     can_d.can_Ld = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-8f;
     can_d.can_Lq = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-7f;
@@ -684,12 +709,12 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     FOC_MTPA_FWC_FF_U.Motor_Parameters.Lq = can_d.can_Lq;
   }
 
-  if (RxMessageBuf.Identifier == 0x104) {
+  else if (RxMessageBuf.Identifier == 0x104) {
     can_d.canFW_params.Kfw = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-3f;
     can_d.canFW_params.Kaw = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-3f;
   }
 
-  if (RxMessageBuf.Identifier == 0x105) {
+  else if (RxMessageBuf.Identifier == 0x105) {
     can_d.canSpeed_PID.Kp = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-2f;
     can_d.canSpeed_PID.Ki = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-2f;
     can_d.canSpeed_PID.Kd = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-5f;
@@ -700,7 +725,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     FOC_MTPA_FWC_FF_U.MTPA_PID.Speed_PID_MTPA.Kd_speed_PID_MTPA = can_d.canSpeed_PID.Kd;
   }
 
-  if (RxMessageBuf.Identifier == 0x106) {
+  else if (RxMessageBuf.Identifier == 0x106) {
     can_d.canId_PID.Kp = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-2f;
     can_d.canId_PID.Ki = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-2f;
     can_d.canId_PID.Kd = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-5f;
@@ -711,7 +736,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     FOC_MTPA_FWC_FF_U.MTPA_PID.Flux_PID_MTPA.Kd_flux_PID_MTPA = can_d.canId_PID.Kd;
   }
 
-  if (RxMessageBuf.Identifier == 0x107) {
+  else if (RxMessageBuf.Identifier == 0x107) {
     can_d.canIq_PID.Kp = (float)((rxMsg[1] << 8) | rxMsg[0]) * 1.0E-2f;
     can_d.canIq_PID.Ki = (float)((rxMsg[3] << 8) | rxMsg[2]) * 1.0E-2f;
     can_d.canIq_PID.Kd = (float)((rxMsg[5] << 8) | rxMsg[4]) * 1.0E-5f;
@@ -722,16 +747,15 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     FOC_MTPA_FWC_FF_U.MTPA_PID.Torque_PID_MTPA.Kd_torque_PID_MTPA = can_d.canIq_PID.Kd;
   }
 
-  if (RxMessageBuf.Identifier == 0x108) {
+  else if (RxMessageBuf.Identifier == 0x108) {
     can_d.direction = rxMsg[0];
   }
-
-  if (RxMessageBuf.Identifier == 0x109) {
+  else if (RxMessageBuf.Identifier == 0x109) {
     can_d.power_mode = rxMsg[0];
   }
 
   #if CAN_BASED_THRV
-  if (RxMessageBuf.Identifier == 0x110) {
+  else if (RxMessageBuf.Identifier == 0x110) {
     can_d.can_instV = (float)((rxMsg[1] << 8) | rxMsg[0]);
     can_d.can_instV *= 0.001f;
 
@@ -740,7 +764,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
   }
   #endif
 
-  if (RxMessageBuf.Identifier == 0x111) {
+  else if (RxMessageBuf.Identifier == 0x111) {
     can_d.reset_flag = rxMsg[0];
     
     if (can_d.reset_flag == (uint8_t)1 && fabsf(d.RPM) <= 10.0f) {

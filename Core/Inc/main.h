@@ -35,15 +35,18 @@ extern "C" {
 #define PROTECTION_MODEL	0
 #define ENABLE_FAULTS		1
 #define DISABLE_FAULTS		0
-#define ENABLE_ENC_ERRORS	0	
-#define VH_CAN_ID			1
-#define DEBUG_CAN_ID		0
-#define CAN_BASED_REF		0
-#define CAN_BASED_DIR		0
-#define THROTTLE_BASED_DIR	1
-#define THROTTLE_BASED_REF  1
-#define CAN_BASED_THRV		0
-#define THR_BASED_THRV		1
+#define ENABLE_ENC_ERRORS	0
+
+#define VH_CAN_ID			0
+#define DEBUG_CAN_ID		1
+#define CAN_BASED_REF		1
+#define CAN_BASED_DIR		1
+#define THROTTLE_BASED_DIR	0
+#define THROTTLE_BASED_REF  0
+#define CAN_BASED_THRV		1
+#define THR_BASED_THRV		0
+
+/* Vehicle Speed Factors */
 #define HLP					0
 #define HI_CITY				1
 #define HI_RANGE			0
@@ -98,7 +101,7 @@ extern "C" {
 
 #define ECO_MAX_SPEED			4500.0f
 #define SPORTS_MAX_SPEED		6000.0f
-#define REV_MAX_SPEED			1900.0f
+#define REV_MAX_SPEED			6000.0f
 #define ECO_MAX_TORQUE			42.0f
 #define SPORTS_MAX_TORQUE		80.0f
 #define REV_MAX_TORQUE			80.0f
