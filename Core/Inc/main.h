@@ -206,6 +206,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include "app_types.h"
+#include "Ad2s1210.h"
 #if OFFSET_SCHEDULER
 #include "Offset_Scheduler.h"
 #endif
