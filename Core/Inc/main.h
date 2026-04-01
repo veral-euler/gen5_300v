@@ -36,6 +36,7 @@ extern "C" {
 #define ENABLE_FAULTS		1
 #define DISABLE_FAULTS		0
 #define ENABLE_ENC_ERRORS	0
+#define FORCE_ANGLETUNE		0
 
 #define VH_CAN_ID			0
 #define DEBUG_CAN_ID		1

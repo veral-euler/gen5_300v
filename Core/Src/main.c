@@ -159,7 +159,7 @@ int main(void)
   Read_EEPROM_at_init();
   HAL_Delay(10);
 
-  if (cS == INIT) {
+  if (cS == INIT || FORCE_ANGLETUNE) {
     set_Initial_angle();
     /* Setting Auto tune algo input params */
     AutotuneConfig.f_idSetRef = AUTO_TUNING_IDREF;
@@ -180,7 +180,7 @@ int main(void)
     AutotuneConfig.u16_AVERAGE_SAMPLE = AVERAGE_SAMPLE;
     AutotuneConfig.u16_VD_VQ_AVERAGE_COUNT = VD_VQ_AVERAGE_COUNT;
     AutotuneInit(&AutotuneConfig);
-  } else if (cS == ANGLE_CALIB_DONE) {
+  } else if (cS == ANGLE_CALIB_DONE || !FORCE_ANGLETUNE) {
     set_Initial_angle();
     Disable_tim5();
   }
@@ -340,7 +340,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         if (d.init_check == HAL_OK)
         {
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-          if (d.start_alignment == 1 && d.end_alignment == 0) {
+          if ((d.start_alignment == 1 && d.end_alignment == 0) || FORCE_ANGLETUNE) {
             FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 1.0f;
             cS = ANGLE_CALIB;
           } else {

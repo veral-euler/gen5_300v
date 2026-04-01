@@ -31,12 +31,12 @@
 #define AUTOTUNE_SPEED_RAMP		10
 #define MAX_ITERATION			6
 #define MAX_VD				    (float)(-0.51)
-#define MIN_VD				    (float)(-2.0)
+#define MIN_VD				    (float)(-1.5)
 #define TUNING_CALC_RPM			(RATED_TUNING_RPM-100)
 #define	ALIGNEMENT_TMO           615
 #define AVERAGE_SAMPLE           128
 #define AUTO_TUNING_IDREF        (float)55.0
-#define AUTOTUNE_ANGLE_INCREMENT (float)0.001
+#define AUTOTUNE_ANGLE_INCREMENT (float)0.007
 #define AUTOTUNE_IDREF_INCREMENT (float)0.02
 #define ANGLE_RAD_360            (float)TWO_PI
 #define MOTOR_POLE_PAIRS		 POLEPAIRS//Motor pole pairs
