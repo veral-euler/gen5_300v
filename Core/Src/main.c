@@ -89,7 +89,7 @@ currSession cS = INIT;
 errors_nums err = NO_ERROR;
 errors er = {0};
 can_data_t can_d = {.can_Lambda = LAMBDA, .can_Ld = LD, .can_Lq = LQ, .canFW_params.M_to_F = FW_M2F, .canFW_params.F_to_M = FW_F2M, .canFW_params.Kaw = FW_KAW, .canFW_params.Kfw = FW_KFW, .canFW_params.Rst_Factor = FW_RST_FACTOR, .canSpeed_PID.Kp = SPEED_KP, .canSpeed_PID.Ki = SPEED_KI, .canSpeed_PID.Kd = SPEED_KD, .canSpeed_PID.Back_Kaw = SPEED_PID_BACK_KAW, .canSpeed_PID.Kd_Filter = SPEED_KD_FILTER, .canSpeed_PID.Output_Up_Limit = SPEED_PID_OUT_UPL, .canSpeed_PID.Output_Low_Limit = SPEED_PID_OUT_LOWL, .canId_PID.Kp = ID_KP, .canId_PID.Ki = ID_KI, .canId_PID.Kd = ID_KD, .canId_PID.Back_Kaw = ID_PID_BACK_KAW, .canId_PID.Kd_Filter = ID_KD_FILTER, .canId_PID.Output_Up_Limit = ID_PID_OUT_UPL, .canId_PID.Output_Low_Limit = ID_PID_OUT_LOWL, .canIq_PID.Kp = IQ_KP, .canIq_PID.Ki = IQ_KI, .canIq_PID.Kd = IQ_KD, .canIq_PID.Back_Kaw = IQ_PID_BACK_KAW, .canIq_PID.Kd_Filter = IQ_KD_FILTER, .canIq_PID.Output_Up_Limit = IQ_PID_OUT_UPL, .canIq_PID.Output_Low_Limit = IQ_PID_OUT_LOWL};
-data d = {.canBus_ok = 1, .Kvf = V_F_RATIO, .speed_ref = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
+data d = {.tuning_enabled = 0, .canBus_ok = 1, .Kvf = V_F_RATIO, .speed_ref = 0.0f, .start_alignment = 1, .end_alignment = 0, .Vmax_SVM = SVM_VOLTAGE_LIMIT, .pole_pair = POLEPAIRS, .Vdc = OP_VOLTAGE};
 
 /* P4 pending flags — EEPROM write deferred out of TIM17 ISR */
 static volatile uint8_t  eeprom_write_pending = 0;
@@ -162,7 +162,16 @@ int main(void)
   Read_EEPROM_at_init();
   HAL_Delay(10);
 
-  if (cS == INIT || FORCE_ANGLETUNE) {
+  #if TUNING_ENABLED
+  d.tuning_enabled = 1;
+  #endif
+
+  #if !TUNING_ENABLED
+  d.tuning_enabled = 0;
+  cS = ANGLE_CALIB_DONE;
+  #endif
+
+  if (cS == INIT && d.tuning_enabled) {
     set_Initial_angle();
     /* Setting Auto tune algo input params */
     AutotuneConfig.f_idSetRef = AUTO_TUNING_IDREF;
@@ -183,8 +192,14 @@ int main(void)
     AutotuneConfig.u16_AVERAGE_SAMPLE = AVERAGE_SAMPLE;
     AutotuneConfig.u16_VD_VQ_AVERAGE_COUNT = VD_VQ_AVERAGE_COUNT;
     AutotuneInit(&AutotuneConfig);
-  } else if (cS == ANGLE_CALIB_DONE || !FORCE_ANGLETUNE) {
+  } else if (cS == ANGLE_CALIB_DONE) {
+    #if RESOLVER_ENABLED
+    AD2S1210_Init();
+    cS = CURR_SENS_CALIB;
+    #endif
+    #if !RESOLVER_ENABLED
     set_Initial_angle();
+    #endif
     Disable_tim5();
   }
   /* USER CODE END WHILE */
@@ -283,6 +298,8 @@ int main(void)
     #if CAN_BASED_REF
     if (cS == FOC_START && FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 == 1)
       FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
+    else if (cS == OPEN_FOC_START)
+      Open_FOC0_U.Speed_ref = RateLimiter_Update(&limiter, d.speed_ref, ((float)time_stamp_now * 0.001f));
     #endif
 
     #if THROTTLE_BASED_REF
@@ -346,12 +363,15 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         if (d.init_check == HAL_OK)
         {
           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-          if ((d.start_alignment == 1 && d.end_alignment == 0) || FORCE_ANGLETUNE) {
+          if ((d.start_alignment == 1 && d.end_alignment == 0) && d.tuning_enabled) {
             FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 1.0f;
             cS = ANGLE_CALIB;
-          } else {
+          } else if (CLOSED_FOC) {
             FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 1.0f;
             cS = FOC_START;
+          } else if (OPEN_FOC) {
+            Open_FOC0_U.Theta_1_Speed_0 = 0.0f;
+            cS = OPEN_FOC_START;
           }
         }
         else if (d.init_check == !HAL_OK)
@@ -364,7 +384,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
         #if DISABLE_FAULTS
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-        cS = FOC_START;
+        cS = OPEN_FOC_START;
         #endif
       }
     }
@@ -583,6 +603,64 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.cycles = end - start;
       #endif
     }
+
+    else if (OPEN_FOC_START) 
+    {
+      Open_FOC0_U.Phase_current[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+      Open_FOC0_U.Phase_current[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
+      Open_FOC0_U.Phase_current[0] = 0.0f - Open_FOC0_U.Phase_current[1] - Open_FOC0_U.Phase_current[2];
+
+      /* Getting angle and velocity from resolver */
+      AD2S1210_ReadAll(&g_rdc);
+      d.elec_angle_resolver = g_rdc.angle_rad;
+      d.omega_e_resolver = g_rdc.velocity_raw;
+
+      /* Updating mech angle data */
+      d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
+      d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS);
+      d.mech_angle = fmodf(d.mech_angle, TWO_PI);
+
+      Open_FOC0_step();
+
+      d.Va_SVM = Open_FOC0_Y.Va;
+      d.Vb_SVM = Open_FOC0_Y.Vb;
+      d.Vc_SVM = Open_FOC0_Y.Vc;
+
+      if (d.Va_SVM > d.Vmax_SVM)
+      {
+        d.Va_SVM = d.Vmax_SVM;
+      }
+      else if (d.Va_SVM < -d.Vmax_SVM)
+      {
+        d.Va_SVM = -d.Vmax_SVM;
+      }
+
+      if (d.Vb_SVM > d.Vmax_SVM)
+      {
+        d.Vb_SVM = d.Vmax_SVM;
+      }
+      else if (d.Vb_SVM < -d.Vmax_SVM)
+      {
+        d.Vb_SVM = -d.Vmax_SVM;
+      }
+
+      if (d.Vc_SVM > d.Vmax_SVM)
+      {
+        d.Vc_SVM = d.Vmax_SVM;
+      }
+      else if (d.Vc_SVM < -d.Vmax_SVM)
+      {
+        d.Vc_SVM = -d.Vmax_SVM;
+      }
+
+      d.pwm_a = (uint16_t)((d.Va_SVM / d.Vmax_SVM) * TIM1_ARR_HALF + TIM1_ARR_HALF);
+      d.pwm_b = (uint16_t)((d.Vb_SVM / d.Vmax_SVM) * TIM1_ARR_HALF + TIM1_ARR_HALF);
+      d.pwm_c = (uint16_t)((d.Vc_SVM / d.Vmax_SVM) * TIM1_ARR_HALF + TIM1_ARR_HALF);
+
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, d.pwm_a);
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, d.pwm_b);
+      __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, d.pwm_c);
+    }
   }
 }
 
@@ -605,7 +683,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     can_counter++;
 
     #if ENABLE_FAULTS
-    if (cS == FOC_START || cS == ANGLE_CALIB) 
+    if (cS == FOC_START || cS == ANGLE_CALIB || cS == OPEN_FOC_START) 
     {
       /* Temperature and Encoder disconnection errors */
       Sensor_Disconnection_Check();
@@ -827,6 +905,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     d.z_pulse ^= 1;
     d.z_count++;
 
+    if (d.z_count > 4)
+      d.z_count = 0;
+
     /* Stopping uint32_t overflow */
     if (d.z_count >= UINT32_MAX)
     {
@@ -868,6 +949,14 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
         d.abs_Angle_pwm = fmodf(d.abs_Angle_pwm, TWO_PI);
       }
     }
+  }
+}
+
+void delay_us(uint32_t us)
+{
+  SysTick->VAL = 0;
+  while(us--) {
+    while(!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk));
   }
 }
 /* USER CODE END 4 */

@@ -30,12 +30,12 @@ static inline void AD2S1210_PulseSample(void)
     /* Ensure SAMPLE is high before pulse */
     HAL_GPIO_WritePin(AD2S1210_SAMPLE_PORT, AD2S1210_SAMPLE_PIN,
                       GPIO_PIN_SET);
-    __NOP();
+    delay_us(2);
 
     /* Falling edge — latch position into register */
     HAL_GPIO_WritePin(AD2S1210_SAMPLE_PORT, AD2S1210_SAMPLE_PIN,
                       GPIO_PIN_RESET);
-    __NOP();   /* 10ns @ 100MHz > 5ns minimum ✅ */
+    delay_us(2);   /* 10ns @ 100MHz > 5ns minimum ✅ */
 
     /* Return high — ready for next latch */
     HAL_GPIO_WritePin(AD2S1210_SAMPLE_PORT, AD2S1210_SAMPLE_PIN,
@@ -115,6 +115,9 @@ void AD2S1210_Init(void)
 
     /* Software reset — clears any startup fault conditions */
     AD2S1210_SoftReset();
+    HAL_GPIO_WritePin(GPIOG, GPIO_PIN_3, GPIO_PIN_RESET);
+    delay_us(1);
+    HAL_GPIO_WritePin(GPIOG, GPIO_PIN_3, GPIO_PIN_SET);
 
     /* Additional settling after reset */
     HAL_Delay(5U);

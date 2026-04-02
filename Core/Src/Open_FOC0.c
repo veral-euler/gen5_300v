@@ -515,8 +515,8 @@ void Open_FOC0_initialize(void)
   Open_FOC0_U.Theta_1_Speed_0 = 1;
   Open_FOC0_U.Theta_e_ref = 0.0f;
   Open_FOC0_U.Pole_pairs = POLEPAIRS;
-  Open_FOC0_U.Id_ref = 0.0;
-  Open_FOC0_U.Iq_ref = 0.0;
+  Open_FOC0_U.Id_ref = -10.0f;
+  Open_FOC0_U.Iq_ref = 10.0f;
 
   /* Rate Limiter Settings */
   Open_FOC0_U.Speed_ref = 0.0f;

@@ -33,10 +33,13 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #define EST_CYC_CNT			1
 #define PROTECTION_MODEL	0
-#define ENABLE_FAULTS		1
-#define DISABLE_FAULTS		0
+#define ENABLE_FAULTS		0
+#define DISABLE_FAULTS		1
 #define ENABLE_ENC_ERRORS	0
-#define FORCE_ANGLETUNE		0
+#define TUNING_ENABLED		0
+#define RESOLVER_ENABLED	1
+#define OPEN_FOC			1
+#define CLOSED_FOC			0
 #define OFFSET_SCHEDULER	0
 
 #define VH_CAN_ID			0
@@ -70,8 +73,8 @@ extern "C" {
 #define CURR_APP1					1
 #define CURR_APP2					2
 
-#define POLEPAIRS 				3.0f
-#define COUNTS_TO_RADS			0.001533981f//(2.0f * (PI / (TIM2_ARR+1)))
+#define POLEPAIRS 				4.0f
+#define COUNTS_TO_RADS			3.8349519E-4f//(2.0f * (PI / (TIM2_ARR+1)))
 #define TWO_PI					6.283185f
 #define TWO_ROOT2				2.828427f
 #define ROOT2					1.414213f
@@ -113,7 +116,7 @@ extern "C" {
 #define TIM1_ARR			2499
 #define TIM1_DEAD_TIME		100
 #define TIM1_ARR_HALF		1250.0f
-#define TIM2_ARR			4095//(MAX_COUNT of your position sensor - 1)
+#define TIM2_ARR			16383//(MAX_COUNT of your position sensor - 1)
 #define TIM5_PSC			99
 #define TIM5_ARR			0xFFFFFFFF
 #define TIM17_PSC			39
@@ -255,6 +258,7 @@ typedef struct data {
 	uint8_t init_check;
 	uint8_t Vdc;
 	uint8_t Aux_dc;
+	uint8_t tuning_enabled;
 	int16_t Mtr_temp;
 	int16_t Mtc_temp;
 	uint16_t pwm_a;
@@ -300,6 +304,8 @@ typedef struct data {
 	float Vmax_SVM;
 	float vrms;
 	float irms;
+	float elec_angle_resolver;
+	float omega_e_resolver;
 	float mech_angle;
 	float elec_angle;
 	float elec_angle_120;
@@ -393,7 +399,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void delay_us(uint32_t us);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
