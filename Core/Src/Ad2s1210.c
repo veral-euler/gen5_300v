@@ -24,18 +24,19 @@ extern SPI_HandleTypeDef hspi1;
  *          into registers on the HIGH-to-LOW transition of SAMPLE.
  *          Minimum SAMPLE low time: 5ns.
  *          At 100MHz sysclock: 1 NOP = 10ns > 5ns minimum.
+ *          SAMPLE → PG8, no PCB pull-up, internal pull-up configured.
  */
 static inline void AD2S1210_PulseSample(void)
 {
     /* Ensure SAMPLE is high before pulse */
     HAL_GPIO_WritePin(AD2S1210_SAMPLE_PORT, AD2S1210_SAMPLE_PIN,
                       GPIO_PIN_SET);
-    delay_us(2);
+    __NOP();
 
     /* Falling edge — latch position into register */
     HAL_GPIO_WritePin(AD2S1210_SAMPLE_PORT, AD2S1210_SAMPLE_PIN,
                       GPIO_PIN_RESET);
-    delay_us(2);   /* 10ns @ 100MHz > 5ns minimum ✅ */
+    __NOP();   /* 10ns @ 100MHz > 5ns minimum ✅ */
 
     /* Return high — ready for next latch */
     HAL_GPIO_WritePin(AD2S1210_SAMPLE_PORT, AD2S1210_SAMPLE_PIN,
@@ -45,44 +46,46 @@ static inline void AD2S1210_PulseSample(void)
 /**
  * @brief  Read 16-bit register from AD2S1210 via SPI.
  *
- * @details Two-phase read:
- *          Phase 1: Transmit register address (1 byte)
- *                   NSS (WR/FSYNC) pulled low by hardware automatically
- *          Phase 2: Transmit NOP (0x00), receive 2 bytes of data
- *                   NSS released high by hardware after transfer
+ * @details Single HAL_SPI_TransmitReceive call with 3 bytes to keep
+ *          NSS (WR/FSYNC) asserted low for the entire frame duration.
  *
- *          CS is hardwired GND — always selected.
- *          SOE is hardwired GND — SPI mode always active.
- *          No manual CS or SOE toggling needed.
+ *          Two separate HAL calls would toggle NSS HIGH between them,
+ *          breaking the AD2S1210 frame and returning no data.
+ *
+ *          3-byte frame:
+ *            TX[0] = register address  RX[0] = ignored (addr phase)
+ *            TX[1] = NOP               RX[1] = data high byte
+ *            TX[2] = NOP               RX[2] = data low byte
+ *
+ *          CS  hardwired GND — always selected, no toggle needed.
+ *          SOE hardwired GND — SPI mode always active.
  *
  * @param  reg   Register address (AD2S1210_REG_*)
- * @return 16-bit raw register value, 0xFFFF on error.
+ * @return 16-bit raw register value, 0xFFFF on SPI error.
  */
 static uint16_t AD2S1210_ReadRegister(uint8_t reg)
 {
-    HAL_StatusTypeDef status;
-    uint8_t tx[2] = {reg,              AD2S1210_NOP};
-    uint8_t rx[2] = {AD2S1210_NOP,     AD2S1210_NOP};
+    uint8_t tx[3] = {reg,          AD2S1210_NOP, AD2S1210_NOP};
+    uint8_t rx[3] = {AD2S1210_NOP, AD2S1210_NOP, AD2S1210_NOP};
 
-    /* Phase 1 — send register address
-     * NSS (WR/FSYNC) pulled low automatically by SPI hardware */
-    status = HAL_SPI_Transmit(&hspi1, &tx[0], 1U, 10U);
+    /* Single call — NSS stays LOW for all 3 bytes */
+    HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(&hspi1, tx, rx,
+                                                        3U, 10U);
     if (status != HAL_OK)
         return 0xFFFFU;
 
-    /* Phase 2 — send NOP, receive 16-bit register data */
-    status = HAL_SPI_TransmitReceive(&hspi1, &tx[1], rx, 2U, 10U);
-    if (status != HAL_OK)
-        return 0xFFFFU;
-
-    /* Combine two received bytes into 16-bit value */
-    return ((uint16_t)rx[0] << 8U) | (uint16_t)rx[1];
+    /* rx[0] = garbage (chip processing address byte)
+     * rx[1] = high byte of position/register data
+     * rx[2] = low byte  of position/register data  */
+    return ((uint16_t)rx[1] << 8U) | (uint16_t)rx[2];
 }
 
 /**
  * @brief  Write a byte to a register on the AD2S1210.
  *
- * @details Used for software reset and configuration register writes.
+ * @details Single HAL_SPI_Transmit call — address + data in one frame.
+ *          NSS (WR/FSYNC) stays low for both bytes automatically.
+ *          Used for software reset and configuration register writes.
  *
  * @param  reg   Register address.
  * @param  data  Byte to write.
@@ -91,7 +94,7 @@ static void AD2S1210_WriteRegister(uint8_t reg, uint8_t data)
 {
     uint8_t tx[2] = {reg, data};
 
-    /* Send address + data in single transfer */
+    /* Single transfer — address + data, NSS low for both bytes */
     HAL_SPI_Transmit(&hspi1, tx, 2U, 10U);
 }
 
@@ -103,26 +106,33 @@ static void AD2S1210_WriteRegister(uint8_t reg, uint8_t data)
  * @brief  Initialise AD2S1210.
  *
  * @details GPIO and SPI already configured by CubeMX.
- *          This function:
- *            1. Waits for AD2S1210 power-on settling (20ms)
- *            2. Issues software reset
- *            3. Reads and stores initial fault status
+ *          RESET pin → PG3, Pull-Up, High (PCB 10kΩ + internal pull-up)
+ *          SAMPLE pin → PG8, Pull-Up, High (internal pull-up only)
+ *
+ *          Steps:
+ *            1. Assert hardware RESET low → full chip reset
+ *            2. Release RESET high → chip begins initialising
+ *            3. Wait 20ms settling — resolver tracking loop stabilises
+ *            4. Read and store initial fault status
  */
 void AD2S1210_Init(void)
 {
-    /* Power-on settling — AD2S1210 requires 15ms minimum after VDD stable */
+    /* Step 1: Assert hardware RESET low — resets all internal registers,
+     *         tracking loop, fault register and encoder emulation outputs */
+    HAL_GPIO_WritePin(AD2S1210_RESET_PORT, AD2S1210_RESET_PIN,
+                      GPIO_PIN_RESET);
+    HAL_Delay(1U);      /* Hold low — 1ms >> 10ns minimum requirement */
+
+    /* Step 2: Release RESET high — chip begins tracking resolver signals */
+    HAL_GPIO_WritePin(AD2S1210_RESET_PORT, AD2S1210_RESET_PIN,
+                      GPIO_PIN_SET);
+
+    /* Step 3: Wait for tracking loop to settle
+     *         AD2S1210 requires 15ms minimum — use 20ms for margin  */
     HAL_Delay(20U);
 
-    /* Software reset — clears any startup fault conditions */
-    AD2S1210_SoftReset();
-    HAL_GPIO_WritePin(GPIOG, GPIO_PIN_3, GPIO_PIN_RESET);
-    delay_us(1);
-    HAL_GPIO_WritePin(GPIOG, GPIO_PIN_3, GPIO_PIN_SET);
-
-    /* Additional settling after reset */
-    HAL_Delay(5U);
-
-    /* Read initial fault register — store in global result */
+    /* Step 4: Read initial fault register — store in global result
+     *         LOS fault expected initially if resolver not connected */
     g_rdc.fault = AD2S1210_ReadFault();
     g_rdc.valid = true;
 }

@@ -8,20 +8,26 @@
  *   NSS         — Hardware Output → WR/FSYNC (Pin 4)
  *   CS          — Hardwired GND on PCB (always selected)
  *   SOE         — Hardwired GND on PCB (SPI mode always active)
- *   PG3 SAMPLE  — GPIO Output High, Pull-Up
+ *   PG3 RESET   — GPIO Output High, Pull-Up (PCB 10kΩ + internal)
  *   PG4 RES1    — GPIO Output High, Pull-Up   (14-bit resolution)
  *   PG5 RES0    — GPIO Output Low,  Pull-Down (14-bit resolution)
  *   PG6 A1      — GPIO Output Low,  Pull-Down (Normal mode)
  *   PG7 A0      — GPIO Output Low,  Pull-Down (Normal mode)
+ *   PG8 SAMPLE  — GPIO Output High, Pull-Up (no PCB resistor, internal pull-up)
  *
  * AD2S1210 Pin mapping:
- *   Pin 2  CS        → GND (PCB)
- *   Pin 4  WR/FSYNC  → SPI1 NSS
- *   Pin 9  SOE       → GND (PCB)
- *   Pin 10 SAMPLE    → PG3
+ *   Pin 2  CS        → GND (PCB hardwired)
+ *   Pin 4  WR/FSYNC  → SPI1 NSS (hardware controlled)
+ *   Pin 9  SOE       → GND (PCB hardwired, SPI mode always active)
+ *   Pin 10 SAMPLE    → PG8
  *   Pin 11 DB15/SDO  → SPI1 MISO
  *   Pin 12 DB14/SDI  → SPI1 MOSI
  *   Pin 13 SCLK      → SPI1 SCLK
+ *   Pin 33 RESET     → PG3 (PCB 10kΩ pull-up to VDD)
+ *   Pin 1  RES1      → PG4
+ *   Pin 36 (RES0)    → PG5
+ *   Pin 36 A1        → PG6
+ *   Pin 37 A0        → PG7
  */
 
 #ifndef AD2S1210_H
@@ -34,7 +40,10 @@
  * ========================================================================= */
 
 #define AD2S1210_SAMPLE_PORT        GPIOG
-#define AD2S1210_SAMPLE_PIN         GPIO_PIN_8
+#define AD2S1210_SAMPLE_PIN         GPIO_PIN_8      /* PG8 — SAMPLE */
+
+#define AD2S1210_RESET_PORT         GPIOG
+#define AD2S1210_RESET_PIN          GPIO_PIN_3      /* PG3 — RESET  */
 
 /* =========================================================================
  * RESOLUTION
