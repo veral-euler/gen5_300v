@@ -350,7 +350,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         /* Setting TIM1 PWM freq to 10kHz and setting TIM2 counter reg to inital angle count */
         __HAL_TIM_SET_PRESCALER(&htim1, 1);
         __HAL_TIM_SET_AUTORELOAD(&htim1, 2499);
-        __HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
+        __HAL_TIM_SET_COUNTER(&htim2, 0);
 
         /* Setting elec angle to 0 */
         d.elec_angle = 0.0f;
@@ -384,7 +384,13 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 
         #if DISABLE_FAULTS
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
-        cS = OPEN_FOC_START;
+        if (OPEN_FOC) {
+          Open_FOC0_U.Theta_1_Speed_0 = 0.0f;
+          cS = OPEN_FOC_START;
+        } else if (CLOSED_FOC) {
+          FOC_MTPA_FWC_FF_U.Speed_1_Torque_0 = 1.0f;
+          cS = FOC_START;
+        }
         #endif
       }
     }
@@ -529,6 +535,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       FOC_MTPA_FWC_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
       FOC_MTPA_FWC_FF_U.PhaseCurrent[0] = 0.0f - FOC_MTPA_FWC_FF_U.PhaseCurrent[1] - FOC_MTPA_FWC_FF_U.PhaseCurrent[2];
 
+      #if !RESOLVER_ENABLED
       /* Updating angle data */
       d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
       if (FOC_MTPA_FWC_FF_Y.Throttle_State == (ThrottleState)FORWARD)
@@ -540,6 +547,16 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.mech_angle = fmodf(d.mech_angle, TWO_PI);
       d.elec_angle = (d.mech_angle * POLEPAIRS);
       d.elec_angle = fmodf(d.elec_angle, TWO_PI);
+      #endif
+
+      #if RESOLVER_ENABLED
+      /* Updating mech angle data */
+      d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
+      d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS);
+      d.mech_angle = fmodf(d.mech_angle, TWO_PI);
+      d.elec_angle_resolver = AD2S1210_ReadAngle();
+      d.elec_angle_resolver = fmodf(d.elec_angle_resolver, TWO_PI);
+      #endif
 
       #if OFFSET_SCHEDULER
       /* Updating mech angle data */
@@ -552,7 +569,14 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.elec_angle = OffsetScheduler_GetTheta(&g_offset_sched, d.mech_angle, d.omega_e, POLEPAIRS);
       d.elec_angle = fmodf(d.elec_angle, TWO_PI);
       #endif
-      FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle;
+
+      #if RESOLVER_ENABLED
+      FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle_resolver; // Using resolver angle for FOC
+      #endif
+
+      #if !RESOLVER_ENABLED
+      FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle; // Using encoder angle for FOC
+      #endif 
 
       /* Running the FOC model */
       rt_OneStep();
