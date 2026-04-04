@@ -634,15 +634,15 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       Open_FOC0_U.Phase_current[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
       Open_FOC0_U.Phase_current[0] = 0.0f - Open_FOC0_U.Phase_current[1] - Open_FOC0_U.Phase_current[2];
 
-      /* Getting angle and velocity from resolver */
-      AD2S1210_ReadAll(&g_rdc);
-      d.elec_angle_resolver = g_rdc.angle_rad;
-      d.omega_e_resolver = g_rdc.velocity_raw;
+      /* Getting angle from resolver */
+      d.elec_angle_resolver = AD2S1210_ReadAngle();
 
       /* Updating mech angle data */
       d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
       d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS);
       d.mech_angle = fmodf(d.mech_angle, TWO_PI);
+      Speed_Sense(d.mech_angle);
+      d.omega_e = d.rad_s * POLEPAIRS;
 
       Open_FOC0_step();
 

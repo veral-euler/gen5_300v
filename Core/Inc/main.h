@@ -162,7 +162,7 @@ extern "C" {
 #define TICKS_PER_SLOT          4U   // 4 ticks × 0.5ms = 2ms per DEVICE_ID slot
 
 /* Speed Sensing Constants */
-#define T_S 0.001f
+#define T_S 0.0001f
 #define DERIVATIVE_CONSTANT (1.0f / T_S) // Derivative constant
 #define T_F_ROTOR_SPEED 0.03f // Constant to filter rotor speed
 #define SPEED_FILTER_CONSTANT_1 ((2.0f * T_F_ROTOR_SPEED - T_S) / (2.0f * T_F_ROTOR_SPEED + T_S)) // Constant to filter speed
