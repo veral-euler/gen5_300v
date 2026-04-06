@@ -4,7 +4,7 @@
  *          for Pegasus 96V Motor Controller
  *
  * Hardware configuration:
- *   SPI1        — Full-Duplex Master, Mode 3, 6.25MHz, 8-bit, MSB first
+ *   SPI1        — Full-Duplex Master, Mode 1 (CPOL=0, CPHA=1), 6.25MHz, 8-bit, MSB first
  *   NSS         — Hardware Output → WR/FSYNC (Pin 4)
  *   CS          — Hardwired GND on PCB (always selected)
  *   SOE         — Hardwired GND on PCB (SPI mode always active)
@@ -134,7 +134,7 @@
  * ========================================================================= */
 
 #define AD2S1210_MODE_POSITION      0U          /* A0=0, A1=0: Normal, position out  */
-#define AD2S1210_MODE_VELOCITY      1U          /* A0=0, A1=1: Normal, velocity out  */
+#define AD2S1210_MODE_VELOCITY      2U          /* A0=0, A1=1: Normal, velocity out  */
 #define AD2S1210_MODE_CONFIG        3U          /* A0=1, A1=1: Configuration mode    */
 
 /* =========================================================================

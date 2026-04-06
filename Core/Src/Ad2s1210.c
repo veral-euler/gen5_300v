@@ -102,19 +102,17 @@ static void AD2S1210_PulseSample(void)
  *
  * @details Per datasheet page 28 (Serial Interface Normal Mode):
  *
- *          In normal mode, NO address byte is transmitted on SDI.
+ *          In normal mode NO address byte is needed.
  *          WR/FSYNC going low immediately starts 24-bit SDO output.
+ *          SDI is don't care — nothing needs to be transmitted.
  *
  *          24-bit output word (MSB first):
- *            Bit 23-8: 16-bit angular data
- *            Bit  7-0: 8-bit fault register
+ *            rx[0] = D15-D8  (angular high byte)
+ *            rx[1] = D7-D0   (angular low  byte)
+ *            rx[2] = fault register byte
  *
- *          SPI frame (3 bytes):
- *            TX: [NOP][NOP][NOP]   (SDI don't care in normal mode)
- *            RX: [ang_hi][ang_lo][fault]
- *
- *          NSS (=WR/FSYNC) auto-toggled by SPI hardware:
- *            LOW  at start → 24 SCLK pulses → HIGH at end
+ *          NSS (WR/FSYNC) auto-toggled by SPI hardware:
+ *            LOW at start → 24 SCLK pulses → HIGH at end
  *
  * @param  angular_out  Pointer for 16-bit angular value (NULL to discard)
  * @param  fault_out    Pointer for fault byte (NULL to discard)
@@ -123,19 +121,18 @@ static void AD2S1210_PulseSample(void)
 static HAL_StatusTypeDef AD2S1210_ReadNormalFrame(uint16_t *angular_out,
                                                     uint8_t  *fault_out)
 {
-    uint8_t tx[3] = {AD2S1210_NOP, AD2S1210_NOP, AD2S1210_NOP};
     uint8_t rx[3] = {0U, 0U, 0U};
 
-    /* Single 3-byte call:
-     * WR/FSYNC pulled LOW by hardware NSS → stays LOW for 24 bits → HIGH
-     * rx[0] = D15-D8  (angular high byte, Bit23-16 of 24-bit word)
-     * rx[1] = D7-D0   (angular low  byte, Bit15-8  of 24-bit word)
-     * rx[2] = fault   (Bit7-0 of 24-bit word)                      */
-    HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(&hspi1, tx, rx,
-                                                        3U, 10U);
+    /* Receive only — no address, no TX needed in normal mode
+     * NSS (WR/FSYNC) pulled LOW by hardware → 24 bits clocked out → HIGH */
+    HAL_StatusTypeDef status = HAL_SPI_Receive(&hspi1, rx, 3U, 10U);
+
     if (status != HAL_OK)
         return HAL_ERROR;
 
+    /* rx[0] = D15-D8 (angular high byte)
+     * rx[1] = D7-D0  (angular low  byte)
+     * rx[2] = fault register             */
     if (angular_out != NULL)
         *angular_out = ((uint16_t)rx[0] << 8U) | (uint16_t)rx[1];
 
@@ -337,12 +334,16 @@ void AD2S1210_ReadAll(AD2S1210_Result_t *result)
     AD2S1210_SetMode(AD2S1210_MODE_VELOCITY);
 
     /* No SAMPLE needed — already latched above.
-     * Just read the velocity frame directly.    */
-    delay_nops(AD2S1210_T30_NOPS);   /* t30 before WR/FSYNC */
+     * Wait t30 before WR/FSYNC can fall (NSS)   */
+    delay_nops(AD2S1210_T30_NOPS);
 
     uint16_t vel_raw = 0U;
     AD2S1210_ReadNormalFrame(&vel_raw, NULL);
-    result->velocity_raw = (int16_t)(vel_raw >> AD2S1210_RAW_SHIFT);
+    /* Velocity — full 16-bit twos complement, no shift
+     * Per datasheet page 21: velocity register is always full 16-bit
+     * regardless of resolution. D5-D0 are noise at 14-bit but cast
+     * directly — shifting would corrupt the sign bit.              */
+    result->velocity_raw = (int16_t)vel_raw;
 
     /* Restore position mode */
     AD2S1210_SetMode(AD2S1210_MODE_POSITION);
@@ -375,7 +376,7 @@ uint8_t AD2S1210_ReadFault(void)
     /* Return to normal position mode */
     AD2S1210_SetMode(AD2S1210_MODE_POSITION);
 
-    g_rdc.fault = fault & 0x7FU;   /* D7 is error bit in config mode reads */
+    g_rdc.fault = fault;   /* All 8 bits are valid fault flags per Table 26 */
     return g_rdc.fault;
 }
 
