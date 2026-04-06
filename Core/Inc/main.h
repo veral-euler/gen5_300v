@@ -33,8 +33,8 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #define EST_CYC_CNT			1
 #define PROTECTION_MODEL	0
-#define ENABLE_FAULTS		0
-#define DISABLE_FAULTS		1
+#define ENABLE_FAULTS		1
+#define DISABLE_FAULTS		0
 #define ENABLE_ENC_ERRORS	0
 #define TUNING_ENABLED		0
 #define RESOLVER_ENABLED	1
@@ -91,7 +91,7 @@ extern "C" {
 #define ADC_TO_V				0.00005030822f
 #define DEG_TWO_PI_3			2.094395f
 #define DEG_4_PI_3				4.188790f
-#define OP_VOLTAGE				96.0f
+#define OP_VOLTAGE				72.0f
 #define AUX_OP_VOLTAGE			12.0f
 #define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
 #define MOTOR_PEAK_ARMS			385.0f
@@ -134,8 +134,8 @@ extern "C" {
 #define AUX_VDC_SCALE		0.000188658f
 
 #define MAX_PHASE_CURRENT		550.0f
-#define BUS_DC_OV_LIMIT			120
-#define BUS_DC_UV_LIMIT			80
+#define BUS_DC_OV_LIMIT			90
+#define BUS_DC_UV_LIMIT			50
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
 #define CONTRL_TEMP_OT_LIMIT	80
