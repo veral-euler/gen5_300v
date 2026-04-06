@@ -231,8 +231,8 @@ void Send_Data_On_CAN_402(void)
 	// Implement similar to Send_Data_On_CAN_401 with different data
 	uint8_t can_data[8] = {0};
 
-	uint16_t Vd = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vd + SVM_VOLTAGE_LIMIT);
-	uint16_t Vq = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vq + SVM_VOLTAGE_LIMIT);
+	uint16_t Vd = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vd + 159.0f);
+	uint16_t Vq = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vq + 159.0f);
 	uint16_t Iq_ref = (uint16_t)(FOC_MTPA_FWC_FF_Y.Iq_ref_final + 512.0f);
 	uint16_t Id_ref = (uint16_t)(FOC_MTPA_FWC_FF_Y.Id_ref_final + 512.0f);
 	uint16_t enc_cnt = (uint16_t)(d.encoder_count);

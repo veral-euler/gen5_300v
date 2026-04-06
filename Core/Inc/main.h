@@ -33,8 +33,8 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #define EST_CYC_CNT			1
 #define PROTECTION_MODEL	0
-#define ENABLE_FAULTS		1
-#define DISABLE_FAULTS		0
+#define ENABLE_FAULTS		0
+#define DISABLE_FAULTS		1
 #define ENABLE_ENC_ERRORS	0
 #define TUNING_ENABLED		0
 #define RESOLVER_ENABLED	1
