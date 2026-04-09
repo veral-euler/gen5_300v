@@ -38,8 +38,8 @@ extern "C" {
 #define ENABLE_ENC_ERRORS	0
 #define TUNING_ENABLED		0
 #define RESOLVER_ENABLED	1
-#define OPEN_FOC			1
-#define CLOSED_FOC			0
+#define OPEN_FOC			0
+#define CLOSED_FOC			1
 #define OFFSET_SCHEDULER	0
 
 #define VH_CAN_ID			0
@@ -82,10 +82,10 @@ extern "C" {
 #define ONE_BY_ROOT2			0.70710678f
 #define ADC_TO_CURR				0.0407496f
 #define ALIGN_DUTY				1000
-#define RS		  				0.01047f
-#define LQ						0.000386f
-#define LD						0.000148f
-#define LAMBDA					0.0263f
+#define RS		  				0.0082f
+#define LQ						0.00022287f
+#define LD						0.00007346f
+#define LAMBDA					0.02437364f
 #define CURR_TORQUE_RATIO		0.15625f //(Max_Torque/Max_A)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
@@ -162,7 +162,7 @@ extern "C" {
 #define TICKS_PER_SLOT          4U   // 4 ticks × 0.5ms = 2ms per DEVICE_ID slot
 
 /* Speed Sensing Constants */
-#define T_S 0.0001f
+#define T_S 0.001f
 #define DERIVATIVE_CONSTANT (1.0f / T_S) // Derivative constant
 #define T_F_ROTOR_SPEED 0.03f // Constant to filter rotor speed
 #define SPEED_FILTER_CONSTANT_1 ((2.0f * T_F_ROTOR_SPEED - T_S) / (2.0f * T_F_ROTOR_SPEED + T_S)) // Constant to filter speed
