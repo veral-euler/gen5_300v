@@ -220,11 +220,8 @@ int main(void)
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1_buffer, 5);
 
   /* Initializing FOC and Protections model */
-  // FOC_MTPA_FF_initialize();
-  // FOC_LivGguard_initialize();
   FOC_MTPA_FWC_FF_initialize();
   Open_FOC0_initialize();
-  // FOC_Basic_FF_initialize();
   #if PROTECTION_MODEL
   MCU_Protections_initialize();
   #endif
@@ -270,7 +267,7 @@ int main(void)
     uint32_t time_stamp_now = HAL_GetTick();
 
     /* P4: deferred EEPROM write (ISR set flag to avoid blocking 1kHz TIM17) */
-    if (eeprom_write_pending)
+    if (eeprom_write_pending && cS == ANGLE_CALIB_DONE)
     {
       eeprom_write_pending = 0;
       if (EEPROM_Write_Page0(eeprom_cw_pending, eeprom_ccw_pending) == HAL_OK)
@@ -282,7 +279,8 @@ int main(void)
       }
     }
 
-    power_mode_fnr_switch();
+    if (cS == FOC_START)
+      power_mode_fnr_switch();
 
     /* Gathering ADC1 values */
     ADC1_Analog_Val_Update();
@@ -312,7 +310,7 @@ int main(void)
       float torque_ref = ThrottleMap_GetTorque(&g_throttle_cfg, d.thr_v_mv, max_torque);
       d.torque_final = apply_torque_scaling(torque_ref, d.rad_s, pw_state, fnr_state, (float)d.Mtr_temp, (float)d.Mtc_temp, &taper_state, &derate_result);
       /* Pass target_reftrq into your FOC Torque reference */
-      FOC_MTPA_FWC_FF_U.RefTrq = RateLimiter_Update(&torqueRate, d.torque_final, ((float)time_stamp_now*0.001f));
+      FOC_MTPA_FWC_FF_U.RefTrq = d.torque_final;
     }
     #endif
   }
@@ -711,7 +709,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     Speed_Sense(d.mech_angle);
     d.omega_e = d.rad_s * POLEPAIRS;
-    FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec = fabsf(d.rad_s);
+    FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec = d.rad_s;
     if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START)
     {
       d.motor_start = 1;

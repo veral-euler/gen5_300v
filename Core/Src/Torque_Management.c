@@ -258,16 +258,16 @@ float apply_torque_scaling(float torque_ref, float speed_rad_s,
     float torque_limited = fminf(torque_ref, torque_limit);
 
     /* Step 2: Temperature derating (safety priority) */
-    TempDerateResult_t derate = get_temp_derate_scale(motor_temp, ctrl_temp);
+    // TempDerateResult_t derate = get_temp_derate_scale(motor_temp, ctrl_temp);
 
-    if (derate_result_out != NULL)
-        *derate_result_out = derate;
+    // if (derate_result_out != NULL)
+    //     *derate_result_out = derate;
 
-    /* Hard cutoff — return immediately, no further computation */
-    if (derate.status == TEMP_STATUS_CUTOFF)
-        return 0.0f;
+    // /* Hard cutoff — return immediately, no further computation */
+    // if (derate.status == TEMP_STATUS_CUTOFF)
+    //     return 0.0f;
 
-    float torque_derated = torque_limited * derate.scale;
+    float torque_derated = torque_limited;
 
     /* Step 3: Speed taper on derated torque */
     float speed_scale = get_speed_taper_scale(speed_rad_s, drive_mode,

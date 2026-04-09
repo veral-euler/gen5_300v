@@ -151,13 +151,11 @@ void power_mode_fnr_switch(void)
   #if CAN_BASED_DIR
   if (can_d.direction == FORWARD) {
     fnr_state = FORWARD;
-    FOC_MTPA_FWC_FF_U.Drive_State = FORWARD;
+    FOC_MTPA_FWC_FF_U.Drive_State = REVERSE;
   } else if (can_d.direction == REVERSE) {
     fnr_state = REVERSE;
-    FOC_MTPA_FWC_FF_U.Drive_State = REVERSE;
+    FOC_MTPA_FWC_FF_U.Drive_State = FORWARD;
   } else if (can_d.direction == NEUTRAL) {
-    d.speed_ref = 0.0f;
-    FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = 0.0f;
     fnr_state = NEUTRAL;
     FOC_MTPA_FWC_FF_U.Drive_State = NEUTRAL;
   }

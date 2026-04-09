@@ -110,7 +110,6 @@ extern "C" {
 #define ECO_MAX_TORQUE			42.0f
 #define SPORTS_MAX_TORQUE		80.0f
 #define REV_MAX_TORQUE			80.0f
-#define FWC_LIMIT				10.0f
 
 #define TIM1_PSC			9
 #define TIM1_ARR			2499
@@ -202,7 +201,7 @@ extern "C" {
 
 #define THR_MIN_VAL 			0.8f
 #define THR_MAX_VAL				4.1f
-#define MIN_RPM_CHANGE_LIM		10.0f
+#define MIN_RPM_CHANGE_LIM		1.0f
 
 #include <math.h>
 #include <string.h>

@@ -230,11 +230,22 @@ void Send_Data_On_CAN_402(void)
 {
 	// Implement similar to Send_Data_On_CAN_401 with different data
 	uint8_t can_data[8] = {0};
+	uint16_t Vd = 0;
+	uint16_t Vq = 0;
+	uint16_t Iq_ref = 0;
+	uint16_t Id_ref = 0;
 
-	uint16_t Vd = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vd + 159.0f);
-	uint16_t Vq = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vq + 159.0f);
-	uint16_t Iq_ref = (uint16_t)(FOC_MTPA_FWC_FF_Y.Iq_ref_final + 512.0f);
-	uint16_t Id_ref = (uint16_t)(FOC_MTPA_FWC_FF_Y.Id_ref_final + 512.0f);
+	if (cS == ANGLE_CALIB) {
+		Vd = (uint16_t)(Open_FOC0_Y.Vd + 159.0f);
+		Vq = (uint16_t)(Open_FOC0_Y.Vq + 159.0f);
+		Iq_ref = (uint16_t)(Open_FOC0_U.Iq_ref + 512.0f);
+		Id_ref = (uint16_t)(Open_FOC0_U.Id_ref + 512.0f);
+	} else if (cS == FOC_START) {
+		Vd = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vd + 159.0f);
+		Vq = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vq + 159.0f);
+		Iq_ref = (uint16_t)(FOC_MTPA_FWC_FF_Y.Iq_ref_final + 512.0f);
+		Id_ref = (uint16_t)(FOC_MTPA_FWC_FF_Y.Id_ref_final + 512.0f);
+	}
 	uint16_t enc_cnt = (uint16_t)(d.encoder_count);
 
 	// Fill can_data with appropriate values for message 402
