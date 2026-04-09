@@ -33,8 +33,8 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #define EST_CYC_CNT			1
 #define PROTECTION_MODEL	0
-#define ENABLE_FAULTS		0
-#define DISABLE_FAULTS		1
+#define ENABLE_FAULTS		1
+#define DISABLE_FAULTS		0
 #define ENABLE_ENC_ERRORS	0
 #define TUNING_ENABLED		0
 #define RESOLVER_ENABLED	1
@@ -128,6 +128,10 @@ extern "C" {
 
 #define MTR_NTC_R25			10000.0f
 #define MTC_NTC_R25			10000.0f
+#define MTR_PTC_R25			1000.0f
+#define CVD_A            	3.9083e-3f
+#define CVD_B           	-5.775e-7f
+
 #define CAN_BUS_CYCLE		500
 #define BUS_VDC_SCALE		0.00206f
 #define AUX_VDC_SCALE		0.000188658f

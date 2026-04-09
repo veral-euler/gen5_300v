@@ -642,8 +642,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
       d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS);
       d.mech_angle = fmodf(d.mech_angle, TWO_PI);
-      Speed_Sense(d.mech_angle);
-      d.omega_e = d.rad_s * POLEPAIRS;
 
       Open_FOC0_step();
 

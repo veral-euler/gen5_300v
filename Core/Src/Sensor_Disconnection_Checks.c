@@ -125,7 +125,7 @@ void ADC1_Analog_Val_Update(void) {
   /* Gathering MTR Temp, CNT Temp, VDC and AUX DC in while loop also throttle voltage */
   d.Mtc_temp = NTC_Read(adc1_buffer[CONTRL_TEMP], MTC_NTC_R25);
   d.mtc_analog_val = adc1_buffer[CONTRL_TEMP];
-  d.Mtr_temp = NTC_Read(adc1_buffer[MOTOR_TEMP], MTR_NTC_R25);
+  d.Mtr_temp = PTC_Read(adc1_buffer[MOTOR_TEMP], MTR_PTC_R25);
   d.mtr_analog_val = adc1_buffer[MOTOR_TEMP];
   d.Vdc = (uint16_t)((float)adc1_buffer[BUS_DC] * BUS_VDC_SCALE);
   d.Aux_dc = (uint16_t)((float)adc1_buffer[AUX_DC] * AUX_VDC_SCALE);
