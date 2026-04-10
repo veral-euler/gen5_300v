@@ -19,7 +19,7 @@ int16_t PTC_Read(uint16_t analog_val, float R0)
     float v_sense = analog_val * (3.297f / 65536.0f);
     float resistance = 10000.0f * (v_sense / (3.297f - v_sense));
 
-    float c = resistance / R0;
+    float c = 1 - (resistance / R0);
     float discriminant = (CVD_A * CVD_A) - (4.0f * CVD_B * c);
     float temp = (-CVD_A + sqrtf(discriminant)) / (2.0f * CVD_B);
 
