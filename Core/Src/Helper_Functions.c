@@ -89,11 +89,22 @@ void rt_OneStep(void)
 void set_Initial_angle(void)
 {
   /* Calculating the startup angle and converting to TIM2 counts */
+  #if !RESOLVER_ENABLED
   d.Angle_From_Duty = (100.0f - d.Duty) * 0.01f * TWO_PI - HIGH_PULSE16_ERROR;
   d.Angle_From_Duty = fmodf(d.Angle_From_Duty, TWO_PI);
   d.Count_From_Duty = (uint32_t)((d.Angle_From_Duty / TWO_PI) * (TIM2_ARR + 1));
+  #endif
 
+
+  #if RESOLVER_ENABLED
+  d.elec_angle_resolver = TWO_PI - AD2S1210_ReadAngle();
+  d.elec_angle_resolver = fmodf(d.elec_angle_resolver, TWO_PI);
+  d.mech_angle_resolver = d.elec_angle_resolver/POLEPAIRS;
+  d.mech_angle_resolver = fmodf(d.mech_angle_resolver, TWO_PI);
+  d.Count_From_Duty = (uint32_t)((d.mech_angle_resolver / TWO_PI) * (TIM2_ARR + 1));
+  #endif
   /* Checking for PWM disconnection error */
+  #if !RESOLVER_ENABLED
   if (encoder_pwm_error_check() == !HAL_OK)
   {
     er.error_triggered = 1;
@@ -105,7 +116,7 @@ void set_Initial_angle(void)
 
     return;
   }
-
+  #endif
   HAL_Delay(10);
 
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);

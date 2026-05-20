@@ -222,6 +222,7 @@ int main(void)
   /* Initializing FOC and Protections model */
   FOC_MTPA_FWC_FF_initialize();
   Open_FOC0_initialize();
+  Offset0_initialize();
   #if PROTECTION_MODEL
   MCU_Protections_initialize();
   #endif
@@ -398,34 +399,36 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       static uint8_t milli_counter = 0; 
       milli_counter++;
 
-      if(!TagAutotuneOutput.AutotuneCompleteflag){
-        TagAutotuneInput.AutotuneFlag = ANGLE_AUTOTUNE; 
-      }
-      else{
-        TagAutotuneInput.AutotuneFlag = NORMAL_RUN;
-      }
+      // if(!TagAutotuneOutput.AutotuneCompleteflag){
+      //   TagAutotuneInput.AutotuneFlag = ANGLE_AUTOTUNE; 
+      // }
+      // else{
+      //   TagAutotuneInput.AutotuneFlag = NORMAL_RUN;
+      // }
 
       if(milli_counter >= 10)
       {
         milli_counter = 0;
-        TagAutotuneInput.f_Pwmangle = d.abs_Angle_pwm;
-        TagAutotuneInput.f_MotorRpm = d.RPM;
-        TagAutotuneInput.f_Vq = FOC_MTPA_FWC_FF_Y.Vq;
-        TagAutotuneInput.f_Vd = FOC_MTPA_FWC_FF_Y.Vd;
+        Offset0_U.Pwmangle = TWO_PI - AD2S1210_ReadAngle();
+        //TagAutotuneInput.f_MotorRpm = d.RPM;
+        Offset0_U.Vq = FOC_MTPA_FWC_FF_Y.Vq;
+        Offset0_U.Vd = FOC_MTPA_FWC_FF_Y.Vd;
 
-        AngleAutotuningRoutine(&TagAutotuneInput, &TagAutotuneOutput, &TagAutotuneDebug);
+        // AngleAutotuningRoutine(&TagAutotuneInput, &TagAutotuneOutput, &TagAutotuneDebug);
+
+        Offset0_step();
       }
 
 
-      if(TagAutotuneOutput.MotorloopStatus == Open_Loop){
+      if(Offset0_Y.FOC_closed_loop == 0){
           /* Updating phase current data */
           Open_FOC0_U.Phase_current[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
           Open_FOC0_U.Phase_current[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
           Open_FOC0_U.Phase_current[0] = 0.0f - Open_FOC0_U.Phase_current[1] - Open_FOC0_U.Phase_current[2];
 
-          Open_FOC0_U.Id_ref = TagAutotuneOutput.f_Idref;
-          Open_FOC0_U.Iq_ref = TagAutotuneOutput.f_Iqref;
-          Open_FOC0_U.Theta_e_ref = TagAutotuneOutput.f_Electricalangle;
+          Open_FOC0_U.Id_ref = Offset0_Y.Idref;
+          Open_FOC0_U.Iq_ref = Offset0_Y.Iqref;
+          Open_FOC0_U.Theta_e_ref = Offset0_Y.Electricalangle;
 
           /* Running Open FOC model */
           Open_FOC0_step();
@@ -435,24 +438,24 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
           d.Vc_SVM = Open_FOC0_Y.Vc;
       }
 
-      else if(TagAutotuneOutput.MotorloopStatus == Closed_Loop){
+      else if(Offset0_Y.FOC_closed_loop == 1){
         /* Updating pahse current data */
         FOC_MTPA_FWC_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
         FOC_MTPA_FWC_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
         FOC_MTPA_FWC_FF_U.PhaseCurrent[0] = 0.0f - FOC_MTPA_FWC_FF_U.PhaseCurrent[1] - FOC_MTPA_FWC_FF_U.PhaseCurrent[2];
       
         FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage = THR_MIN_VAL;
-        FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = TagAutotuneOutput.f_MotorRpmRef;
+        FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm = Offset0_Y.MotorRpmRef;
 
-        if(TagAutotuneOutput.CalibrationDirection == Motor_Forward){
+        if(Offset0_Y.FNR == Forward){
           FOC_MTPA_FWC_FF_U.Drive_State = Forward;
-          d.ATA_Offset = TagAutotuneOutput.f_Offset_CW;
+          d.ATA_Offset = Offset0_Y.Offset_CW;
         }
-        else if(TagAutotuneOutput.CalibrationDirection == Motor_Reverse){
+        else if(Offset0_Y.FNR == Reverse){
           FOC_MTPA_FWC_FF_U.Drive_State = Reverse;
-          d.ATA_Offset = TagAutotuneOutput.f_Offset_CCW;
+          d.ATA_Offset = Offset0_Y.Offset_CCW;
         }
-        else if(TagAutotuneOutput.CalibrationDirection == Motor_Neutral){
+        else if(Offset0_Y.FNR == Neutral){
           FOC_MTPA_FWC_FF_U.Drive_State = Neutral;
         }
         else{
@@ -460,12 +463,12 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         }
 
         d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
-        d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS) - d.ATA_Offset;
+        d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS);
         d.mech_angle = fmodf(d.mech_angle, TWO_PI);
 
         /* Updating elec angle data */
         d.elec_angle = (d.mech_angle * POLEPAIRS);
-        d.elec_angle = fmodf(d.elec_angle, TWO_PI);
+        d.elec_angle = fmodf(d.elec_angle - d.ATA_Offset, TWO_PI);
         FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle;
 
         /* Running the FOC model */
@@ -477,7 +480,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         d.Vc_SVM = FOC_MTPA_FWC_FF_Y.Vc;
       }
 
-      if (TagAutotuneOutput.AutotuneCompleteflag == true)
+      if (Offset0_Y.AutotuneCompleteflag == true)
       {
         d.start_alignment = 0;
         d.end_alignment = 1;

@@ -36,7 +36,7 @@ extern "C" {
 #define ENABLE_FAULTS		1
 #define DISABLE_FAULTS		0
 #define ENABLE_ENC_ERRORS	0
-#define TUNING_ENABLED		0
+#define TUNING_ENABLED		1
 #define RESOLVER_ENABLED	1
 #define OPEN_FOC			0
 #define CLOSED_FOC			1
@@ -91,7 +91,7 @@ extern "C" {
 #define ADC_TO_V				0.00005030822f
 #define DEG_TWO_PI_3			2.094395f
 #define DEG_4_PI_3				4.188790f
-#define OP_VOLTAGE				72.0f
+#define OP_VOLTAGE				96.0f
 #define AUX_OP_VOLTAGE			12.0f
 #define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
 #define MOTOR_PEAK_ARMS			385.0f
@@ -137,7 +137,7 @@ extern "C" {
 #define AUX_VDC_SCALE		0.000188658f
 
 #define MAX_PHASE_CURRENT		550.0f
-#define BUS_DC_OV_LIMIT			90
+#define BUS_DC_OV_LIMIT			150
 #define BUS_DC_UV_LIMIT			50
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
@@ -213,6 +213,7 @@ extern "C" {
 #include <stdbool.h>
 #include "app_types.h"
 #include "Ad2s1210.h"
+#include "Offset0.h"
 #if OFFSET_SCHEDULER
 #include "Offset_Scheduler.h"
 #endif
@@ -326,6 +327,7 @@ typedef struct data {
 	float rms_total;
 	float throttle_v;
 	float ATA_Offset;
+	float mech_angle_resolver;
 } data;
 
 typedef struct foc_pid_t {
