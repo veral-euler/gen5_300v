@@ -349,10 +349,10 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         /* Setting TIM1 PWM freq to 10kHz and setting TIM2 counter reg to inital angle count */
         __HAL_TIM_SET_PRESCALER(&htim1, 1);
         __HAL_TIM_SET_AUTORELOAD(&htim1, 2499);
-        __HAL_TIM_SET_COUNTER(&htim2, 0);
+        __HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
 
         /* Setting elec angle to 0 */
-        d.elec_angle = TWO_PI - AD2S1210_ReadAngle();
+        d.elec_angle = 0.0f;
 
         #if ENABLE_FAULTS
         /* Running initial fault check */
@@ -557,7 +557,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.mech_angle = fmodf(d.mech_angle, TWO_PI);
       d.elec_angle = (d.mech_angle * POLEPAIRS);
       d.elec_angle = fmodf(d.elec_angle, TWO_PI);
-      d.elec_angle_resolver = TWO_PI - AD2S1210_ReadAngle();
+      d.elec_angle_resolver = TWO_PI - AD2S1210_ReadAngle() - 1.06228f;
       d.elec_angle_resolver = fmodf(d.elec_angle_resolver, TWO_PI);
       #endif
 
@@ -574,7 +574,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       #endif
 
       #if RESOLVER_ENABLED
-      FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle_resolver; // Using resolver angle for FOC
+      FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle; // Using resolver angle for FOC
       #endif
 
       #if !RESOLVER_ENABLED
@@ -707,14 +707,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     /* Time counter for CAN transmission */
     static uint16_t can_counter = 500;
     can_counter++;
-
-    Speed_Sense(d.mech_angle);
-    d.omega_e = d.rad_s * POLEPAIRS;
-    FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec = d.rad_s;
-    if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START)
-    {
-      d.motor_start = 1;
-    }
 
     #if ENABLE_FAULTS
     if (cS == FOC_START || cS == ANGLE_CALIB || cS == OPEN_FOC_START) 
@@ -939,7 +931,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     d.z_pulse ^= 1;
     d.z_count++;
 
-    d.elec_angle = 0.0f; // Resetting angle on Z pulse, can be changed to an offset if needed
+    //d.elec_angle = 0.0f; // Resetting angle on Z pulse, can be changed to an offset if needed
 
     if (d.z_count > 4)
       d.z_count = 0;

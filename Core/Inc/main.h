@@ -86,12 +86,12 @@ extern "C" {
 #define LQ						0.00022287f
 #define LD						0.00007346f
 #define LAMBDA					0.02437364f
-#define CURR_TORQUE_RATIO		0.15625f //(Max_Torque/Max_A)
+#define CURR_TORQUE_RATIO		0.2033239f //(Max_Torque/Max_A)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
 #define DEG_TWO_PI_3			2.094395f
 #define DEG_4_PI_3				4.188790f
-#define OP_VOLTAGE				96.0f
+#define OP_VOLTAGE				77.0f
 #define AUX_OP_VOLTAGE			12.0f
 #define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
 #define MOTOR_PEAK_ARMS			385.0f
@@ -154,7 +154,7 @@ extern "C" {
 
 /* EEPROM Settings */
 #define EEPROM_ADDRESS          0xA0 // Adjust based on your EEPROM's I2C address
-#define EEPROM_MAGIC_NUM        0x15
+#define EEPROM_MAGIC_NUM        0x23
 #define EEPROM_NO_MAGIC_NUM     2
 #define EEPROM_PAGE_SIZE        8
 #define EEPROM_WRITE_TIMEOUT    5
@@ -173,21 +173,21 @@ extern "C" {
 
 /* FOC PID Default Settings */
 /* FW Kfw and Kaw */
-#define FW_KFW					0.001f
-#define FW_KAW					10.0f
+#define FW_KFW					0.0008f
+#define FW_KAW					15.0f
 #define FW_M2F					0.9f
 #define FW_F2M					0.95f
 #define FW_RST_FACTOR			0.9f
 /* Speed PID */
-#define SPEED_KP				4.0f
-#define SPEED_KI				8.0f
+#define SPEED_KP				5.0f
+#define SPEED_KI				1.0f
 #define SPEED_KD				0.00001f
 #define SPEED_KD_FILTER			5.0f
 #define SPEED_PID_OUT_UPL		MOTOR_PEAK_AC
 #define SPEED_PID_OUT_LOWL		0.0f
 #define SPEED_PID_BACK_KAW		ROOT2
 /* ID PID */
-#define ID_KP					0.4f
+#define ID_KP					0.1f
 #define ID_KI					6.0f
 #define ID_KD					0.00001f
 #define ID_KD_FILTER			5.0f
@@ -195,8 +195,8 @@ extern "C" {
 #define ID_PID_OUT_LOWL			-SVM_VOLTAGE_LIMIT
 #define ID_PID_BACK_KAW			3.87298f
 /* IQ PID */
-#define IQ_KP					0.3f
-#define IQ_KI					7.0f
+#define IQ_KP					0.15f
+#define IQ_KI					5.5f
 #define IQ_KD					0.00001f
 #define IQ_KD_FILTER			5.0f
 #define IQ_PID_OUT_UPL			SVM_VOLTAGE_LIMIT

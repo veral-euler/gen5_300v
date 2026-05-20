@@ -879,11 +879,11 @@ void Offset0_initialize(void)
   Offset0_U.NO_OF_CW_SAMPLE = 3.0f;
   Offset0_U.NO_OF_V_SAMPLES = 600.0f;
   Offset0_U.POLE_PAIRS = 1.0f;
-  Offset0_U.RATED_RPM = 500.0f;
+  Offset0_U.RATED_RPM = 1000.0f;
   Offset0_U.Speed_Ramp_down = -100.0f;
   Offset0_U.Speed_Ramp_up = 500.0f;
-  Offset0_U.Vd_MAX = -0.5f;
-  Offset0_U.Vd_MIN = -1.5f;
+  Offset0_U.Vd_MAX = -0.2f;
+  Offset0_U.Vd_MIN = -1.0f;
   Offset0_U.WAIT_TIME = 30000.0f;
 
 

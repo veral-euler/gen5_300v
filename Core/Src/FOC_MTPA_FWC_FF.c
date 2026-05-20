@@ -1291,22 +1291,22 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Constant: '<S2>/Constant'
    *  RelationalOperator: '<S2>/Compare'
    */
-  // if (FOC_MTPA_FWC_FF_B.DataTypeConversion1 != 2.0F) {
-  //   /* Update for Delay: '<S1>/Delay One Step' incorporates:
-  //    *  Inport: '<Root>/Actual Speed_mech_rad//sec'
-  //    */
-  //   FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE =
-  //     FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec;
-  // } else {
-  //   /* Update for Delay: '<S1>/Delay One Step' incorporates:
-  //    *  Gain: '<S1>/Gain'
-  //    *  Inport: '<Root>/Actual Speed_mech_rad//sec'
-  //    */
-  //   FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE =
-  //     -FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec;
-  // }
+  if (FOC_MTPA_FWC_FF_B.DataTypeConversion1 != 2.0F) {
+    /* Update for Delay: '<S1>/Delay One Step' incorporates:
+     *  Inport: '<Root>/Actual Speed_mech_rad//sec'
+     */
+    FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE =
+      FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec;
+  } else {
+    /* Update for Delay: '<S1>/Delay One Step' incorporates:
+     *  Gain: '<S1>/Gain'
+     *  Inport: '<Root>/Actual Speed_mech_rad//sec'
+     */
+    FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE =
+      -FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec;
+  }
 
-  FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE = FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec;
+  // FOC_MTPA_FWC_FF_DW.DelayOneStep_DSTATE = FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec;
 
   /* End of Switch: '<S1>/Switch' */
 
@@ -1461,7 +1461,7 @@ void FOC_MTPA_FWC_FF_step1(void)       /* Sample time: [0.001s, 0.0s] */
    */
   FOC_MTPA_FWC_FF_Y.Speed_error = 0.104719758F *
     FOC_MTPA_FWC_FF_Y.Ref_speed_out_RPM -
-    fabsf(FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec);
+    FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec;
 
   /* Product: '<S215>/NProd Out' incorporates:
    *  DiscreteIntegrator: '<S207>/Filter'

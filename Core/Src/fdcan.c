@@ -236,9 +236,9 @@ void Send_Data_On_CAN_402(void)
 	uint16_t Id_ref = 0;
 
 	if (cS == ANGLE_CALIB) {
-		Vd = (uint16_t)(Open_FOC0_Y.Vd + 159.0f);
-		Vq = (uint16_t)(Open_FOC0_Y.Vq + 159.0f);
-		Iq_ref = (uint16_t)(Open_FOC0_U.Iq_ref + 512.0f);
+		Vd = (uint16_t)(Offset0_Y.Vd_avg + 159.0f);
+		Vq = (uint16_t)(Offset0_Y.Vq_avg + 159.0f);
+		Iq_ref = (uint16_t)(Offset0_Y.Vd_net  + 512.0f);
 		Id_ref = (uint16_t)(Open_FOC0_U.Id_ref + 512.0f);
 	} else if (cS == FOC_START) {
 		Vd = (uint16_t)(FOC_MTPA_FWC_FF_Y.Vd + 159.0f);
@@ -307,8 +307,8 @@ void Send_Data_On_CAN_404(void) {
 void Send_Data_On_CAN_405(void) {
 	uint8_t can_data[8] = {0};
 
-	uint16_t can_offsetAngle = (uint16_t)(d.offset_angle_mech_avg * 1000.0f);
-	uint16_t can_thrVoltage = (uint16_t)(FOC_MTPA_FWC_FF_U.Throttle_input.Throttle_Inst_Voltage * 1000.0f);
+	uint16_t can_offsetAngle = (uint16_t)(Offset0_Y.Offset_CW * 1000.0f);
+	uint16_t can_thrVoltage = (uint16_t)(Offset0_Y.Offset_CCW * 1000.0f);
 
 	can_data[0] = (uint8_t)(fnr_state);
 	can_data[1] = (uint8_t)(cS);
