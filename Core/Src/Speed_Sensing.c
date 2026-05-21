@@ -31,10 +31,10 @@ void Speed_Sense(float MechAngle)
 
     d.raw_rad_s = ((cosine_rotor*derivative_sine_rotor)-(sine_rotor*derivative_cosine_rotor));
 
-    if (d.raw_rad_s >= 680.6784f) {
-        d.raw_rad_s = 680.6784f;
-    } else if (d.raw_rad_s <= -680.6784f) {
-        d.raw_rad_s = -680.6784f;
+    if (d.raw_rad_s >= 942.477f) {
+        d.raw_rad_s = 942.477f;
+    } else if (d.raw_rad_s <= -942.477f) {
+        d.raw_rad_s = -942.477f;
     }
 
     Speed_Filter(d.raw_rad_s);
