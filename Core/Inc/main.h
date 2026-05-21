@@ -83,8 +83,8 @@ extern "C" {
 #define ADC_TO_CURR				0.0407496f
 #define ALIGN_DUTY				1000
 #define RS		  				0.0082f
-#define LQ						0.000111435f
-#define LD						0.00003673f
+#define LQ						0.00022287f
+#define LD						0.00007346f
 #define LAMBDA					0.02437364f
 #define CURR_TORQUE_RATIO		0.2033239f //(Max_Torque/Max_A)
 #define NO_OF_SAMPLES 			4096
