@@ -31,7 +31,8 @@ typedef enum currSession {
 	CURR_SENS_CALIB,
 	FOC_START,
 	CONT_ERROR,
-	RESET_STATE
+	RESET_STATE,
+	ENC_READ
 } currSession;
 
 typedef enum fnr_state_t {

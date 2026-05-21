@@ -172,6 +172,7 @@ int main(void)
   #endif
 
   if (cS == INIT && d.tuning_enabled) {
+    AD2S1210_Init();
     set_Initial_angle();
     /* Setting Auto tune algo input params */
     AutotuneConfig.f_idSetRef = AUTO_TUNING_IDREF;
@@ -195,12 +196,13 @@ int main(void)
   } else if (cS == ANGLE_CALIB_DONE) {
     #if RESOLVER_ENABLED
     AD2S1210_Init();
-    cS = CURR_SENS_CALIB;
+    set_Initial_angle();
     #endif
     #if !RESOLVER_ENABLED
     set_Initial_angle();
     #endif
     Disable_tim5();
+    //cS = ENC_READ;
   }
   /* USER CODE END WHILE */
 
@@ -469,6 +471,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         /* Updating elec angle data */
         d.elec_angle = (d.mech_angle * POLEPAIRS);
         d.elec_angle = fmodf(d.elec_angle - d.ATA_Offset, TWO_PI);
+        if (d.elec_angle < 0.0f) d.elec_angle += TWO_PI;
         FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle;
 
         /* Running the FOC model */
@@ -556,8 +559,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       d.mech_angle = ((float)d.encoder_count * COUNTS_TO_RADS);
       d.mech_angle = fmodf(d.mech_angle, TWO_PI);
       d.elec_angle = (d.mech_angle * POLEPAIRS);
-      d.elec_angle = fmodf(d.elec_angle, TWO_PI);
-      d.elec_angle_resolver = TWO_PI - AD2S1210_ReadAngle() - 1.06228f;
+      d.elec_angle = fmodf(d.elec_angle - 4.24f, TWO_PI);
+      if (d.elec_angle < 0.0f) d.elec_angle += TWO_PI;
+      d.elec_angle_resolver = TWO_PI - AD2S1210_ReadAngle();
       d.elec_angle_resolver = fmodf(d.elec_angle_resolver, TWO_PI);
       #endif
 
@@ -686,6 +690,11 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, d.pwm_a);
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, d.pwm_b);
       __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, d.pwm_c);
+    }
+    
+    else if (cS == ENC_READ)
+    {
+      d.encoder_count = __HAL_TIM_GET_COUNTER(&htim2);
     }
   }
 }

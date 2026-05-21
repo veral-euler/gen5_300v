@@ -74,7 +74,7 @@ extern "C" {
 #define CURR_APP2					2
 
 #define POLEPAIRS 				4.0f
-#define COUNTS_TO_RADS			3.8349519E-4f//(2.0f * (PI / (TIM2_ARR+1)))
+#define COUNTS_TO_RADS			1.5339807E-3f//(2.0f * (PI / (TIM2_ARR+1)))
 #define TWO_PI					6.283185f
 #define TWO_ROOT2				2.828427f
 #define ROOT2					1.414213f
@@ -83,8 +83,8 @@ extern "C" {
 #define ADC_TO_CURR				0.0407496f
 #define ALIGN_DUTY				1000
 #define RS		  				0.0082f
-#define LQ						0.00022287f
-#define LD						0.00007346f
+#define LQ						0.000111435f
+#define LD						0.00003673f
 #define LAMBDA					0.02437364f
 #define CURR_TORQUE_RATIO		0.2033239f //(Max_Torque/Max_A)
 #define NO_OF_SAMPLES 			4096
@@ -105,8 +105,8 @@ extern "C" {
 #define ALIGNMENT_REP_COUNT		5
 
 #define ECO_MAX_SPEED			4500.0f
-#define SPORTS_MAX_SPEED		6000.0f
-#define REV_MAX_SPEED			6000.0f
+#define SPORTS_MAX_SPEED		8000.0f
+#define REV_MAX_SPEED			8000.0f
 #define ECO_MAX_TORQUE			42.0f
 #define SPORTS_MAX_TORQUE		80.0f
 #define REV_MAX_TORQUE			80.0f
@@ -115,7 +115,7 @@ extern "C" {
 #define TIM1_ARR			2499
 #define TIM1_DEAD_TIME		100
 #define TIM1_ARR_HALF		1250.0f
-#define TIM2_ARR			16383//(MAX_COUNT of your position sensor - 1)
+#define TIM2_ARR			4095//(MAX_COUNT of your position sensor - 1)
 #define TIM5_PSC			99
 #define TIM5_ARR			0xFFFFFFFF
 #define TIM17_PSC			39
@@ -154,7 +154,7 @@ extern "C" {
 
 /* EEPROM Settings */
 #define EEPROM_ADDRESS          0xA0 // Adjust based on your EEPROM's I2C address
-#define EEPROM_MAGIC_NUM        0x23
+#define EEPROM_MAGIC_NUM        0x28
 #define EEPROM_NO_MAGIC_NUM     2
 #define EEPROM_PAGE_SIZE        8
 #define EEPROM_WRITE_TIMEOUT    5

@@ -93,8 +93,8 @@
  *   Shift right 2 to get [0, 16383]
  * ========================================================================= */
 
-#define AD2S1210_RESOLUTION         16384U  /* 2^14 counts per electrical rev   */
-#define AD2S1210_RAW_SHIFT          2U      /* Shift right 2 to extract 14-bit  */
+#define AD2S1210_RESOLUTION         4096U  /* 2^12 counts per electrical rev   */
+#define AD2S1210_RAW_SHIFT          4U      /* Shift right 4 to extract 14-bit  */
 
 /* =========================================================================
  * REGISTER ADDRESSES (for configuration mode reads/writes)
@@ -154,6 +154,8 @@ typedef struct {
 
 extern AD2S1210_Result_t g_rdc;
 
+uint8_t AD2S1210_ReadConfig(uint8_t reg);
+void AD2S1210_WriteConfig(uint8_t reg, uint8_t data);
 /* =========================================================================
  * API
  * ========================================================================= */

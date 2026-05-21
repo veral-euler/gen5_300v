@@ -158,7 +158,7 @@ static HAL_StatusTypeDef AD2S1210_ReadNormalFrame(uint16_t *angular_out,
  *          Frame 2: send 8-bit data
  *          Each frame: WR/FSYNC LOW → 8 SCLK pulses → WR/FSYNC HIGH
  */
-static void AD2S1210_WriteConfig(uint8_t reg, uint8_t data)
+void AD2S1210_WriteConfig(uint8_t reg, uint8_t data)
 {
     uint8_t tx_addr = reg;
     uint8_t tx_data = data & 0x7FU;   /* MSB must be 0 for data writes */
@@ -179,7 +179,7 @@ static void AD2S1210_WriteConfig(uint8_t reg, uint8_t data)
  * @param  reg  Register address
  * @return 8-bit register data (D7=error bit, D6-D0=data)
  */
-static uint8_t AD2S1210_ReadConfig(uint8_t reg)
+uint8_t AD2S1210_ReadConfig(uint8_t reg)
 {
     uint8_t tx  = reg;
     uint8_t rx  = 0U;
@@ -209,7 +209,7 @@ static uint8_t AD2S1210_ReadConfig(uint8_t reg)
 void AD2S1210_Init(void)
 {
     /* Set normal mode: A0=0, A1=0 → position output */
-    AD2S1210_SetMode(AD2S1210_MODE_POSITION);
+    AD2S1210_SetMode(AD2S1210_MODE_CONFIG);
 
     /* Hardware reset — assert low */
     HAL_GPIO_WritePin(AD2S1210_RESET_PORT, AD2S1210_RESET_PIN,
@@ -223,6 +223,11 @@ void AD2S1210_Init(void)
     /* Wait tTRACK: 25ms at 14-bit resolution (Table 27, page 31)
      * Use 30ms for margin                                         */
     HAL_Delay(30U);
+
+    AD2S1210_WriteConfig(AD2S1210_REG_CONTROL, 0x72);
+    volatile uint8_t rx_ctrl_reg = AD2S1210_ReadConfig(AD2S1210_REG_CONTROL);
+
+    AD2S1210_SetMode(AD2S1210_MODE_POSITION);
 
     /* Read initial fault status
      * Fault comes free with every normal mode read                */
