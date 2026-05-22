@@ -15,27 +15,29 @@ void Speed_Filter(float Speed)
 
 void Speed_Sense(float MechAngle)
 {
-    static float sine_rotor ,sine_rotor_prev;
-    static float derivative_sine_rotor;
-    static float cosine_rotor,cosine_rotor_prev;
-    static float derivative_cosine_rotor;
-
-    sine_rotor = sinf(MechAngle);
-    derivative_sine_rotor = DERIVATIVE_CONSTANT*(sine_rotor-sine_rotor_prev);
-
-    cosine_rotor = cosf(MechAngle);
-    derivative_cosine_rotor = DERIVATIVE_CONSTANT*(cosine_rotor-cosine_rotor_prev);
-
-    sine_rotor_prev = sine_rotor;
-    cosine_rotor_prev = cosine_rotor;
-
-    d.raw_rad_s = ((cosine_rotor*derivative_sine_rotor)-(sine_rotor*derivative_cosine_rotor));
-
+    static float prev_angle = 0.0f;
+    float angle_delta;
+    
+    // Direct angle derivative (no sin/cos approximation)
+    angle_delta = MechAngle - prev_angle;
+    
+    // Handle angle wrap-around for 0-2π or -π to π ranges
+    if (angle_delta > 3.14159f) {
+        angle_delta -= 6.28318f;
+    } else if (angle_delta < -3.14159f) {
+        angle_delta += 6.28318f;
+    }
+    
+    // Raw speed = angle_delta / time_sample
+    d.raw_rad_s = angle_delta * DERIVATIVE_CONSTANT;  // 1000 Hz sampling
+    
     if (d.raw_rad_s >= 942.477f) {
         d.raw_rad_s = 942.477f;
     } else if (d.raw_rad_s <= -942.477f) {
         d.raw_rad_s = -942.477f;
     }
-
+    
     Speed_Filter(d.raw_rad_s);
+    
+    prev_angle = MechAngle;
 }
