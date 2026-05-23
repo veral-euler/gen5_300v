@@ -50,6 +50,8 @@ void rt_OneStep(void)
   }
 
   /* Set model inputs associated with base rate here */
+   rtAngle_to_Speed_U.Theta = d.mech_angle;
+   Angle_to_Speed_step();
 
   /* Step the model for base rate */
   FOC_MTPA_FWC_FF_step0();
@@ -70,8 +72,10 @@ void rt_OneStep(void)
 
     /* Set model inputs associated with subrates here */
     /* Gathering speed feedback data and setting motor start flag */
-    Speed_Sense(d.mech_angle);
+    //Speed_Sense(d.mech_angle);
+    d.rad_s = rtAngle_to_Speed_Y.Speed_filtered * 0.1047f;   
     d.omega_e = d.rad_s * POLEPAIRS;
+    d.RPM = rtAngle_to_Speed_Y.Speed_filtered;
     FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec = fabsf(d.rad_s);
     if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START)
     {

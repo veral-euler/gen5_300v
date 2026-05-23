@@ -225,6 +225,7 @@ int main(void)
   FOC_MTPA_FWC_FF_initialize();
   Open_FOC0_initialize();
   Offset0_initialize();
+  Angle_to_Speed_initialize();
   #if PROTECTION_MODEL
   MCU_Protections_initialize();
   #endif

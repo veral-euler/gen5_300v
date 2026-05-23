@@ -214,6 +214,7 @@ extern "C" {
 #include "app_types.h"
 #include "Ad2s1210.h"
 #include "Offset0.h"
+#include "Angle_to_Speed.h"
 #if OFFSET_SCHEDULER
 #include "Offset_Scheduler.h"
 #endif
