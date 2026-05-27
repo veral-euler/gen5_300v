@@ -110,6 +110,13 @@ extern "C" {
 #define ECO_MAX_TORQUE			42.0f
 #define SPORTS_MAX_TORQUE		80.0f
 #define REV_MAX_TORQUE			80.0f
+#define MIN_POWER			    5000.0f
+#define ECO_MAX_POWER		    5000.0f
+#define MAX_POWER			    10900.0f
+#define SPORTS_MAX_POWER	    10900.0f
+#define LD_PERCENTAGE_CHANGE	15.0f
+#define LQ_PERCENTAGE_CHANGE	15.0f
+#define THR_HYS_BAND		0.1f
 
 #define TIM1_PSC			9
 #define TIM1_ARR			2499
@@ -207,6 +214,19 @@ extern "C" {
 #define THR_MAX_VAL				4.1f
 #define MIN_RPM_CHANGE_LIM		1.0f
 
+
+#define REGEN_MAX_TORQUE	5.0f
+#define REGEN_MIN_RPM_EN	1000.0f
+#define REGEN_POLARITY		false
+#define REGEN_CAP_RPM		2000.0f
+#define REGEN_ACTIVE_STATE	false
+
+#define LOW_SPEED_TO_HIGH_SPEED_SWITCH_RPM	400.0f
+
+#define LOW_SPEED_I_LIMIT	    60.0f
+#define LOW_SPEED_T_LIMIT		10.0f
+#define LOW_SPEED_I_T_SWITCH	1
+#define LOW_SPEED_SCALING		0.8f
 #include <math.h>
 #include <string.h>
 #include <stdint.h>

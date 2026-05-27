@@ -473,7 +473,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         d.elec_angle = (d.mech_angle * POLEPAIRS);
         d.elec_angle = fmodf(d.elec_angle - d.ATA_Offset, TWO_PI);
         if (d.elec_angle < 0.0f) d.elec_angle += TWO_PI;
-        FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle;
+        FOC_MTPA_FWC_FF_U.angle = d.elec_angle;
 
         /* Running the FOC model */
         rt_OneStep();
@@ -579,7 +579,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       #endif
 
       #if RESOLVER_ENABLED
-      FOC_MTPA_FWC_FF_U.MtrElcPos = d.elec_angle; // Using resolver angle for FOC
+      FOC_MTPA_FWC_FF_U.angle = d.elec_angle; // Using resolver angle for FOC
       #endif
 
       #if !RESOLVER_ENABLED
