@@ -208,8 +208,8 @@ void Send_Data_On_CAN_401(void)
 {
 	uint8_t can_data[8] = {0};
 
-	uint16_t rpm_ref = (uint16_t)(FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm * 10.0f);
-	uint16_t rpm_fdbk = (uint16_t)(fabsf(d.RPM) * 10.0f);
+	uint16_t rpm_ref = (uint16_t)(FOC_MTPA_FWC_FF_U.Ref_Speed_mech_rpm);
+	uint16_t rpm_fdbk = (uint16_t)(fabsf(d.RPM));
 	uint16_t Id = (uint16_t)(FOC_MTPA_FWC_FF_Y.Id + 512.0f);
 	uint16_t Iq = (uint16_t)(FOC_MTPA_FWC_FF_Y.Iq + 512.0f);
 

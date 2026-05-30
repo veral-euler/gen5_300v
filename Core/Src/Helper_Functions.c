@@ -76,7 +76,7 @@ void rt_OneStep(void)
     d.rad_s = rtAngle_to_Speed_Y.Speed_filtered * 0.1047f;   
     d.omega_e = d.rad_s * POLEPAIRS;
     d.RPM = rtAngle_to_Speed_Y.Speed_filtered;
-    FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec = fabsf(d.rad_s);
+    FOC_MTPA_FWC_FF_U.ActualSpeed_mech_radsec = d.rad_s;
     if (fabsf(d.RPM) >= MIN_RPM_FOR_MOTOR_START)
     {
       d.motor_start = 1;

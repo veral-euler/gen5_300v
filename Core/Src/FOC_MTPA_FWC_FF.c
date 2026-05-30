@@ -1145,9 +1145,14 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_DW.UnitDelay_DSTATE_c = Abs -
       FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE;
     {
-      Abs = (float)(3.1415926535897931 - (float)(3.1415926535897931 -
-      rt_atan2f_snf(FOC_MTPA_FWC_FF_Y.Iq_ref_MTPA, FOC_MTPA_FWC_FF_Y.Id_ref_MTPA))
-                  * Abs);
+      float angle_MTPA = rt_atan2f_snf(FOC_MTPA_FWC_FF_Y.Iq_ref_MTPA,
+                                        FOC_MTPA_FWC_FF_Y.Id_ref_MTPA);
+      /* Rotate toward -pi for reverse (Iq<0), +pi for forward (Iq>0).
+       * Original formula assumed +pi target, which gave positive Id in reverse
+       * when LivGuard's high Lambda forces FW_scale below ~0.7. */
+      float fw_target = (angle_MTPA >= 0.0F) ? (float)3.1415926535897931
+                                              : -(float)3.1415926535897931;
+      Abs = fw_target - (fw_target - angle_MTPA) * Abs;
     }
     rtb_V_qo = rt_hypotf_snf(FOC_MTPA_FWC_FF_Y.Id_ref_MTPA,
       FOC_MTPA_FWC_FF_Y.Iq_ref_MTPA);

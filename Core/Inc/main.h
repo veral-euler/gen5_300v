@@ -36,7 +36,7 @@ extern "C" {
 #define ENABLE_FAULTS		1
 #define DISABLE_FAULTS		0
 #define ENABLE_ENC_ERRORS	0
-#define TUNING_ENABLED		1
+#define TUNING_ENABLED		0
 #define RESOLVER_ENABLED	1
 #define OPEN_FOC			0
 #define CLOSED_FOC			1
@@ -114,7 +114,7 @@ extern "C" {
 #define ECO_MAX_POWER		    5000.0f
 #define MAX_POWER			    10900.0f
 #define SPORTS_MAX_POWER	    10900.0f
-#define LD_PERCENTAGE_CHANGE	15.0f
+#define LD_PERCENTAGE_CHANGE    15.0f
 #define LQ_PERCENTAGE_CHANGE	15.0f
 #define THR_HYS_BAND		0.1f
 
