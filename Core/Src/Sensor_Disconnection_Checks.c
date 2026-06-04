@@ -267,20 +267,20 @@ void Sensor_Disconnection_Check(void) {
   }
   #endif
 
-  if (temp_sensor_disconnection_check(d.mtc_analog_val, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
-    er.error_triggered = 1;
-    er.mtc_temp_disconnection_error = 1;
-    err = MTC_TEMP_DISCONNECTION_ERROR;
-    cS = CONT_ERROR;
-  }
+  // if (temp_sensor_disconnection_check(d.mtc_analog_val, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
+  //   er.error_triggered = 1;
+  //   er.mtc_temp_disconnection_error = 1;
+  //   err = MTC_TEMP_DISCONNECTION_ERROR;
+  //   cS = CONT_ERROR;
+  // }
 
-  if (temp_sensor_disconnection_check(d.mtr_analog_val, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
-    er.error_triggered = 1;
-    er.error_c2 |= (1 << 1);
-    er.mtr_temp_disconnection_error = 1;
-    err = MTR_TEMP_DISCONNECTION_ERROR;
-    cS = CONT_ERROR;
-  }
+  // if (temp_sensor_disconnection_check(d.mtr_analog_val, TEMP_SENS_FAULT_COUNT) == !HAL_OK) {
+  //   er.error_triggered = 1;
+  //   er.error_c2 |= (1 << 1);
+  //   er.mtr_temp_disconnection_error = 1;
+  //   err = MTR_TEMP_DISCONNECTION_ERROR;
+  //   cS = CONT_ERROR;
+  // }
 
   disable_drive();
 }

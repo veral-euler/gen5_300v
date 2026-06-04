@@ -98,9 +98,9 @@ static volatile uint16_t eeprom_ccw_pending   = 0;
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -119,7 +119,7 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-  /* Configure the peripherals common clocks */
+/* Configure the peripherals common clocks */
   PeriphCommonClock_Config();
 
   /* USER CODE BEGIN SysInit */
@@ -204,9 +204,9 @@ int main(void)
     Disable_tim5();
     //cS = ENC_READ;
   }
-  /* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-  /* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
   // Start encoder capture on both channels with interrupts
   if (HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL) != HAL_OK)
     Error_Handler();
@@ -350,7 +350,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         counter = 0;
 
         /* Setting TIM1 PWM freq to 10kHz and setting TIM2 counter reg to inital angle count */
-        __HAL_TIM_SET_PRESCALER(&htim1, 1);
+        __HAL_TIM_SET_PRESCALER(&htim1, 2);
         __HAL_TIM_SET_AUTORELOAD(&htim1, 2499);
         __HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
 
@@ -535,8 +535,8 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
       /* Current count for time estimation */
       uint32_t start = DWT->CYCCNT;
       #endif
-      /* Updating pahse current data */
-      FOC_MTPA_FWC_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
+      /* Updating phase current data */
+	  FOC_MTPA_FWC_FF_U.PhaseCurrent[2] = (float)(injectedVal[PHASE_U] - currSensOff[PHASE_U]) * ADC_TO_CURR;
       FOC_MTPA_FWC_FF_U.PhaseCurrent[1] = (float)(injectedVal[PHASE_V] - currSensOff[PHASE_V]) * ADC_TO_CURR;
       FOC_MTPA_FWC_FF_U.PhaseCurrent[0] = 0.0f - FOC_MTPA_FWC_FF_U.PhaseCurrent[1] - FOC_MTPA_FWC_FF_U.PhaseCurrent[2];
 
@@ -1000,9 +1000,9 @@ void delay_us(uint32_t us)
 /* USER CODE END 4 */
 
 /**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -1014,14 +1014,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
+#ifdef  USE_FULL_ASSERT
 /**
- * @brief  Reports the name of the source file and the source line number
- *         where the assert_param error has occurred.
- * @param  file: pointer to the source file name
- * @param  line: assert_param error line source number
- * @retval None
- */
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */

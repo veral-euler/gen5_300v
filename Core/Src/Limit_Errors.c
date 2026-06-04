@@ -1,5 +1,5 @@
 #include "Limit_Errors.h"
-
+uint16_t aux_error_count = 0;
 uint8_t Over_Current_Phase_Error(float a, float b, float c) {
     volatile float max_curr = fmaxf(a, fmaxf(b, c));
     volatile float min_curr = fminf(a, fminf(b, c));
@@ -89,29 +89,38 @@ uint8_t Bus_Voltage_Error(float Bus_DC) {
 uint8_t Aux_Voltage_Error(float Aux_DC) {
     /* Checking for Aux DC UV Error explicitly */
     if (Aux_DC <= AUX_UV_LIMIT && d.motor_start == 1) {
-        er.error_c3 |= (1 << 1);
-        return !HAL_OK;
-    } else {
+        aux_error_count++;
+     if(aux_error_count >= 10) {
+            aux_error_count = 0;
+             er.error_c3 |= (1 << 1);
+             return !HAL_OK;
+        }
+      else{
+
+      }
+    } 
+    else {
+        aux_error_count = 0;
         return HAL_OK;
     }
 }
 
-uint8_t Mtr_OT_Error(float motor_temp) {
-    if (motor_temp >= MOTOR_TEMP_OT_LIMIT) {
-        er.error_c1 |= (1 << 3);
-        return !HAL_OK;
-    } else {
-        return HAL_OK;
-    }
-}
+// uint8_t Mtr_OT_Error(float motor_temp) {
+//     if (motor_temp >= MOTOR_TEMP_OT_LIMIT) {
+//         er.error_c1 |= (1 << 3);
+//         return !HAL_OK;
+//     } else {
+//         return HAL_OK;
+//     }
+// }
 
-uint8_t Mtc_OT_Error(float controller_temp) {
-    if (controller_temp >= CONTRL_TEMP_OT_LIMIT) {
-        return !HAL_OK;
-    } else {
-        return HAL_OK;
-    }
-}
+// uint8_t Mtc_OT_Error(float controller_temp) {
+//     if (controller_temp >= CONTRL_TEMP_OT_LIMIT) {
+//         return !HAL_OK;
+//     } else {
+//         return HAL_OK;
+//     }
+// }
 
 void Error_Check(void) {
     if (Over_Current_Phase_Error(FOC_MTPA_FWC_FF_U.PhaseCurrent[0], FOC_MTPA_FWC_FF_U.PhaseCurrent[1], FOC_MTPA_FWC_FF_U.PhaseCurrent[2]) == !HAL_OK) {
@@ -149,19 +158,19 @@ void Error_Check(void) {
         cS = CONT_ERROR;
     }
 
-    if (Mtr_OT_Error(d.Mtr_temp) == !HAL_OK) {
-        er.error_triggered = 1;
-        er.mtr_temp_ot_error = 1;
-        err = MTR_TEMP_OT_ERROR;
-        cS = CONT_ERROR;
-    }
+    // if (Mtr_OT_Error(d.Mtr_temp) == !HAL_OK) {
+    //     er.error_triggered = 1;
+    //     er.mtr_temp_ot_error = 1;
+    //     err = MTR_TEMP_OT_ERROR;
+    //     cS = CONT_ERROR;
+    // }
 
-    if (Mtc_OT_Error(d.Mtc_temp) == !HAL_OK) {
-        er.error_triggered = 1;
-        er.mtc_temp_ot_error = 1;
-        err = MTC_TEMP_OT_ERROR;
-        cS = CONT_ERROR;
-    }
+    // if (Mtc_OT_Error(d.Mtc_temp) == !HAL_OK) {
+    //     er.error_triggered = 1;
+    //     er.mtc_temp_ot_error = 1;
+    //     err = MTC_TEMP_OT_ERROR;
+    //     cS = CONT_ERROR;
+    // }
 
     disable_drive();
 }

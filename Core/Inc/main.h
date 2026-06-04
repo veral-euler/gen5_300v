@@ -91,7 +91,7 @@ extern "C" {
 #define ADC_TO_V				0.00005030822f
 #define DEG_TWO_PI_3			2.094395f
 #define DEG_4_PI_3				4.188790f
-#define OP_VOLTAGE				73.0f
+#define OP_VOLTAGE				96.0f
 #define AUX_OP_VOLTAGE			12.0f
 #define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
 #define MOTOR_PEAK_ARMS			385.0f
@@ -118,7 +118,7 @@ extern "C" {
 #define LQ_PERCENTAGE_CHANGE	15.0f
 #define THR_HYS_BAND		0.1f
 
-#define TIM1_PSC			9
+#define TIM1_PSC			11
 #define TIM1_ARR			2499
 #define TIM1_DEAD_TIME		100
 #define TIM1_ARR_HALF		1250.0f
@@ -144,15 +144,15 @@ extern "C" {
 #define AUX_VDC_SCALE		0.000188658f
 
 #define MAX_PHASE_CURRENT		550.0f
-#define BUS_DC_OV_LIMIT			150
-#define BUS_DC_UV_LIMIT			50
+#define BUS_DC_OV_LIMIT			160
+#define BUS_DC_UV_LIMIT			30
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
 #define CONTRL_TEMP_OT_LIMIT	80
 #define PHASE_OC_COUNT			10
 #define ID_IQ_OC_COUNT			10
 #define BUS_DC_OV_COUNT			1
-#define BUS_DC_UV_COUNT			1
+#define BUS_DC_UV_COUNT			20
 #define CURR_SEN_ANLG_HIGH		40000
 #define CURR_SEN_ANLG_LOW		14000
 #define TEMP_SENS_FAULT_COUNT 	65000

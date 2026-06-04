@@ -2251,13 +2251,13 @@ void FOC_MTPA_FWC_FF_initialize(void)
   FOC_MTPA_FWC_FF_U.Id_Iq_MTPA_limit.Id_low_limit = -560.0f;
   
   /* Speed Ref Rate Limiter Settings */
-  FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_up = 100.0f * 10000.0f;
-  FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_down = -500.0f * 10000.0f;
-  FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_down_neutral = -600.0f * 10000.0f;
+  FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_up = 10.0f * 10000.0f;
+  FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_down = -50.0f * 10000.0f;
+  FOC_MTPA_FWC_FF_U.Rate_limiter.Ref_Speed_rate_down_neutral = -60.0f * 10000.0f;
 
   /* Rate Limiter Settings */
-  FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_up = 5.0f * 10000.0f;
-  FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_down = -5.0f * 10000.0f;
+  FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_up = 1.0f * 10000.0f;
+  FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_down = -1.0f * 10000.0f;
   FOC_MTPA_FWC_FF_U.Rate_limiter.Iq_ramp_up = 50.0f * 10000.0f;
   FOC_MTPA_FWC_FF_U.Rate_limiter.Iq_ramp_down = -50.0f * 10000.0f;
   FOC_MTPA_FWC_FF_U.Rate_limiter.Id_ramp_up = 50.0f * 10000.0f;
