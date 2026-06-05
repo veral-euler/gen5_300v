@@ -45,7 +45,7 @@ void rt_OneStep(void)
   }
 
   taskCounter[1]++;
-  if (taskCounter[1] == 10) {
+  if (taskCounter[1] == 5) {
     taskCounter[1]= 0;
   }
 
@@ -54,7 +54,7 @@ void rt_OneStep(void)
    Angle_to_Speed_step();
 
   /* Step the model for base rate */
-  FOC_MTPA_FWC_FF_step0();
+    FOC_MTPA_FWC_FF_step0();
 
   /* Get model outputs here */
 

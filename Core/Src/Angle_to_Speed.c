@@ -63,7 +63,7 @@ void Angle_to_Speed_step(void)
    */
   rtb_SpeedGain = (float)(int16_t)((int16_t)rtb_AlgoDataType - (int16_t)
     rtAngle_to_Speed_DW.Delay_DSTATE[rtAngle_to_Speed_DW.CircBufIdx]) *
-    0.315699071F;
+    0.326974064F; // for 10 khz 0.315699071F,  0.157849535F for 5kHz
 
   /* DiscreteIntegrator: '<S10>/Integrator' */
   if (rtAngle_to_Speed_DW.Integrator_IC_LOADING != 0) {
@@ -96,7 +96,7 @@ void Angle_to_Speed_step(void)
   /* Update for Delay: '<S3>/Delay' */
   rtAngle_to_Speed_DW.Delay_DSTATE[rtAngle_to_Speed_DW.CircBufIdx] =
     rtb_AlgoDataType;
-  if (rtAngle_to_Speed_DW.CircBufIdx < 28U) {
+  if (rtAngle_to_Speed_DW.CircBufIdx < 13U) /*28U*/
     rtAngle_to_Speed_DW.CircBufIdx++;
   } else {
     rtAngle_to_Speed_DW.CircBufIdx = 0U;
@@ -113,7 +113,7 @@ void Angle_to_Speed_step(void)
   rtAngle_to_Speed_DW.Integrator_IC_LOADING = 0U;
   rtAngle_to_Speed_DW.Integrator_DSTATE += 1.0F / (float)fmax
     (rtAngle_to_Speed_DW.Probe[0], 0.00086813365565862276) * (rtb_SpeedGain -
-    rtAngle_to_Speed_DW.Integrator_DSTATE) * 0.0001F;
+    rtAngle_to_Speed_DW.Integrator_DSTATE) * 0.0002F;
   if (rtAngle_to_Speed_DW.Integrator_DSTATE > 10000.0F) {
     rtAngle_to_Speed_DW.Integrator_DSTATE = 10000.0F;
   } else if (rtAngle_to_Speed_DW.Integrator_DSTATE < -10000.0F) {
@@ -129,7 +129,7 @@ void Angle_to_Speed_step(void)
 void Angle_to_Speed_initialize(void)
 {
   /* Start for Probe: '<S4>/Probe' */
-  rtAngle_to_Speed_DW.Probe[0] = 0.0001F;
+  rtAngle_to_Speed_DW.Probe[0] = 0.0002F;
   rtAngle_to_Speed_DW.Probe[1] = 0.0F;
 
   /* InitializeConditions for DiscreteIntegrator: '<S10>/Integrator' */

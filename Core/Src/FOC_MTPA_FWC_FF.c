@@ -849,7 +849,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  y = K where K = ( w * Ts )
    *   */
   FOC_MTPA_FWC_FF_Y.Id_error = FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_up
-    * 0.0001F;
+    * 0.0002F;
 
   /* Sum: '<S235>/Difference Inputs1' incorporates:
    *  Delay: '<S235>/Delay'
@@ -872,7 +872,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      * About '<S235>/sample time':
      *  y = K where K = ( w * Ts )
      *   */
-    FOC_MTPA_FWC_FF_Y.Id_error = 0.0001F *
+    FOC_MTPA_FWC_FF_Y.Id_error = 0.0002F *
       FOC_MTPA_FWC_FF_U.Rate_limiter.Torque_gen_ramp_down;
 
     /* Switch: '<S236>/Switch' incorporates:
@@ -1133,7 +1133,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
     FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE += ((1.0F -
       FOC_MTPA_FWC_FF_Y.V_s / Abs) * FOC_MTPA_FWC_FF_U.FWC_values.Kfw +
       FOC_MTPA_FWC_FF_DW.UnitDelay_DSTATE_c * FOC_MTPA_FWC_FF_U.FWC_values.Kaw) *
-      0.0001F;
+      0.0002F;
     if (FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE > 1.0F) {
       Abs = 1.0F;
     } else if (FOC_MTPA_FWC_FF_DW.DiscreteTimeIntegrator_DSTATE < 0.0F) {
@@ -1185,7 +1185,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  y = K where K = ( w * Ts )
    *   */
   FOC_MTPA_FWC_FF_Y.Id_error = FOC_MTPA_FWC_FF_U.Rate_limiter.Id_ramp_up *
-    0.0001F;
+    0.0002F;
 
   /* Sum: '<S154>/Difference Inputs1' incorporates:
    *  Delay: '<S154>/Delay'
@@ -1207,7 +1207,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      * About '<S154>/sample time':
      *  y = K where K = ( w * Ts )
      *   */
-    FOC_MTPA_FWC_FF_Y.Id_error = 0.0001F *
+    FOC_MTPA_FWC_FF_Y.Id_error = 0.0002F *
       FOC_MTPA_FWC_FF_U.Rate_limiter.Id_ramp_down;
 
     /* Switch: '<S166>/Switch' incorporates:
@@ -1327,7 +1327,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  y = K where K = ( w * Ts )
    *   */
   FOC_MTPA_FWC_FF_Y.Iq_ref_final = FOC_MTPA_FWC_FF_U.Rate_limiter.Iq_ramp_up *
-    0.0001F;
+    0.0002F;
 
   /* Sum: '<S155>/Difference Inputs1' incorporates:
    *  Delay: '<S155>/Delay'
@@ -1349,7 +1349,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
      * About '<S155>/sample time':
      *  y = K where K = ( w * Ts )
      *   */
-    FOC_MTPA_FWC_FF_Y.Iq_ref_final = 0.0001F *
+    FOC_MTPA_FWC_FF_Y.Iq_ref_final = 0.0002F *
       FOC_MTPA_FWC_FF_U.Rate_limiter.Iq_ramp_down;
 
     /* Switch: '<S167>/Switch' incorporates:
@@ -1930,7 +1930,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    *  Sum: '<S113>/SumI4'
    */
   FOC_MTPA_FWC_FF_DW.Integrator_DSTATE += ((FOC_MTPA_FWC_FF_Y.Vd_PID - rtb_V_qo) * can_d.canId_PID.Back_Kaw
-    + FOC_MTPA_FWC_FF_Y.Id_error * FOC_MTPA_FWC_FF_B.Merge[1]) * 0.0001F;
+    + FOC_MTPA_FWC_FF_Y.Id_error * FOC_MTPA_FWC_FF_B.Merge[1]) * 0.0002F;
   if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE > d.Vmax_SVM) {
     FOC_MTPA_FWC_FF_DW.Integrator_DSTATE = d.Vmax_SVM;
   } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE < -d.Vmax_SVM) {
@@ -1940,7 +1940,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
   /* End of Update for DiscreteIntegrator: '<S121>/Integrator' */
 
   /* Update for DiscreteIntegrator: '<S116>/Filter' */
-  FOC_MTPA_FWC_FF_DW.Filter_DSTATE += 0.0001F * Abs;
+  FOC_MTPA_FWC_FF_DW.Filter_DSTATE += 0.0002F * Abs;
 
   /* Update for Delay: '<S155>/Delay' */
   FOC_MTPA_FWC_FF_DW.icLoad_p = false;
@@ -1952,7 +1952,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
    */
   FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h += ((FOC_MTPA_FWC_FF_Y.Vq_PID -
     rtb_UkYk1_j) * can_d.canIq_PID.Back_Kaw + FOC_MTPA_FWC_FF_Y.Iq_error * FOC_MTPA_FWC_FF_B.Merge2[1]) *
-    0.0001F;
+    0.0002F;
   if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h > d.Vmax_SVM) {
     FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h = d.Vmax_SVM;
   } else if (FOC_MTPA_FWC_FF_DW.Integrator_DSTATE_h < -d.Vmax_SVM) {
@@ -1962,7 +1962,7 @@ void FOC_MTPA_FWC_FF_step0(void)       /* Sample time: [0.0001s, 0.0s] */
   /* End of Update for DiscreteIntegrator: '<S67>/Integrator' */
 
   /* Update for DiscreteIntegrator: '<S62>/Filter' */
-  FOC_MTPA_FWC_FF_DW.Filter_DSTATE_d += 0.0001F * rtb_VqFF_unsat;
+  FOC_MTPA_FWC_FF_DW.Filter_DSTATE_d += 0.0002F * rtb_VqFF_unsat;
 }
 
 /* Model step function for TID1 */

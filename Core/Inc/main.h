@@ -82,16 +82,16 @@ extern "C" {
 #define ONE_BY_ROOT2			0.70710678f
 #define ADC_TO_CURR				0.0407496f
 #define ALIGN_DUTY				1000
-#define RS		  				0.0082f
-#define LQ						0.00022287f
-#define LD						0.00007346f
-#define LAMBDA					0.02437364f
+#define RS		  				0.065f
+#define LQ						0.00058f
+#define LD						0.000178f
+#define LAMBDA					0.09946f
 #define CURR_TORQUE_RATIO		0.2033239f //(Max_Torque/Max_A)
 #define NO_OF_SAMPLES 			4096
 #define ADC_TO_V				0.00005030822f
 #define DEG_TWO_PI_3			2.094395f
 #define DEG_4_PI_3				4.188790f
-#define OP_VOLTAGE				96.0f
+#define OP_VOLTAGE				300.0f
 #define AUX_OP_VOLTAGE			12.0f
 #define SVM_VOLTAGE_LIMIT		(OP_VOLTAGE / ROOT3)
 #define MOTOR_PEAK_ARMS			385.0f
@@ -140,12 +140,13 @@ extern "C" {
 #define CVD_B           	-5.775e-7f
 
 #define CAN_BUS_CYCLE		500
-#define BUS_VDC_SCALE		0.00206f
+#define BUS_VDC_SCALE		0.01179f
 #define AUX_VDC_SCALE		0.000188658f
 
 #define MAX_PHASE_CURRENT		550.0f
-#define BUS_DC_OV_LIMIT			160
-#define BUS_DC_UV_LIMIT			30
+#define BUS_DC_OV_LIMIT			350
+#define BUS_DC_UV_LIMIT			0
+
 #define AUX_UV_LIMIT			9
 #define MOTOR_TEMP_OT_LIMIT		120
 #define CONTRL_TEMP_OT_LIMIT	80
@@ -281,7 +282,7 @@ typedef struct data {
 	uint8_t forward_pin;
 	uint8_t reverse_pin;
 	uint8_t init_check;
-	uint8_t Vdc;
+	uint16_t Vdc;
 	uint8_t Aux_dc;
 	uint8_t tuning_enabled;
 	int16_t Mtr_temp;

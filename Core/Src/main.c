@@ -350,7 +350,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
         counter = 0;
 
         /* Setting TIM1 PWM freq to 10kHz and setting TIM2 counter reg to inital angle count */
-        __HAL_TIM_SET_PRESCALER(&htim1, 2);
+        __HAL_TIM_SET_PRESCALER(&htim1, 3);
         __HAL_TIM_SET_AUTORELOAD(&htim1, 2499);
         __HAL_TIM_SET_COUNTER(&htim2, d.Count_From_Duty);
 
