@@ -97,7 +97,7 @@ void Angle_to_Speed_step(void)
   rtAngle_to_Speed_DW.Delay_DSTATE[rtAngle_to_Speed_DW.CircBufIdx] =
     rtb_AlgoDataType;
   if (rtAngle_to_Speed_DW.CircBufIdx < 13U) /*28U*/
-    rtAngle_to_Speed_DW.CircBufIdx++;
+   { rtAngle_to_Speed_DW.CircBufIdx++;
   } else {
     rtAngle_to_Speed_DW.CircBufIdx = 0U;
   }

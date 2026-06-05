@@ -118,7 +118,7 @@ extern "C" {
 #define LQ_PERCENTAGE_CHANGE	15.0f
 #define THR_HYS_BAND		0.1f
 
-#define TIM1_PSC			11
+#define TIM1_PSC			9
 #define TIM1_ARR			2499
 #define TIM1_DEAD_TIME		100
 #define TIM1_ARR_HALF		1250.0f
@@ -134,7 +134,7 @@ extern "C" {
 #define OFFSET_CALC_MECH_AVG	0.63565f
 
 #define MTR_NTC_R25			10000.0f
-#define MTC_NTC_R25			10000.0f
+#define MTC_NTC_R25			5000.0f
 #define MTR_PTC_R25			1000.0f
 #define CVD_A            	3.9083e-3f
 #define CVD_B           	-5.775e-7f
